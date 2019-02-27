@@ -79,3 +79,5 @@ git rebase --continue
 git rebase --abort
 git rebase --skip
 ```
+
+- 追加修改到上一个提交或修改上一个提交的 message： git commit --amend
