@@ -25,8 +25,7 @@
 ```
 版本回退,修改重新放回工作区: git reset ...
 版本回退,直接删修改: git reset --hard ...
-暂存区回到工作区: git reset head ...
-丢弃工作区修改: git checkout -- ...
+丢弃工作区修改: git checkout ...
 
 ```
 
@@ -81,3 +80,6 @@ git rebase --skip
 ```
 
 - 追加修改到上一个提交或修改上一个提交的 message： git commit --amend
+- 查看一个文件的所有历史修改：git log -p 文件名
+- 合并一个 commit：git cherry-pick \$commit
+- 强推：git pull -f
