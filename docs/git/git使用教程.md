@@ -1,4 +1,6 @@
-# git 笔记
+<h2 align="center">git学习笔记</h2>
+
+## git 笔记
 
 ### 提交,拉取
 
@@ -83,3 +85,23 @@ git rebase --skip
 - 查看一个文件的所有历史修改：git log -p 文件名
 - 合并一个 commit：git cherry-pick \$commit
 - 强推：git pull -f
+
+## git flow
+
+### 创建
+
+```
+git flow init
+```
+
+### 开始新功能
+
+```
+git flow feature start name
+```
+
+### 结束新功能
+
+```
+git flow feature end name
+```
