@@ -340,3 +340,59 @@ module.exports = {
 环境变量，当不存在时，采用.env 变量。
 
 当我们跑 yarn bulit 时，采用.env 变量
+
+## Router
+
+```
+import Vue from "vue";
+import Router from "vue-router";
+
+Vue.use(Router);
+
+const router = new Router({
+  mode: "hash",
+  base: process.env.VUE_APP_BASEURL,
+  scrollBehavior: () => ({ y: 0 }),
+
+  routes: [
+    {
+      path: '/foo',
+      name: 'foo',
+      redirect: { name: 'login' },
+      component: () => import("@/views/foo"),
+      meta: {
+        title: 'foo'
+      },
+      children: [
+        {
+          path: '/foo/edit',
+          name: 'edit',
+          component: () => import("@/views/foo/eidt"),
+          meta: {
+            title: 'edit'
+          }
+        }
+      ],
+      beforeEnter(to, from, next) {
+        const TK = Vue.cookie.get("token");
+        TK && next({ name: 'home' }) : next();
+      }
+    }
+  ]
+})
+
+router.beforeEach((to, from, next) => {
+  const token = Vue.cookie.get("token");
+  const hasToken = token && /\S/.test(token);
+
+  if (!hasToken) {
+    // - 是全局路由, 直接访问
+    // - 否则, 重定向至 { name: 'login' }
+    return isGlobalRoute(to) ? next() : next({ name: "login" });
+  }else {
+    next();
+  }
+})
+
+export default router;
+```

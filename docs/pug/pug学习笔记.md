@@ -1,5 +1,11 @@
 <h2 align="center">pug笔记</h2>
 
+## 安装
+
+```
+yarn add vue-cli-plugin-pug --dev
+```
+
 ## 1.类名/ID
 
 ```
