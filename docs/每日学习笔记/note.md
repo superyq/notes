@@ -306,3 +306,17 @@ meta name=”format-detection” content=”telephone=no,email=no,adress=no”
 3. adress
    adress=no 禁止跳转至地图
    adress=yes 开启点击地址直接跳转至地图的功能, 默认开启
+
+### canvas 转 img
+
+```
+$("#Android-qrcode").qrcode("http://www.baidu.com");
+
+function canvasToImage(el) {
+  let img = new Image();
+  img.src = el.toDataURL("image/png");
+  return img;
+}
+
+$("#Android-qrcode").append(canvasToImage($("canvas")[0]));
+```

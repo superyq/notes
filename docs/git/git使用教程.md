@@ -84,7 +84,7 @@ git rebase --skip
 - 追加修改到上一个提交或修改上一个提交的 message： git commit --amend
 - 查看一个文件的所有历史修改：git log -p 文件名
 - 合并一个 commit：git cherry-pick \$commit
-- 强推：git pull -f
+- 强推：git push -f
 
 ## git flow
 
