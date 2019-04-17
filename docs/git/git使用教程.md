@@ -85,6 +85,7 @@ git rebase --skip
 - 查看一个文件的所有历史修改：git log -p 文件名
 - 合并一个 commit：git cherry-pick \$commit
 - 强推：git push -f
+- 本地有 commit，pull 远端 commit 到本地 commit 之前： git pull --rebase
 
 ## git flow
 

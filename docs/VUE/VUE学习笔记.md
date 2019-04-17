@@ -407,3 +407,28 @@ router.beforeEach((to, from, next) => {
 
 export default router;
 ```
+
+### props
+
+1. 数组,对象 props 默认值回调函数
+
+```
+props: {
+  A: {
+    type: Array,
+    default: function() {
+      return ...
+    }
+  }
+}
+```
+
+2. props 多种类型数组表示
+
+```
+props: {
+  A: {
+    type: [Stirng, Number]
+  }
+}
+```

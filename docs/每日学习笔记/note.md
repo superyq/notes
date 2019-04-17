@@ -320,3 +320,32 @@ function canvasToImage(el) {
 
 $("#Android-qrcode").append(canvasToImage($("canvas")[0]));
 ```
+
+### input 常规背景、激活背景、完成背景、错误背景
+
+### 字符串转数字
+
+1. string \* 1
+
+2. String(value)、Number(value)、Boolean(value)
+
+3. parseInt(val)、parseFloat(val)
+
+### 补位、保留 2 位小数
+
+1. number.toFixed(2)
+
+### 数组 map 作用
+
+> > > 返回一个新数组，旧数组元素调用同一个方法
+
+### css 倒三角
+
+```
+#triangle-bottomright {
+    width: 0;
+    height: 0;
+    border-bottom: 100px solid red;
+    border-left: 100px solid transparent;
+}
+```
