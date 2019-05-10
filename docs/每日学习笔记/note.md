@@ -349,3 +349,8 @@ $("#Android-qrcode").append(canvasToImage($("canvas")[0]));
     border-left: 100px solid transparent;
 }
 ```
+
+### JSON.parse()、 JSON.stringify()
+
+- JSON.parse()： JSON 字符串转换为对象
+- JSON.stringify()： 对象转换为 JSON 字符串
