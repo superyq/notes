@@ -1,0 +1,12 @@
+{
+  "name": "yqnotes",
+  "version": "1.0.0",
+  "description": "学习笔记",
+  "main": "index.js",
+  "repository": "git@github.com:superyq/notes.git",
+  "author": "superyq <447845126@qq.com>",
+  "license": "MIT",
+  "dependencies": {
+    "i5ting_toc": "^1.1.5"
+  }
+}

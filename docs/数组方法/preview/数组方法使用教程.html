@@ -1,0 +1,199 @@
+<html>
+  <head>
+	  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>i5ting_ztree_toc:数组方法使用教程</title>
+		<link href="toc/style/github-bf51422f4bb36427d391e4b75a1daa083c2d840e.css" media="all" rel="stylesheet" type="text/css"/>
+		<link href="toc/style/github2-d731afd4f624c99a4b19ad69f3083cd6d02b81d5.css" media="all" rel="stylesheet" type="text/css"/>
+		<link href="toc/css/zTreeStyle/zTreeStyle.css" media="all" rel="stylesheet" type="text/css"/>
+	  <style>
+		pre {
+		    counter-reset: line-numbering;
+		    border: solid 1px #d9d9d9;
+		    border-radius: 0;
+		    background: #fff;
+		    padding: 0;
+		    line-height: 23px;
+		    margin-bottom: 30px;
+		    white-space: pre;
+		    overflow-x: auto;
+		    word-break: inherit;
+		    word-wrap: inherit;
+		}
+
+		pre a::before {
+		  content: counter(line-numbering);
+		  counter-increment: line-numbering;
+		  padding-right: 1em; /* space after numbers */
+		  width: 25px;
+		  text-align: right;
+		  opacity: 0.7;
+		  display: inline-block;
+		  color: #aaa;
+		  background: #eee;
+		  margin-right: 16px;
+		  padding: 2px 10px;
+		  font-size: 13px;
+		  -webkit-touch-callout: none;
+		  -webkit-user-select: none;
+		  -khtml-user-select: none;
+		  -moz-user-select: none;
+		  -ms-user-select: none;
+		  user-select: none;
+		}
+
+		pre a:first-of-type::before {
+		  padding-top: 10px;
+		}
+
+		pre a:last-of-type::before {
+		  padding-bottom: 10px;
+		}
+
+		pre a:only-of-type::before {
+		  padding: 10px;
+		}
+
+		.highlight { background-color: #ffffcc } /* RIGHT */
+		</style>
+  </head>
+  <body>
+	  <div>
+				<div style='width:25%;'>
+						<ul id="tree" class="ztree" style='width:100%'>
+
+						</ul>
+				</div>
+        <div id='readme' style='width:70%;margin-left:20%;'>
+          	<article class='markdown-body'>
+            	<h1 align="center"><a href="https://www.jb51.net/article/87930.htm">常用数组方法</a></h1>
+
+<pre><code>\\ 数组转字符串，返回改变后的数组，不改变原数组，通过 join()方法可以实现重复字符串
+var arr = [1,2,3];
+console.log(arr.join()); // 1,2,3
+console.log(arr.join(&quot;-&quot;)); // 1-2-3
+console.log(arr); // [1, 2, 3]（原数组不变）
+
+function repeatString(str, n) {
+return new Array(n + 1).join(str);
+}
+console.log(repeatString(&quot;abc&quot;, 3)); // abcabcabc
+console.log(repeatString(&quot;Hi&quot;, 5)); // HiHiHiHiHi
+
+\\ 数组尾部添加参数，返回长度，改变原数组
+var count = arr.push(&quot;Jack&quot;,&quot;Sean&quot;);
+
+\\ 数组头部添加参数，返回长度，改变原数组
+var count = arr.unshift(&quot;Jack&quot;,&quot;Sean&quot;);
+
+\\ 移除数组最后一项，返回移除项，改变原数组
+var item = arr.pop();
+
+\\ 移除数组头一项，返回移除项，改变原数组
+var item = arr.shift();
+
+\\ 反转数组项的顺序，返回新数组，改变原数组
+var arr = [13, 24, 51, 3];
+console.log(arr.reverse()); //[3, 51, 24, 13]
+console.log(arr); //[3, 51, 24, 13](原数组改变)
+
+\\ 数组拼接，返回新数组，不改变原数组
+var arr = [1,3,5,7];
+var arrCopy = arr.concat(9,[11,13]);
+console.log(arrCopy); //[1, 3, 5, 7, 9, 11, 13]
+console.log(arr); // [1, 3, 5, 7](原数组未被修改)
+
+\\ 数组实现删除、插入、替换，返回包含删除项的数组，没有就返回空数组，改变原数组
+
+- 删除 -
+var arr = [1,3,5,7,9,11];
+var arrRemoved = arr.splice(0,2);
+console.log(arr); //[5, 7, 9, 11]
+console.log(arrRemoved); //[1, 3]
+
+- 插入 -
+var arrRemoved2 = arr.splice(2,0,4,6);
+console.log(arr); // [5, 7, 4, 6, 9, 11]
+console.log(arrRemoved2); // []
+
+- 替换 -
+var arrRemoved3 = arr.splice(1,1,2,4);
+console.log(arr); // [5, 2, 4, 4, 6, 9, 11]
+console.log(arrRemoved3); //[7]
+
+\\ 查找数组元素，如果存在返回下标，不存在返回-1
+var arr = [1,3,5,7,7,5,3,1];
+console.log(arr.indexOf(5)); //2
+console.log(arr.lastIndexOf(5)); //5
+console.log(arr.indexOf(5,2)); //2
+console.log(arr.lastIndexOf(5,4)); //2
+console.log(arr.indexOf(&quot;5&quot;)); //-1
+
+\\ 数组进行遍历循环，对数组中的每一项运行给定函数。这个方法没有返回值。参数都是 function 类型，默认有传参，参数分别为：遍历的数组内容；第对应的数组索引，数组本身。
+var arr = [1, 2, 3, 4, 5];
+arr.forEach(function(x, index, a){
+console.log(x + &#39;|&#39; + index + &#39;|&#39; + (a === arr));
+});
+// 输出为：
+// 1|0|true
+// 2|1|true
+// 3|2|true
+// 4|3|true
+// 5|4|true
+
+\\ 数组中的每一项运行给定函数，返回每次函数调用的结果组成的数组，不改变原数组，“映射”
+var arr = [1, 2, 3, 4, 5];
+var arr2 = arr.map(function(item){
+return item\*item;
+});
+console.log(arr2); //[1, 4, 9, 16, 25]
+
+\\ 数组中的每一项运行给定函数，返回满足过滤条件组成的数组，不改变原数组，“过滤”
+var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+var arr2 = arr.filter(function(x, index) {
+return index % 3 === 0 || x &gt;= 8;
+});
+console.log(arr2); //[1, 4, 7, 8, 9, 10]
+
+\\ 数组中的每一项运行给定函数，返回Boolean值，所有项都满足条件，返回 true，否则返回 false
+var arr = [1, 2, 3, 4, 5];
+var arr2 = arr.every(function(x) {
+return x &lt; 10;
+});
+console.log(arr2); //true
+var arr3 = arr.every(function(x) {
+return x &lt; 3;
+});
+console.log(arr3); // false
+
+\\ 数组中的每一项运行给定函数，返回Boolean值，一项满足条件，返回 true，否则返回 false
+var arr = [1, 2, 3, 4, 5];
+var arr2 = arr.some(function(x) {
+return x &lt; 3;
+});
+console.log(arr2); //true
+var arr3 = arr.some(function(x) {
+return x &lt; 1;
+});
+console.log(arr3); // false
+</code></pre>
+          	</article>
+        </div>
+		</div>
+  </body>
+</html>
+<script type="text/javascript" src="toc/js/jquery-1.4.4.min.js"></script>
+<script type="text/javascript" src="toc/js/jquery.ztree.all-3.5.min.js"></script>
+<script type="text/javascript" src="toc/js/ztree_toc.js"></script>
+<script type="text/javascript" src="toc_conf.js"></script>
+
+<SCRIPT type="text/javascript" >
+<!--
+$(document).ready(function(){
+    var css_conf = eval(markdown_panel_style);
+    $('#readme').css(css_conf)
+    
+    var conf = eval(jquery_ztree_toc_opts);
+		$('#tree').ztree_toc(conf);
+});
+//-->
+</SCRIPT>

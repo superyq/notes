@@ -1,0 +1,215 @@
+<html>
+  <head>
+	  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>i5ting_ztree_toc:grid栅格学习笔记</title>
+		<link href="toc/style/github-bf51422f4bb36427d391e4b75a1daa083c2d840e.css" media="all" rel="stylesheet" type="text/css"/>
+		<link href="toc/style/github2-d731afd4f624c99a4b19ad69f3083cd6d02b81d5.css" media="all" rel="stylesheet" type="text/css"/>
+		<link href="toc/css/zTreeStyle/zTreeStyle.css" media="all" rel="stylesheet" type="text/css"/>
+	  <style>
+		pre {
+		    counter-reset: line-numbering;
+		    border: solid 1px #d9d9d9;
+		    border-radius: 0;
+		    background: #fff;
+		    padding: 0;
+		    line-height: 23px;
+		    margin-bottom: 30px;
+		    white-space: pre;
+		    overflow-x: auto;
+		    word-break: inherit;
+		    word-wrap: inherit;
+		}
+
+		pre a::before {
+		  content: counter(line-numbering);
+		  counter-increment: line-numbering;
+		  padding-right: 1em; /* space after numbers */
+		  width: 25px;
+		  text-align: right;
+		  opacity: 0.7;
+		  display: inline-block;
+		  color: #aaa;
+		  background: #eee;
+		  margin-right: 16px;
+		  padding: 2px 10px;
+		  font-size: 13px;
+		  -webkit-touch-callout: none;
+		  -webkit-user-select: none;
+		  -khtml-user-select: none;
+		  -moz-user-select: none;
+		  -ms-user-select: none;
+		  user-select: none;
+		}
+
+		pre a:first-of-type::before {
+		  padding-top: 10px;
+		}
+
+		pre a:last-of-type::before {
+		  padding-bottom: 10px;
+		}
+
+		pre a:only-of-type::before {
+		  padding: 10px;
+		}
+
+		.highlight { background-color: #ffffcc } /* RIGHT */
+		</style>
+  </head>
+  <body>
+	  <div>
+				<div style='width:25%;'>
+						<ul id="tree" class="ztree" style='width:100%'>
+
+						</ul>
+				</div>
+        <div id='readme' style='width:70%;margin-left:20%;'>
+          	<article class='markdown-body'>
+            	<h2 align="center"><a href="https://matiji.cn/post/5c98b5e8996f307d572c0a8c">grid栅格学习笔记</a></h2>
+
+<h2 id="-">容器属性</h2>
+<h3 id="-">容器的类型为块元素还是行内元素</h3>
+<pre><code>.container {
+    display: grid | inline-grid
+}
+</code></pre><h3 id="-">栅格轨道的数量以及宽度</h3>
+<pre><code>\\ auto：默认情况下该栅格轨道会充满栅格容器的富余空间
+
+.container {
+    display: grid;
+    grid-template-columns: 100px auto 100px;
+    grid-template-rows: repeat(2, 50px);
+    grid-gap: 10px;
+}
+</code></pre><h3 id="-">给栅格单元命名，同名的栅格单元自动成为一个栅格区域。</h3>
+<pre><code>.container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-areas:
+        &#39;header header header&#39;
+        &#39;sidebar main main&#39;
+        &#39;footer footer footer&#39;;
+}
+</code></pre><p>命名之后有什么用呢？栅格项目有一个 grid-area 属性，它来瓜分栅格区域。</p>
+<pre><code>.item {
+    grid-area: header;
+}
+</code></pre><p>这个意思是说，名字叫 header 的栅格区域都是我的，撒尿为证。</p>
+<p>缺省名字：不知道叫什么的时候就用.代替。</p>
+<pre><code>.container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-areas:
+        &#39;main main sidebar&#39;
+        &#39;main main .&#39;;
+}
+</code></pre><h3 id="-">长度的取值种类</h3>
+<ol>
+<li>fr：富余空间为总长度，以声明的 fr 数量总和为分母，以自身声明的 fr 数量为分子</li>
+</ol>
+<pre><code>.container {
+    display: grid;
+    grid-template-columns: 100px repeat(2, 1fr);
+    grid-template-rows: repeat(2, 50px);
+    grid-gap: 10px;
+}
+</code></pre><ol start="2">
+<li>minmax()：它有两个参数，分别是最小值和最大值。当栅格单元需要压缩时，最小值就是栅格项目被压缩的最小极限，当栅格单元有剩余空间时，最大值就是栅格项目扩张的最大极限。</li>
+</ol>
+<pre><code>.container {
+    display: grid;
+    grid-template-columns: minmax(100px, 200px) 300px 300px;
+}
+</code></pre><ol start="3">
+<li>fit-content()：当内容小于 200px 时，以内容为长度，当内容大于 200px 时，以 200px 为长度。</li>
+</ol>
+<pre><code>.container {
+    display: grid;
+    grid-template-columns: repeat(3, fit-content(200px));
+    grid-template-rows: repeat(2, 50px);
+    grid-gap: 10px;
+}
+</code></pre><ol start="4">
+<li>repeat()第一个参数取值 auto-fill 和 auto-fit</li>
+</ol>
+<p>auto-fill 和 auto-fit 的共同点在于它们会保证栅格系统不溢出栅格容器。因为如果你写死了重复多少个，栅格容器空间不够的话只能溢出了。</p>
+<p>而不同点在于，auto-fill 会生成尽可能多的栅格轨道，即便这些轨道看起来没什么用；auto-fit 则会生成尽可能少的栅格轨道，以便让那些自适应的栅格单元尽可能占用更多空间。</p>
+<p>所以区别在于，auto-fill 想让栅格轨道尽可能多，auto-fit 想让栅格单元尽可能大。</p>
+<pre><code>.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+</code></pre><p>这里的意思是说，自适应布局，每个栅格项目长度等分，但最小不低于 300px。最大不超过 600px，因为超过 600px 就是两个 300px。</p>
+<h3 id="-">栅格单元之间的空隙</h3>
+<pre><code>.container {
+    grid-column-gap: &lt;length&gt;;
+    grid-row-gap: &lt;length&gt;;
+    grid-gap: &lt;length&gt;;
+}
+</code></pre><h3 id="-">项目相对于区域的对齐方式</h3>
+<pre><code>.container {
+    // 水平对齐方式
+    justify-items: stretch /*default*/ | start | end | center;
+
+    // 垂直对齐方式
+    align-items: stretch /*default*/ | start | end | center;
+
+}
+</code></pre><h3 id="-">栅格系统相对于栅格容器的水平对齐方式。</h3>
+<pre><code>.container {
+    // 水平对齐方式
+    justify-content: start /*default*/ | end | center | stretch | space-around | space-between | space-evenly;
+
+    // 垂直对齐方式
+    align-content: start /*default*/ | end | center | stretch | space-around | space-between | space-evenly;
+}
+</code></pre><h3 id="-">编外栅格单元的高度和宽度。</h3>
+<pre><code>.container {
+    grid-auto-columns: &lt;length&gt; &lt;length&gt; &lt;length&gt;;
+    grid-auto-rows: &lt;length&gt; &lt;length&gt; &lt;length&gt;;
+}
+</code></pre><h3 id="-">栅格项目应该如何依次排列</h3>
+<pre><code>.container {
+    //row：水平排  column：垂直排
+    grid-auto-flow: row /*default*/ | column | dense | row dense | column dense;
+}
+</code></pre><h2 id="-">项目属性</h2>
+<h3 id="-">栅格项目占据哪个栅格区域。</h3>
+<pre><code>item{
+    grid-area: &lt;name&gt; | &lt;row-start&gt; / &lt;column-start&gt; / &lt;row-end&gt; / &lt;column-end&gt;;
+}
+</code></pre><h3 id="-">这是两个集合属性，它们可以同时声明在某个方向开始和结束的位置。</h3>
+<pre><code>.item {
+    grid-column: &lt;start&gt; / &lt;end&gt;;
+    grid-row: &lt;start&gt; / &lt;end&gt;;
+}
+</code></pre><h3 id="-">栅格项目相对于栅格区域对齐方式, 覆盖栅格容器</h3>
+<pre><code>.item {
+    // 水平对齐方式
+    justify-self: stretch /*default*/ | start | end | center;
+
+    // 垂直对齐方式
+    align-self: stretch /*default*/ | start | end | center;
+}
+</code></pre>
+          	</article>
+        </div>
+		</div>
+  </body>
+</html>
+<script type="text/javascript" src="toc/js/jquery-1.4.4.min.js"></script>
+<script type="text/javascript" src="toc/js/jquery.ztree.all-3.5.min.js"></script>
+<script type="text/javascript" src="toc/js/ztree_toc.js"></script>
+<script type="text/javascript" src="toc_conf.js"></script>
+
+<SCRIPT type="text/javascript" >
+<!--
+$(document).ready(function(){
+    var css_conf = eval(markdown_panel_style);
+    $('#readme').css(css_conf)
+    
+    var conf = eval(jquery_ztree_toc_opts);
+		$('#tree').ztree_toc(conf);
+});
+//-->
+</SCRIPT>

@@ -1,0 +1,206 @@
+<html>
+  <head>
+	  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>i5ting_ztree_toc:note</title>
+		<link href="toc/style/github-bf51422f4bb36427d391e4b75a1daa083c2d840e.css" media="all" rel="stylesheet" type="text/css"/>
+		<link href="toc/style/github2-d731afd4f624c99a4b19ad69f3083cd6d02b81d5.css" media="all" rel="stylesheet" type="text/css"/>
+		<link href="toc/css/zTreeStyle/zTreeStyle.css" media="all" rel="stylesheet" type="text/css"/>
+	  <style>
+		pre {
+		    counter-reset: line-numbering;
+		    border: solid 1px #d9d9d9;
+		    border-radius: 0;
+		    background: #fff;
+		    padding: 0;
+		    line-height: 23px;
+		    margin-bottom: 30px;
+		    white-space: pre;
+		    overflow-x: auto;
+		    word-break: inherit;
+		    word-wrap: inherit;
+		}
+
+		pre a::before {
+		  content: counter(line-numbering);
+		  counter-increment: line-numbering;
+		  padding-right: 1em; /* space after numbers */
+		  width: 25px;
+		  text-align: right;
+		  opacity: 0.7;
+		  display: inline-block;
+		  color: #aaa;
+		  background: #eee;
+		  margin-right: 16px;
+		  padding: 2px 10px;
+		  font-size: 13px;
+		  -webkit-touch-callout: none;
+		  -webkit-user-select: none;
+		  -khtml-user-select: none;
+		  -moz-user-select: none;
+		  -ms-user-select: none;
+		  user-select: none;
+		}
+
+		pre a:first-of-type::before {
+		  padding-top: 10px;
+		}
+
+		pre a:last-of-type::before {
+		  padding-bottom: 10px;
+		}
+
+		pre a:only-of-type::before {
+		  padding: 10px;
+		}
+
+		.highlight { background-color: #ffffcc } /* RIGHT */
+		</style>
+  </head>
+  <body>
+	  <div>
+				<div style='width:25%;'>
+						<ul id="tree" class="ztree" style='width:100%'>
+
+						</ul>
+				</div>
+        <div id='readme' style='width:70%;margin-left:20%;'>
+          	<article class='markdown-body'>
+            	<h1 align="center">不知道怎么分类的笔记</h1>
+
+<h2 id="a-javascript-">a 标签加 javascript 意义</h2>
+<p>执行一段空白的 javascript 语句，返回空或者 false 值，从而防止链接跳转。跟当前 a 标签无关，这段代码始终都会执行。</p>
+<pre><code>&lt;a href=&quot;javascript:;&quot;&gt;
+</code></pre><h2 id="-ie9">判断浏览器是否支持 ie9</h2>
+<pre><code>&lt;!--[if IE 9]&gt;
+  &lt;link ref=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;ie9.css&quot; /&gt;
+&lt;![endif]--&gt;
+</code></pre><h2 id="object-assign-">Object.assign()</h2>
+<p>Object.assign() 方法用于将所有可枚举属性的值从一个或多个源对象复制到目标对象。它将返回目标对象。</p>
+<pre><code>const target = { a: 1, b: 2 };
+const source = { b: 4, c: 5 };
+
+const returnedTarget = Object.assign(target, source);
+
+console.log(target);
+// expected output: Object { a: 1, b: 4, c: 5 }
+
+console.log(returnedTarget);
+// expected output: Object { a: 1, b: 4, c: 5 }
+</code></pre><h2 id="promise-all">Promise.all</h2>
+<p>Promise.all 等待所有都完成（或第一个失败）</p>
+<pre><code>Promise.all([getA({ page, limit, ...this.search }), flag &amp;&amp; getB()])
+.then(([
+  {
+    data: { data: list = [], total }
+  },
+  {
+    data: cates = []
+  } = {}
+]) =&gt; {
+  falg &amp;&amp; (this.list = [...cates])
+})
+.catch(() =&gt; {})
+</code></pre><h2 id="array-from-">Array.from()</h2>
+<p>Array.from() 方法从一个类似数组或可迭代对象中创建一个新的数组实例。</p>
+<pre><code>console.log(Array.from(&#39;foo&#39;));
+// expected output: Array [&quot;f&quot;, &quot;o&quot;, &quot;o&quot;]
+
+console.log(Array.from([1, 2, 3], x =&gt; x + x));
+// expected output: Array [2, 4, 6]
+</code></pre><h2 id="-new-set-arr-">数组去重 new Set(arr)，返回去重后数组，不改变原来数组</h2>
+<pre><code>var b = [1,2,1,2,1,2,1,2,3,1,6];
+new Set(b);// [1,2,3,6]
+</code></pre><h2 id="em">em</h2>
+<p>“em”是一个相对的大小,相对所指的是相对于元素父元素的 font-size</p>
+<h2 id="-">搜索表单只有一个输入框时</h2>
+<p>当一个 form 元素中只有一个输入框时，在该输入框中按下回车应提交该表单。如果希望阻止这一默认行为，可以在 <el-form> 标签上添加 @submit.native.prevent</p>
+<pre><code>&lt;el-form
+  size=&quot;mini&quot;
+  :inline=&quot;true&quot;
+  :model=&quot;search&quot;
+  @keyup.enter.native=&quot;updateTableData&quot;
+  @submit.native.prevent
+  slot=&quot;header&quot;
+&gt;
+</code></pre><h2 id="meta-format-detection-">Meta 标签中的 format-detection 属性及含义</h2>
+<p>format-detection —— 格式检测，用来检测 html 里的一些格式，主要有以下几个设置：</p>
+<ul>
+<li>meta name=”format-detection” content=”telephone=no”</li>
+<li>meta name=”format-detection” content=”email=no”</li>
+<li>meta name=”format-detection” content=”adress=no”</li>
+</ul>
+<p>或者直接写成：</p>
+<p>meta name=”format-detection” content=”telephone=no,email=no,adress=no”</p>
+<ol>
+<li><p>telephone
+主要作用是是否设置自动将你的数字转化为拨号连接
+telephone=no 禁止把数字转化为拨号链接
+telephone=yes 开启把数字转化为拨号链接，默认开启</p>
+</li>
+<li><p>email
+告诉设备不识别邮箱，点击之后不自动发送
+email=no 禁止作为邮箱地址
+email=yes 开启把文字默认为邮箱地址，默认情况开启</p>
+</li>
+<li><p>adress
+adress=no 禁止跳转至地图
+adress=yes 开启点击地址直接跳转至地图的功能, 默认开启</p>
+</li>
+</ol>
+<h2 id="canvas-img">canvas 转 img</h2>
+<pre><code>$(&quot;#Android-qrcode&quot;).qrcode(&quot;http://www.baidu.com&quot;);
+
+function canvasToImage(el) {
+  let img = new Image();
+  img.src = el.toDataURL(&quot;image/png&quot;);
+  return img;
+}
+
+$(&quot;#Android-qrcode&quot;).append(canvasToImage($(&quot;canvas&quot;)[0]));
+</code></pre><h2 id="-">字符串转数字</h2>
+<ol>
+<li><p>string * 1</p>
+</li>
+<li><p>String(value)、Number(value)、Boolean(value)</p>
+</li>
+<li><p>parseInt(val)、parseFloat(val)</p>
+</li>
+</ol>
+<h2 id="-2-">补位、保留 2 位小数</h2>
+<ol>
+<li>number.toFixed(2)</li>
+</ol>
+<h2 id="css-">css 倒三角</h2>
+<pre><code>#triangle-bottomright {
+  width: 0;
+  height: 0;
+  border-bottom: 100px solid red;
+  border-left: 100px solid transparent;
+}
+</code></pre><h2 id="json-parse-json-stringify-">JSON.parse()、 JSON.stringify()</h2>
+<ul>
+<li>JSON.parse()： JSON 字符串转换为对象</li>
+<li>JSON.stringify()： 对象转换为 JSON 字符串</li>
+</ul>
+
+          	</article>
+        </div>
+		</div>
+  </body>
+</html>
+<script type="text/javascript" src="toc/js/jquery-1.4.4.min.js"></script>
+<script type="text/javascript" src="toc/js/jquery.ztree.all-3.5.min.js"></script>
+<script type="text/javascript" src="toc/js/ztree_toc.js"></script>
+<script type="text/javascript" src="toc_conf.js"></script>
+
+<SCRIPT type="text/javascript" >
+<!--
+$(document).ready(function(){
+    var css_conf = eval(markdown_panel_style);
+    $('#readme').css(css_conf)
+    
+    var conf = eval(jquery_ztree_toc_opts);
+		$('#tree').ztree_toc(conf);
+});
+//-->
+</SCRIPT>

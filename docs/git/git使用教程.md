@@ -1,8 +1,6 @@
-<h2 align="center">git学习笔记</h2>
+<h1 align="center">git学习笔记</h1>
 
-## git 笔记
-
-### 提交,拉取
+## 提交,拉取
 
 ```
 创建版本库: git init
@@ -13,7 +11,7 @@
 提交到远程仓库: git push
 ```
 
-### 查看操作
+## 查看操作
 
 ```
 查看工作区修改: git status
@@ -22,16 +20,15 @@
 查看所有所有所有commit: git reflog
 ```
 
-### 后悔操作
+## 后悔操作
 
 ```
 版本回退,修改重新放回工作区: git reset ...
 版本回退,直接删修改: git reset --hard ...
 丢弃工作区修改: git checkout ...
-
 ```
 
-### 处理冲突
+## 处理冲突
 
 ```
 当pull远程仓库时.报冲突错误,直接合并远程仓库和本地仓库: git rebase
@@ -42,7 +39,7 @@
 将存储的list删除: git stash drop
 ```
 
-### 分支
+## 分支
 
 ```
 创建分支: git branch ...
@@ -56,53 +53,32 @@
 删除远端分支: git push origin --delete 分支名
 ```
 
-### 修改文件名
+## 进阶
 
 ```
-git mv oldName newName /*更改文件名称*/
+变基同步分支commit: CB rebase FB
+捡出一个 commit: git cherry-pick BN commit CM
+追加到上一个提交： git commit --amend
+查看一个文件的所有历史修改：git log -p 文件名
+强推：git push -f
+本地有 commit，pull 远端 commit 到本地 commit 之前： git pull --rebase
+合并 commit 时未完成就退出后，再操作
+继续：git rebase --continue
+删除：git rebase --abort
+跳过：git rebase --skip
 ```
-
-### 提交格式化
-
-```
-yarn lint --fix
-```
-
-### 进阶
-
-- 从本地分支切换创建分支: git flow feature start fix
-- 变基: feature-fix rebase dev
-- 从其他分支捡出一个 commit: git cherry-pick feature-fix commit 名
-- 合并 commit 时未完成就退出后，再操作
-
-```
-git rebase --continue
-git rebase --abort
-git rebase --skip
-```
-
-- 追加修改到上一个提交或修改上一个提交的 message： git commit --amend
-- 查看一个文件的所有历史修改：git log -p 文件名
-- 合并一个 commit：git cherry-pick \$commit
-- 强推：git push -f
-- 本地有 commit，pull 远端 commit 到本地 commit 之前： git pull --rebase
 
 ## git flow
 
-### 创建
-
 ```
-git flow init
-```
-
-### 开始新功能
-
-```
-git flow feature start name
+创建：git flow init
+创建新功能：git flow feature start name
+结束新功能：git flow feature end name
 ```
 
-### 结束新功能
+## 其他
 
 ```
-git flow feature end name
+更改文件名称：git mv oldName newName
+提交格式化：yarn lint --fix
 ```
