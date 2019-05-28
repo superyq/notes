@@ -157,3 +157,11 @@ $("#Android-qrcode").append(canvasToImage($("canvas")[0]));
 
 - JSON.parse()： JSON 字符串转换为对象
 - JSON.stringify()： 对象转换为 JSON 字符串
+
+## cookies、sesstionStorage、localStorage 区别
+
+cookies：存储大小 4KB。不设时间默认关闭浏览器删除保存，设置时间关闭浏览器保存数据直到设置时间。会与服务器发生交互，占用带宽，没有及时性。不安全。只能保存字符串类型。已经没怎么用了。
+
+sesstionStorage：储存大小 5MB。及时会话，关闭浏览器数据删除。调用方法 window.sesstionStorage。H5 提供新特性。
+
+localStorage：储存大小 5MK。不删除，数据一直保存。调用方法 window.localStorage。方法有 setItem(key, val),getItem(key),removeItem(key),clear(),key(index)
