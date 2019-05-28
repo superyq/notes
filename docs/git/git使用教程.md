@@ -23,6 +23,7 @@
 ## 后悔操作
 
 ```
+并且把这次撤销作为一次最新的提交: git revert ...
 版本回退,修改重新放回工作区: git reset ...
 版本回退,直接删修改: git reset --hard ...
 丢弃工作区修改: git checkout ...
@@ -51,13 +52,14 @@
 合并分支: git merge ...
 创建并推送至远端分支: git push origin 分支名
 删除远端分支: git push origin --delete 分支名
+本地分支和远端分支创建链接：git branch --set-upstream-to=origin/feat feat
 ```
 
 ## 进阶
 
 ```
-变基同步分支commit: CB rebase FB
-捡出一个 commit: git cherry-pick BN commit CM
+变基同步分支commit: ... rebase ...
+捡出一个 commit: git cherry-pick ... commit ...
 追加到上一个提交： git commit --amend
 查看一个文件的所有历史修改：git log -p 文件名
 强推：git push -f

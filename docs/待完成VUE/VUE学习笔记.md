@@ -1,4 +1,39 @@
-<h2 align="center">VUE笔记</h2>
+<h1 align="center">VUE笔记</h1>
+
+## 计算属性 set
+
+```
+compouted: {
+  // 一般情况只有get
+  name() {
+    return this.firstname + this.lastname;
+  }
+
+  // 也可以有set
+  name: {
+    get() {
+      return this.firstname + this.lastname;
+    },
+    set(val) {
+      this.firstname = val.split(1,2);
+      this.lastname = val.split(2,3);
+    }
+  }
+}
+```
+
+## class 和 style 得绑定
+
+```
+// isActive 为变量
+<div :class="{ active: isActive }"></div>
+
+// 数组内为变量
+<div :class="[activeClass, errorClass]"></div>
+
+// 可以用3元表达式
+<div :class="[isActive ? activeClass : '', errorClass]"></div>
+```
 
 ## 生命周期
 
