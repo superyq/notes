@@ -1,5 +1,23 @@
 <h1 align="center">不知道怎么分类的笔记</h1>
 
+## 文件上传
+
+```
+import http from "./http";
+
+export default function upload(file, config) {
+  const params = new FormData();
+  params.append("file", file);
+
+  return http.post("/upload", params, {
+    ...config,
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  });
+}
+```
+
 ## a 标签加 javascript 意义
 
 执行一段空白的 javascript 语句，返回空或者 false 值，从而防止链接跳转。跟当前 a 标签无关，这段代码始终都会执行。
