@@ -6,7 +6,5 @@
   "repository": "git@github.com:superyq/notes.git",
   "author": "superyq <447845126@qq.com>",
   "license": "MIT",
-  "dependencies": {
-    "i5ting_toc": "^1.1.5"
-  }
+  "dependencies": {}
 }
