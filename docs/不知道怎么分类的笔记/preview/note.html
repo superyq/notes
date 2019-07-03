@@ -67,7 +67,151 @@
           	<article class='markdown-body'>
             	<h1 align="center">不知道怎么分类的笔记</h1>
 
-<h2 id="a-javascript-">a 标签加 javascript 意义</h2>
+<h2 id="-xlsx">导出/导出 xlsx</h2>
+<pre><code>\\ 导出
+export function exportA() {
+  return http.post(
+      &#39;接口&#39;,
+      {},
+      {
+        format: false,
+        responseType: &#39;blob&#39;
+      }
+    )
+}
+
+this.$confirm(&quot;模板已生成，是否保存至本地&quot;, &quot;已生成模板&quot;)
+  .then(() =&gt; {
+    const $a = document.createElement(&quot;a&quot;);
+    $a.href = URL.createObjectURL(data);
+    $a.target = &quot;_blank&quot;;
+    $a.download = &quot;敏感词模板.xlsx&quot;;
+    $a.click();
+  })
+  .catch(() =&gt; {
+    this.loading = false;
+  });
+
+\\ 导入
+export function importA() {
+  const params = new FormData();
+  params.append(&quot;file&quot;, file);
+
+  return http.post(&quot;接口&quot;, params, {
+    headers: {
+      &quot;Content-Type&quot;: &quot;multipart/form-data&quot;
+    }
+  })
+}
+
+fileChangeHandle(evt) {
+  const files = evt.target.files || evt.dataTransfer.files;
+
+  importSensitive(files[0])
+    .then(({ message = &quot;导入成功&quot; }) =&gt; {
+      this.$message.success(message);
+      this.$refs.fileInput.value = &quot;&quot;;
+      this.updateTableData();
+    })
+    .catch(({ message = &quot;导入失败！&quot; }) =&gt; {
+      this.$refs.fileInput.value = &quot;&quot;;
+      this.$message.error(message);
+    })
+    .finally(() =&gt; {
+      this.loading = false;
+    });
+  }
+
+</code></pre><h2 id="vue-watch-time-computed-time">vue watch time 改为 computed time</h2>
+<pre><code>computed: {
+  time: {
+    get() {
+      const { start, end } = this.search;
+      return start &amp;&amp; end ? [start, end] : &quot;&quot;;
+    },
+    set([start = &quot;&quot;, end = &quot;&quot;] = []) {
+      this.search.start = start;
+      this.search.end = end;
+    }
+  }
+}
+</code></pre><h2 id="vue-">vue 图片上传外貌</h2>
+<pre><code>el-form-item(label=&#39;等级图标&#39;, prop=&#39;icon&#39;)
+  .user-grade__box(@click=&#39;chooseFile&#39;)
+    i.el-icon-plus
+  input(type=&#39;file&#39;, ref=&#39;fileInput&#39;, @change=&#39;fileChangeHandle($event)&#39;, hidden)
+
+chooseFile() {
+  this.$refs.fileInput.click();
+},
+fileChangeHandle() {},
+</code></pre><h2 id="vue-">vue 子组件调用父组件的方法</h2>
+<pre><code>\\ 父组件
+provide() {
+  return {
+    updateTableHandle: this.updateTableHandle
+  };
+}
+
+\\ 子组件
+inject: [&quot;updateTableHandle&quot;]
+
+</code></pre><h2 id="vue-">vue 插槽</h2>
+<pre><code>\\ 子组件
+(name=&quot;a&quot;)
+(v-bind=&quot;{ data }&quot;)
+
+\\ 父组件
+(slot=&quot;a&quot;)
+(slot-scope=&quot;{ data }&quot;)
+</code></pre><h2 id="vue-router-">vue 与 router 相关</h2>
+<pre><code>data() {
+  return {
+    active: this.$route.query.tab || &quot;exchange&quot;
+  }
+},
+methods: {
+  tab({ name }) {
+    this.$router.push({
+      name: &#39;goods&#39;,
+      query: {
+        tab: name
+      }
+    })
+  }
+}
+</code></pre><h2 id="try-catch">try/catch</h2>
+<p>try/catch 语句用于处理代码中可能出现的错误信息，出现异常会导致程序崩溃，而 try/catch 则可以保证程序的正常运行</p>
+<pre><code>try {
+//执行代码  不报错则 正常执行 不会进入下面的catch
+} catch(err){
+    //当上面的代码出错时 这里可以捕获到错误信息
+    console.error(err)
+}
+</code></pre><h2 id="async-await-vue-">async/await 在 vue 中的运用</h2>
+<p>解释：这是一个用同步思维来解决异步问题的方案，需要等到接口返回体返回时才渲染页面</p>
+<p>async: 放到函数前面，表异步，意味该函数的执行不会阻塞后面代码的执行，返回的是一个 promise 对象</p>
+<p>await: 等待 await 后面的函数运行完并且有了返回结果之后，才继续执行下面的代码。这正是同步的效果</p>
+<pre><code>methods: {
+  async fn() {
+    await fo();
+  }
+}
+</code></pre><h2 id="-">文件上传</h2>
+<pre><code>import http from &quot;./http&quot;;
+
+export default function upload(file, config) {
+  const params = new FormData();
+  params.append(&quot;file&quot;, file);
+
+  return http.post(&quot;/upload&quot;, params, {
+    ...config,
+    headers: {
+      &quot;Content-Type&quot;: &quot;multipart/form-data&quot;
+    }
+  });
+}
+</code></pre><h2 id="a-javascript-">a 标签加 javascript 意义</h2>
 <p>执行一段空白的 javascript 语句，返回空或者 false 值，从而防止链接跳转。跟当前 a 标签无关，这段代码始终都会执行。</p>
 <pre><code>&lt;a href=&quot;javascript:;&quot;&gt;
 </code></pre><h2 id="-ie9">判断浏览器是否支持 ie9</h2>
@@ -182,6 +326,10 @@ $(&quot;#Android-qrcode&quot;).append(canvasToImage($(&quot;canvas&quot;)[0]));
 <li>JSON.parse()： JSON 字符串转换为对象</li>
 <li>JSON.stringify()： 对象转换为 JSON 字符串</li>
 </ul>
+<h2 id="cookies-sesstionstorage-localstorage-">cookies、sesstionStorage、localStorage 区别</h2>
+<p>cookies：存储大小 4KB。不设时间默认关闭浏览器删除保存，设置时间关闭浏览器保存数据直到设置时间。会与服务器发生交互，占用带宽，没有及时性。不安全。只能保存字符串类型。已经没怎么用了。</p>
+<p>sesstionStorage：储存大小 5MB。及时会话，关闭浏览器数据删除。调用方法 window.sesstionStorage。H5 提供新特性。</p>
+<p>localStorage：储存大小 5MK。不删除，数据一直保存。调用方法 window.localStorage。方法有 setItem(key, val),getItem(key),removeItem(key),clear(),key(index)</p>
 
           	</article>
         </div>

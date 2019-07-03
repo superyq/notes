@@ -4,4 +4,4 @@
 
 # md 转 html
 
-i5ting_toc -f bug 处理.md -o
+i5ting_toc -f 处理.md -o

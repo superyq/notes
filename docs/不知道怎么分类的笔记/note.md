@@ -1,5 +1,171 @@
 <h1 align="center">不知道怎么分类的笔记</h1>
 
+## 导出/导出 xlsx
+
+```
+\\ 导出
+export function exportA() {
+  return http.post(
+      '接口',
+      {},
+      {
+        format: false,
+        responseType: 'blob'
+      }
+    )
+}
+
+this.$confirm("模板已生成，是否保存至本地", "已生成模板")
+  .then(() => {
+    const $a = document.createElement("a");
+    $a.href = URL.createObjectURL(data);
+    $a.target = "_blank";
+    $a.download = "敏感词模板.xlsx";
+    $a.click();
+  })
+  .catch(() => {
+    this.loading = false;
+  });
+
+\\ 导入
+export function importA() {
+  const params = new FormData();
+  params.append("file", file);
+
+  return http.post("接口", params, {
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  })
+}
+
+fileChangeHandle(evt) {
+  const files = evt.target.files || evt.dataTransfer.files;
+
+  importSensitive(files[0])
+    .then(({ message = "导入成功" }) => {
+      this.$message.success(message);
+      this.$refs.fileInput.value = "";
+      this.updateTableData();
+    })
+    .catch(({ message = "导入失败！" }) => {
+      this.$refs.fileInput.value = "";
+      this.$message.error(message);
+    })
+    .finally(() => {
+      this.loading = false;
+    });
+  }
+
+```
+
+## vue watch time 改为 computed time
+
+```
+computed: {
+  time: {
+    get() {
+      const { start, end } = this.search;
+      return start && end ? [start, end] : "";
+    },
+    set([start = "", end = ""] = []) {
+      this.search.start = start;
+      this.search.end = end;
+    }
+  }
+}
+```
+
+## vue 图片上传外貌
+
+```
+el-form-item(label='等级图标', prop='icon')
+  .user-grade__box(@click='chooseFile')
+    i.el-icon-plus
+  input(type='file', ref='fileInput', @change='fileChangeHandle($event)', hidden)
+
+chooseFile() {
+  this.$refs.fileInput.click();
+},
+fileChangeHandle() {},
+```
+
+## vue 子组件调用父组件的方法
+
+```
+\\ 父组件
+provide() {
+  return {
+    updateTableHandle: this.updateTableHandle
+  };
+}
+
+\\ 子组件
+inject: ["updateTableHandle"]
+
+```
+
+## vue 插槽
+
+```
+\\ 子组件
+(name="a")
+(v-bind="{ data }")
+
+\\ 父组件
+(slot="a")
+(slot-scope="{ data }")
+```
+
+## vue 与 router 相关
+
+```
+data() {
+  return {
+    active: this.$route.query.tab || "exchange"
+  }
+},
+methods: {
+  tab({ name }) {
+    this.$router.push({
+      name: 'goods',
+      query: {
+        tab: name
+      }
+    })
+  }
+}
+```
+
+## try/catch
+
+try/catch 语句用于处理代码中可能出现的错误信息，出现异常会导致程序崩溃，而 try/catch 则可以保证程序的正常运行
+
+```
+try {
+//执行代码  不报错则 正常执行 不会进入下面的catch
+} catch(err){
+    //当上面的代码出错时 这里可以捕获到错误信息
+    console.error(err)
+}
+```
+
+## async/await 在 vue 中的运用
+
+解释：这是一个用同步思维来解决异步问题的方案，需要等到接口返回体返回时才渲染页面
+
+async: 放到函数前面，表异步，意味该函数的执行不会阻塞后面代码的执行，返回的是一个 promise 对象
+
+await: 等待 await 后面的函数运行完并且有了返回结果之后，才继续执行下面的代码。这正是同步的效果
+
+```
+methods: {
+  async fn() {
+    await fo();
+  }
+}
+```
+
 ## 文件上传
 
 ```
