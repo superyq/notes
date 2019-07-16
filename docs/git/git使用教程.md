@@ -84,3 +84,16 @@
 更改文件名称：git mv oldName newName
 提交格式化：yarn lint --fix
 ```
+
+## git ssh添加
+
+```
+// 第一步：查看有无id_rsa.pub文件
+cd ~/.ssh/
+
+// 第二步：生成id_rsa.pub文件(重点)
+ssh-keygen -t rsa -C "1234@qq.com"
+
+// 第三步：添加id_rsa.pub文件到git上
+复制里面id_rsa.pub到ssh上
+```

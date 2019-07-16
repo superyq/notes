@@ -1,5 +1,19 @@
 <h1 align="center">不知道怎么分类的笔记</h1>
 
+## 使用cmder
+
+```
+// 第一步：全局注册cmder
+
+找到cmder.exe所在文件路径，复制路径拷贝到系统变量的path中去
+win + R 弹出框，输入cmder看是否添加成功
+
+// 第二部：cmder添加到鼠标右键
+
+在管理员权限的终端输入以下语句即可: 
+Cmder.exe /REGISTER ALL
+```
+
 ## 导出/导出 xlsx
 
 ```
