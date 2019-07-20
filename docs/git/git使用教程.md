@@ -59,7 +59,7 @@
 
 ```
 变基同步分支commit: ... rebase ...
-捡出一个 commit: git cherry-pick ... commit ...
+捡出一个 commit: git cherry-pick 《commitID》
 追加到上一个提交： git commit --amend
 查看一个文件的所有历史修改：git log -p 文件名
 强推：git push -f
