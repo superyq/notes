@@ -1,0 +1,71 @@
+<h2 align='center'>vue生命周期笔记</h2>
+
+## 例子
+
+```
+// html
+  <div id='app'>
+    {{ message }}
+  </div>
+
+// js
+var vm = new Vue({
+  el: '#app',
+  data: {
+    message: 'vue 生命周期'
+  }
+})
+```
+
+## new Vue()
+
+1. Vue 本身的初始化操作
+
+## beforeCreate
+
+1. 数据观测 (data observer) 和 event/watcher 事件配置
+2. 在这个方法生命周期中，无法访问（this.$el, this.$data, data 中的数据），都是 undefined
+3. 实例刚在内存中被创建出来，此时，还没有初始化好 data 和 methods 属性
+4. data 和 methods 中数据都还没有初始化（虽然多打了一遍，起强调作用）
+
+## created
+
+1. 实例已经在内存中创建 OK，此时 data 和 methods 已经创建 OK，此时还没有开始 编译模板
+2. watch/event 事件回调。然而，挂载阶段还没开始，\$el 属性目前不可见。
+3. 如果要调用 methods 中的方法，或者操作 data 中的数据，最早，只能在 created 中操作了
+4. 此时还没有开始 编译模板
+
+## beforeMount
+
+1. 此时已经完成了模板的编译，但是还没有挂载到页面中
+
+## mounted
+
+1. 此时，已经将编译好的模板，挂载到了页面指定的容器中显示
+2. 如果要操作 DOM 节点，最早只有在 mounted 中进行
+3. 只要执行完mounted，就表示vue实例已经初始化完毕了
+4. 此时，组件已经脱离创建阶段，进入到运行阶段
+
+## beforeUpdate
+
+1. 此时 data 中的状态值是最新的，但是界面上显示的 数据还是旧的，因为此时还没有开始重新渲染DOM节点
+
+## updated
+
+1. 实例更新完毕之后调用此函数，此时 data 中的状态值 和 界面上显示的数据，都已经完成了更新，界面已经被重新渲染好了！
+
+## activated
+
+1. keep-alive 组件激活时调用
+
+## deactivated
+
+1. keep-alive 组件停用时调用
+
+## beforeDestroy
+
+1. 实例销毁之前调用。在这一步，实例仍然完全可用。
+
+## destroyed
+
+1. Vue 实例销毁后调用。调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁。

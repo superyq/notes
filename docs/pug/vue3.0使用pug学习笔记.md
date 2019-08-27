@@ -51,3 +51,38 @@ p
 ```
 \#{{id}}
 ```
+
+6. extends 扩展：允许模板来扩展一个布局或父模板，它可以覆盖某些预定义内容块。例：
+
+```
+//- index.pug
+extends layout.pug
+
+block title
+  title article title
+
+block content
+  h1 my article
+
+//- layout
+doctype html
+html
+  head
+    block title
+      title Default title
+  body
+    block content
+
+// 编译结果
+<html>
+  <head>
+    <title>article title</title>
+  </head>
+
+  <body>
+    <h1>my article</h1>
+  </body>
+
+</html>
+```
+
