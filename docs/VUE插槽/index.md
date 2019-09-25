@@ -1,0 +1,36 @@
+# vue 插槽
+
+1. 直接插入
+
+```
+// 如果没有包含一个 <slot> 元素，则该组件起始标签和结束标签之间的任何内容都会被抛弃。
+
+<slot></slot>
+```
+2. 编译作用域
+
+父级模板里的所有内容都是在父级作用域中编译的；子模板里的所有内容都是在子作用域中编译的
+
+3. 后备内容
+
+slot 的默认内容
+
+```
+<button type="submit">
+  <slot>Submit</slot>
+</button>
+```
+
+4. 具名插槽
+
+有时我们需要多个插槽，对于这样的情况，<slot> 元素有一个特殊的特性：name。这个特性可以用来定义额外的插槽：
+
+```
+// 子
+<slot name="header"></slot>
+<slot name="footer"></slot>
+
+// 父
+<div slot='header'></div>
+<div slot='footer'></div>
+```
