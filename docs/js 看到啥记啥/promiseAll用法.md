@@ -1,6 +1,6 @@
 # Promise.All用法
 
-```
+```js
 // 例子
  Promise.all([
   getStatisticsDetail({ module_type: "task:refund:ct", date_type }),

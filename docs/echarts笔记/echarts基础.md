@@ -1,8 +1,17 @@
 # echarts学习笔记
 
-1. 基础用法（vue中）
+1. 基础属性
 
-```
+title:标题组件 
+tooltip:提示框组件 
+legend：图例组件，展现了不同系列的标记(symbol)，颜色和名字 
+xAxis：直角坐标系 grid 中的 x 轴，单个 grid 组件最多只能放上下两个 x 轴。 
+yAxis:直角坐标系 grid 中的 y 轴，单个 grid 组件最多只能放左右两个 y 轴。 
+series:系列列表。每个系列通过 type 决定自己的图表类型。 
+
+2. 基础用法（vue中）
+
+```js
 \\ html
 .data-chart(style='width: 100%;height: 100%;')
 
@@ -19,6 +28,7 @@ watch: {
 },
 methods: {
   reloadChart() {
+    // 2. 设置配置
     this.chart.setOption(this.options);
   },
   resizeChart() {
@@ -26,6 +36,7 @@ methods: {
   }
 },
 mounted() {
+  // 1.获得节点
   this.chart = echarts.init(this.$el);
 
   this.$nextTick(() => {

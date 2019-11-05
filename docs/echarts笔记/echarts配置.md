@@ -2,7 +2,7 @@
 
 1. 网格--grid
 
-```
+```js
 grid: {
   show: false,   // 是否显示竖线
   z: 2,   // 控制图形的前后顺序,z越大越在上
@@ -16,13 +16,12 @@ grid: {
   backgroundColor: transparent,   // 网格背景色 前提： show: true
   borderColor: #ccc, // 网格边框颜色 前提： show: true
   borderWidth: 1, // 边框线宽 前提： show: true
-
 }
 ```
 
 2. x轴--xAxis
 
-```
+```js
 xAxis: {
   type: 'category', // 坐标轴类型，value:数值，category：类目，必须设置data，time：时间，log：对数，
   axisTick: {
@@ -36,7 +35,7 @@ xAxis: {
 
 3. 头部--legend
 
-```
+```js
 legend: {
   left: auto, //距离容器上下左右得距离
   rop: auto,
@@ -61,7 +60,7 @@ legend: {
 
 4. 提示框--tooltip
 
-```
+```js
 tooltip: {
   trigger: "axis", // axis:多条， item：单条
   formatter: function(params) {
