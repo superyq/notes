@@ -4,7 +4,7 @@
 
 ### 容器的类型为块元素还是行内元素
 
-```
+```css
 .container {
     display: grid | inline-grid
 }
@@ -12,9 +12,8 @@
 
 ### 栅格轨道的数量以及宽度
 
-```
-\\ auto：默认情况下该栅格轨道会充满栅格容器的富余空间
-
+```css
+/* auto：默认情况下该栅格轨道会充满栅格容器的富余空间 */
 .container {
     display: grid;
     grid-template-columns: 100px auto 100px;
@@ -25,7 +24,7 @@
 
 ### 给栅格单元命名，同名的栅格单元自动成为一个栅格区域。
 
-```
+```css
 .container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -38,7 +37,7 @@
 
 命名之后有什么用呢？栅格项目有一个 grid-area 属性，它来瓜分栅格区域。
 
-```
+```css
 .item {
     grid-area: header;
 }
@@ -48,7 +47,7 @@
 
 缺省名字：不知道叫什么的时候就用.代替。
 
-```
+```css
 .container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -62,7 +61,7 @@
 
 1. fr：富余空间为总长度，以声明的 fr 数量总和为分母，以自身声明的 fr 数量为分子
 
-```
+```css
 .container {
     display: grid;
     grid-template-columns: 100px repeat(2, 1fr);
@@ -73,7 +72,7 @@
 
 2. minmax()：它有两个参数，分别是最小值和最大值。当栅格单元需要压缩时，最小值就是栅格项目被压缩的最小极限，当栅格单元有剩余空间时，最大值就是栅格项目扩张的最大极限。
 
-```
+```css
 .container {
     display: grid;
     grid-template-columns: minmax(100px, 200px) 300px 300px;
@@ -82,7 +81,7 @@
 
 3. fit-content()：当内容小于 200px 时，以内容为长度，当内容大于 200px 时，以 200px 为长度。
 
-```
+```css
 .container {
     display: grid;
     grid-template-columns: repeat(3, fit-content(200px));
@@ -99,7 +98,7 @@ auto-fill 和 auto-fit 的共同点在于它们会保证栅格系统不溢出栅
 
 所以区别在于，auto-fill 想让栅格轨道尽可能多，auto-fit 想让栅格单元尽可能大。
 
-```
+```css
 .container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -110,7 +109,7 @@ auto-fill 和 auto-fit 的共同点在于它们会保证栅格系统不溢出栅
 
 ### 栅格单元之间的空隙
 
-```
+```css
 .container {
     grid-column-gap: <length>;
     grid-row-gap: <length>;
@@ -120,12 +119,12 @@ auto-fill 和 auto-fit 的共同点在于它们会保证栅格系统不溢出栅
 
 ### 项目相对于区域的对齐方式
 
-```
+```css
 .container {
-    // 水平对齐方式
+    /* 水平对齐方式 */
     justify-items: stretch /*default*/ | start | end | center;
 
-    // 垂直对齐方式
+    /* 垂直对齐方式 */
     align-items: stretch /*default*/ | start | end | center;
 
 }
@@ -133,19 +132,19 @@ auto-fill 和 auto-fit 的共同点在于它们会保证栅格系统不溢出栅
 
 ### 栅格系统相对于栅格容器的水平对齐方式。
 
-```
+```css
 .container {
-    // 水平对齐方式
+    /* 水平对齐方式 */
     justify-content: start /*default*/ | end | center | stretch | space-around | space-between | space-evenly;
 
-    // 垂直对齐方式
+    /* 垂直对齐方式 */
     align-content: start /*default*/ | end | center | stretch | space-around | space-between | space-evenly;
 }
 ```
 
 ### 编外栅格单元的高度和宽度。
 
-```
+```css
 .container {
     grid-auto-columns: <length> <length> <length>;
     grid-auto-rows: <length> <length> <length>;
@@ -154,9 +153,9 @@ auto-fill 和 auto-fit 的共同点在于它们会保证栅格系统不溢出栅
 
 ### 栅格项目应该如何依次排列
 
-```
+```css
 .container {
-    //row：水平排  column：垂直排
+    /* row：水平排  column：垂直排 */
     grid-auto-flow: row /*default*/ | column | dense | row dense | column dense;
 }
 ```
@@ -165,7 +164,7 @@ auto-fill 和 auto-fit 的共同点在于它们会保证栅格系统不溢出栅
 
 ### 栅格项目占据哪个栅格区域。
 
-```
+```css
 item{
     grid-area: <name> | <row-start> / <column-start> / <row-end> / <column-end>;
 }
@@ -173,7 +172,7 @@ item{
 
 ### 这是两个集合属性，它们可以同时声明在某个方向开始和结束的位置。
 
-```
+```css
 .item {
     grid-column: <start> / <end>;
     grid-row: <start> / <end>;
@@ -182,12 +181,12 @@ item{
 
 ### 栅格项目相对于栅格区域对齐方式, 覆盖栅格容器
 
-```
+```css
 .item {
-    // 水平对齐方式
+    /* 水平对齐方式 */
     justify-self: stretch /*default*/ | start | end | center;
 
-    // 垂直对齐方式
+    /* 垂直对齐方式 */
     align-self: stretch /*default*/ | start | end | center;
 }
 ```

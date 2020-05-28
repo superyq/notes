@@ -2,7 +2,7 @@
 
 ## 提交,拉取
 
-```
+```js
 创建版本库: git init
 克隆远程仓库: git clone ...
 拉取代码: git pull
@@ -13,7 +13,7 @@
 
 ## 查看操作
 
-```
+```js
 查看工作区修改: git status
 查看工作区和版本库的不同: git diff
 查看commit: git log --pretty=oneline
@@ -22,7 +22,7 @@
 
 ## 后悔操作
 
-```
+```js
 并且把这次撤销作为一次最新的提交: git revert ...
 版本回退,修改重新放回工作区: git reset ...
 版本回退,直接删修改: git reset --hard ...
@@ -31,7 +31,7 @@
 
 ## 处理冲突
 
-```
+```js
 当pull远程仓库时.报冲突错误,直接合并远程仓库和本地仓库: git rebase
 解决冲突之后,继续合并本地及远程仓库: git rebase --continue
 规范自己的commit: git rebase -i
@@ -42,7 +42,7 @@
 
 ## 分支
 
-```
+```js
 创建分支: git branch ...
 删除分支: git branch -d ...
 查看分支: git branch
@@ -57,7 +57,7 @@
 
 ## 进阶
 
-```
+```js
 变基同步分支commit: ... rebase ...
 捡出一个 commit: git cherry-pick 《commitID》
 追加到上一个提交： git commit --amend
@@ -72,7 +72,7 @@
 
 ## git flow
 
-```
+```js
 创建：git flow init
 创建新功能：git flow feature start name
 结束新功能：git flow feature end name
@@ -80,7 +80,7 @@
 
 ## 其他
 
-```
+```js
 更改文件名称：git mv oldName newName
 提交格式化：yarn lint --fix
 ```
@@ -96,4 +96,16 @@ ssh-keygen -t rsa -C "1234@qq.com"
 
 // 第三步：添加id_rsa.pub文件到git上
 复制里面id_rsa.pub到ssh上
+```
+
+## git commit 提交格式
+
+```
+feat: 新功能
+fix: 修复bug
+docs: 文档
+style: 格式
+refactor: 重构
+test: 测试
+chore: 构建工具和辅助工具变动
 ```

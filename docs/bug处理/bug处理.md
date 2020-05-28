@@ -2,7 +2,7 @@
 
 ## https 协议只能引入 https
 
-```
+```js
 <!-- 引入百度地图，解决方案： -->
 <script
   type="text/javascript"
