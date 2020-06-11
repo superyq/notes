@@ -1,14 +1,5 @@
 # cursor 属性
 
-1. 基础
-
-默认值：	auto
-继承：	yes
-版本：	CSS2
-JavaScript 语法：	object.style.cursor="crosshair"
-
-2. 属性
-
 url：	需使用的自定义光标的 URL。注释：请在此列表的末端始终定义一种普通的光标，以防没有由 URL 定义的可用光标。
 default：默认光标（通常是一个箭头）
 auto：默认。浏览器设置的光标。
