@@ -23,10 +23,13 @@ vue create <project-name>
 2. 安装依赖
 
 注意：加-D是开发环境下需要的依赖，在线上环境就不需要了
+** 我们下载的资源包默认地址都是在国外，由于众所周知的原因，往往会下的很慢，甚至下载失败。所以我们要配置yarn的下载依赖包的仓库地址，使用淘宝镜像是目前最好的选择: **
 
 ```js 
-// 安装scss,一定要一起装，不然装不了node-sass，我也不晓得为啥
-yarn add sass-loader node-sass -D
+// 安装scss
+1. yarn config set registry https://registry.npm.taobao.org -g
+2. yarn config set sass_binary_site http://cdn.npm.taobao.org/dist/node-sass -g
+3. yarn add sass-loader node-sass -D
 
 // 安装pug
 yarn add vue-cli-plugin-pug -D

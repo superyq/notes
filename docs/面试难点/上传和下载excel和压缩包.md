@@ -2,7 +2,7 @@
 
 1. 下载(VUE模式)
 
-```
+```js
 // 通过请求接口，请求到下载地址
 getDownLoad(params).then(({ url }) => {
   const $a = document.createElement('a');
@@ -19,7 +19,7 @@ this.$refs["sensitive"].click();
 
 2. 上传
 
-```
+```js
 // input 按钮
 input(hidden, type="file", ref="fileInput", @change="fileChangeHandle($event)")
 
@@ -61,7 +61,7 @@ importSensitive(file) {
 
 FormData对象的操作方法，全部在原型中，自己本身没任何的属性及方法
 
-```
+```js
 // 通过FormData将文件转成二进制数据
 let formData = new FormData()
 
@@ -72,7 +72,7 @@ formData.append('user', 'zhang')
 
 4. [blob对象](https://blog.csdn.net/wangguoyu1996/article/details/81610066)
 
-```
+```js
 let blob = new Blob([content]);
 elink.href = URL.createObjectURL(blob);
 ```

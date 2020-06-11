@@ -12,10 +12,10 @@ series:系列列表。每个系列通过 type 决定自己的图表类型。
 2. 基础用法（vue中）
 
 ```js
-\\ html
+//  html
 .data-chart(style='width: 100%;height: 100%;')
 
-\\ js
+//  js
 data() {
   return {
     chart: null
