@@ -13,6 +13,13 @@ this.$set(item, 'key', value);
 用法：provide / inject 这对选项需要一起使用，以允许一个祖先组件向其所有子孙后代注入一个依赖，不论组件层次有多深，并在起上下游关系成立的时间里始终生效。
 
 ```js
-provide // 选项应该是：一个对象或返回一个对象的函数
-inject // 选项应该是：一个字符串数组，或 一个对象，对象的 key 是本地的绑定名
+// 祖先
+provide() {
+  return {
+    text: this
+  }
+}
+
+// 子
+inject: ['text']
 ```

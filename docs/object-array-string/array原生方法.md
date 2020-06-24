@@ -70,6 +70,12 @@ arr.concat() // 未改变原数组
 arr.splice()
 ```
 
+## 截取
+
+```js
+arr.slice()
+```
+
 ## 查找
 
 ```js
