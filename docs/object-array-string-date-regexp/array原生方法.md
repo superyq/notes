@@ -33,7 +33,7 @@ arr.sort() // 原数组改变
 // 升序 -1 不换位置 1 换位置
 function up(val1, val2) {
   if(val1 < val2) {
-    return -1
+    return -1u
   }else if( val1 > val2 ) {
     return 1
   }else {
@@ -87,4 +87,13 @@ arr.lastIndexOf()
 
 ```js
 new Set(arr)
+```
+
+## 归并
+
+```js
+let a = function(pre, cur, index, arr) {
+  return pre + cur
+}
+arr.reduce(a, 10)
 ```
