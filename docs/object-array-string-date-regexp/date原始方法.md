@@ -20,3 +20,8 @@ let hour = date.getHours(); //返回日期中的小时数（0到23）
 let minutes = date.getMinutes(); // 返回日期中的分钟数（0到59）
 let seconds = date.getSeconds(); // 返回日期中的秒数（0到59）
 ```
+
+## 进阶
+
+```js
+```
