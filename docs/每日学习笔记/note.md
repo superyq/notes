@@ -30,3 +30,10 @@
     <!-- test.js -->
     import fu from "./main.js"
 ```
+
+## 启本地服务
+
+```js
+全局安装：npm install anywhere -g
+启动本地服务：anywhere -p 8080
+```
