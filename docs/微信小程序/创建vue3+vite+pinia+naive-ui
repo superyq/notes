@@ -1,0 +1,66 @@
+# 从0搭建vue3+vite+pinia+naive-ui项目
+
+## 创建项目
+
+1. yarn create vite
+2. yarn install
+3. yarn dev
+
+## 安装依赖
+
+1. 安装到dependencies中
+    vue-router、axios、naive-ui、pinia、fast-glob、js-cookie、jsencrypt
+2. 安装到devdependencies中
+    sass、dart-sass、vite-plugin-svg-icons
+
+## 新建文件夹
+
+1. api、assets、pages、router、store、utils
+1.1 router路由文件夹
+新建index.js：创建路由、路由监听
+新建base.js：页面路由
+
+1.2 pages页面文件夹
+新建components：页面组件
+*.vue文件：页面
+
+1.3 assets静态资源文件夹
+新建images：放置静态图片
+新建style：放置css样式
+新建svg：存放icons
+
+1.4 utils工具文件夹
+新建utils.js：工具函数
+新建cookies.js：token、权限储存
+新建validate.js：验证函数
+
+1.5 store状态管理文件夹
+*.js文件：全局状态管理
+
+1.6 api调用后端接口文件夹
+新建http.js：封装axios请求，请求拦截，响应拦截
+
+## 配置环境变量
+
+## 配置vite.config.js
+
+## 开始构建
+
+1. router/index.js
+引入的组件在pages下创建
+在app.vue中添加：router-view
+构建完后需在main.js引入
+
+2. assets构建
+
+3. utils 构建
+
+4. api构建
+
+5. 组件构建
+
+6. 状态管理构建
+
+
+
+
