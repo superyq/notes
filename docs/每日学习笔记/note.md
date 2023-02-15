@@ -37,3 +37,14 @@
 全局安装：npm install anywhere -g
 启动本地服务：anywhere -p 8080
 ```
+
+## AMD,CMD,common.js,require.js
+
+```
+客户端: AMD: 异步模块加载机制，AMD规范简单到只有一个API，define函数，require.js就是AMD规范
+        CMD: 和AMD相似,sea.js
+客户端: commonjs: 基于服务端node应用的
+requirejs:  说明：1.模块化组织JS，2.异步加载JS
+            用法：1.通过require.config配置。2.require([js模块], function() {})
+```
+
