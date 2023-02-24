@@ -1,99 +1,55 @@
-<h2>array原生方法</h2>
+<h2>数组</h2>
 
-## 遍历方法
-
+<!-- 创建数组 -->
 ```js
-arr.map() // 有返回值，对数组没影响，返回一个又新数组
-arr.find() // 返回满足条件得第一个元素
-arr.every() // 返回boolean
-arr.filter() //对数组没影响，返回新数组
-arr.forEach() // 没有返回值，对数组没有影响
+let arr = new Array(1,2,3); // [1,2,3]
+let arr = [1,2,3];
 ```
 
-## 转字符串
-
+ <!-- 数组方法 -->
 ```js
-arr.join("-") // 不改变数组，返回字符串
+// 默认数组
+let arr = [1,2,3];
+
+// 拼接，默认','拼接
+arr.join("-") // "1-2-3"
+
+// 尾部添加
+arr.push(4,5) // 返回长度：5，改变数组 [1,2,3,4,5]
+arr.concat(4,5) // [1,2,3,4,5]
+
+// 头部添加
+arr.unshift(4,5) // 返回长度：5，改变数组 [4,5,1,2,3]
+
+// 移除尾部
+arr.pop()  // 返回移除项：3，改变数组 [1,2]
+
+// 移除头部
+arr.shift() // 返回移除项：1，改变数组 [2,3]
+
+// 裁切 一个参数，开始到数组结束
+//      两个参数，开始到结束，不包含结束下标的项
+arr.slice(1,2) // [2]
+
+// 删除指定项 参数1：开始下标，参数2：结束下标
+arr.splice(1,2) // 返回删除项：[2, 3]，改变数组 [1]
+
+// 替换
+arr.splice(1, 1, 4, 5) // 返回替换项：[2]，改变数组 [1,4,5,3]
+
+// 查找 参数1：查找项，参数2：开始下标
+arr.indexOf(2, 1) // 返回下标：1
+arr.lastIndexOf(2, 1) // 返回下标：1
+
+// 排序 从大到小
+arr.sort((num1, num2) => num1 - num2) // 返回: [1,2,3]，改变原数组 [1,2,3] 
+
+// 反转排序
+arr.reverse() // 返回：[3,2,1]，改变原数组 [3,2,1]
 ```
 
-## 头尾处理
-
+<!-- 数组迭代 -->
 ```js
-arr.push() // 返回修改后数组的长度
-arr.pop() // 返回移除的项
-arr.shift() // 返回删除元素的值
-arr.unshift() // 返回数组的长度
-```
 
-## 排序
-
-```js
-arr.sort() // 原数组改变
-
-// 升序 -1 不换位置 1 换位置
-function up(val1, val2) {
-  if(val1 < val2) {
-    return -1u
-  }else if( val1 > val2 ) {
-    return 1
-  }else {
-    return 0
-  }
-}
-// 降序
-function down(val1, val2) {
-  if(val1 < val2) {
-    return 1
-  }else if(val1 > val2) {
-    return -1
-  }else {
-    return 0
-  }
-}
-```
-
-## 倒叙
-
-```js
-arr.reverse() //改变原数组
-```
-
-## 拼接
-
-```js
-arr.concat() // 未改变原数组
-```
-
-## 删除、插入、替换
-
-```js
-arr.splice()
-```
-
-## 截取
-
-```js
-arr.slice()
-```
-
-## 查找
-
-```js
-arr.indexOf()
-arr.lastIndexOf()
-```
-
-## 去重
-
-```js
-new Set(arr)
-```
-
-## 归并
-
-```js
-let a = function(pre, cur, index, arr) {
-  return pre + cur
-}
-arr.reduce(a, 10)
+arr.forEach((item, index self) => {})
 ```
