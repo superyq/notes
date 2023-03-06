@@ -1,34 +1,28 @@
-<h1 align="center">常用字符串方法</h1>
+<h1>常用字符串方法</h1>
 
-## 转数组
-
+<!-- 创建字符串 -->
 ```js
-str.split()
+let str = new String("abc"); // "abc"
+let str = "abc";
 ```
 
-## 查找、替换
-
 ```js
-str.indexOf() // 返回下标
-str.replace() // 返回新字符串，不改变原来字符串
+str.indexOf("1"); //
 ```
+indexOf()
+lastIndexOf()
+search()
+slice()
+substring()
+substr()
+toUpperCase()
+trim()
+concat()
+charAt()
+split()
+replace()
+includes()
+startsWith()
+endsWith()
 
-## 转大小写
 
-```js
-str.toUpperCase()
-str.toLowerCase()
-```
-
-## 去空格
-
-```js
-str.trim()
-```
-
-## 截取、拼接
-
-```js
-str.substr()
-str.concat()
-```
