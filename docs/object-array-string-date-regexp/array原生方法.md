@@ -48,8 +48,12 @@ arr.sort((num1, num2) => num1 - num2) // 返回: [1,2,3]，改变原数组 [1,2,
 arr.reverse() // 返回：[3,2,1]，改变原数组 [3,2,1]
 ```
 
-<!-- 数组迭代 -->
+<!-- 数组遍历 -->
 ```js
-
-arr.forEach((item, index self) => {})
+// item：子项，index：下标，self：遍历的数组
+arr.map((item, index, self) => item + 1) // 返回：[2,3,4]
+arr.filter((item, index, self) => item > 1) // 返回：[2,3]
+arr.every((item, index, self) => item > 1) // 返回：false
+arr.some((item, index.self) => item > 1) // 返回：true
+arr.forEach((item, index self) => { item + 2 }) // 没有返回体，只是遍历数组
 ```
