@@ -1,7 +1,6 @@
 <h1 align="center">小白进阶之《从0开始搭建vite+vue3.0项目》</h1>
 
 1.创建项目
-npm create vite@latest
 yarn create vite
 
 2.安装依赖
