@@ -6,7 +6,7 @@ yarn create vite
 2.安装依赖
 -S
 vue-router
-axois
+axios
 pinia
 naive-ui
 nprogress
