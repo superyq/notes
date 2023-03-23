@@ -1,24 +1,30 @@
 # Vue3-Ts-Pinia-Naive-ui
 
-## 前言
+## 构建项目
+
+### 前言
 
 这是一个基于 Vue3+Vite+TS+Pinia+naive-ui 开发的可适用于多人配合开发的大型项目的基础开发模板。
 紧跟前端工程化理念，提取公用模块，组件、拆分 css，js 实现功能独特性，代码复用性。便于维护。缩减开发时间。解放生产力。
 
-## 构建项目
+### 构建项目
 
 ```js
 yarn create vite
 ```
 
-## 安装依赖
+### 安装依赖
 
 ```js
 yarn add -S vue-router axios pinia naive-ui nprogress js-cookie
 yarn add -D sass dart-sass fast-glob vite-plugin-svg-icons
 ```
 
-## 在 src 下创建文件夹
+### 重置项目
+
+删除 components 下 HelloWorld 文件、重置 App.vue、删除 style.css、main.ts 删除 style.css 引入
+
+### 在 src 下创建文件夹
 
 views 页面
 
@@ -191,8 +197,6 @@ extends: [
   "plugin:prettier/recommended" // 解决ESlint和Prettier冲突
 ]
 ```
-
-## vite.config.ts 配置
 
 ## router 构建
 
