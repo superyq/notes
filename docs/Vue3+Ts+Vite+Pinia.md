@@ -16,8 +16,8 @@ yarn create vite
 ### 安装依赖
 
 ```js
-yarn add -S vue-router axios pinia naive-ui nprogress js-cookie
-yarn add -D sass dart-sass fast-glob vite-plugin-svg-icons
+yarn add vue-router axios pinia naive-ui nprogress js-cookie -S
+yarn add sass dart-sass fast-glob vite-plugin-svg-icons -D
 ```
 
 ### 重置项目
