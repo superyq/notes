@@ -24,6 +24,8 @@ let router = createRouter({
   },
 });
 
+export default router;
+
 // main.js
 import router from "./router/index.js";
 const app = createApp(App);
@@ -193,4 +195,227 @@ const routes = [
 ```js
 // 当用户访问 /home 时，URL 仍然是 /home，但会被匹配为用户正在访问 /
 const routes = [{ path: "/", component: Homepage, alias: "/home" }];
+```
+
+## 路由组件传参
+
+```js
+const User = {
+  // 请确保添加一个与路由参数完全相同的 prop 名
+  props: ["id"],
+  template: "<div>User {{ id }}</div>",
+};
+const routes = [{ path: "/user/:id", component: User, props: true }];
+
+// 有命名视图得路由
+const routes = [
+  {
+    path: "/user/:id",
+    components: { default: User, sidebar: Sidebar },
+    props: { default: true, sidebar: false },
+  },
+];
+```
+
+## 导航守卫
+
+```js
+const router = createRouter({ ... })
+router.beforeEach((to, from) => {
+  // ...
+  // 返回 false 以取消导航
+  return false
+})
+```
+
+```js
+// false: 取消当前的导航。
+// 一个路由地址: 通过一个路由地址跳转到一个不同的地址。
+// 如果什么都没有，undefined 或返回 true，则导航是有效的
+router.beforeEach(async (to, from) => {
+  if (
+    // 检查用户是否已登录
+    !isAuthenticated &&
+    // ❗️ 避免无限重定向
+    to.name !== "Login"
+  ) {
+    // 将用户重定向到登录页面
+    return { name: "Login" };
+  }
+});
+```
+
+```js
+// 全局解析守卫, 确保用户可以访问自定义 meta 属性
+router.beforeResolve(async (to) => {
+  if (to.meta.requiresCamera) {
+    try {
+      await askForCameraPermission();
+    } catch (error) {
+      if (error instanceof NotAllowedError) {
+        // ... 处理错误，然后取消导航
+        return false;
+      } else {
+        // 意料之外的错误，取消导航并把错误传给全局处理器
+        throw error;
+      }
+    }
+  }
+});
+```
+
+```js
+// 全局后置钩子,它们对于分析、更改页面标题、声明页面等辅助功能以及许多其他事情都很有用
+router.afterEach((to, from) => {
+  sendToAnalytics(to.fullPath);
+});
+```
+
+## 路由元信息
+
+```js
+// 有时，你可能希望将任意信息附加到路由上，如过渡名称、谁可以访问路由等,并且它可以在路由地址和导航守卫上都被访问到
+const routes = [
+  {
+    path: '/posts',
+    component: PostsLayout,
+    children: [
+      {
+        path: 'new',
+        component: PostsNew,
+        // 只有经过身份验证的用户才能创建帖子
+        meta: { requiresAuth: true }
+      },
+      {
+        path: ':id',
+        component: PostsDetail
+        // 任何人都可以阅读文章
+        meta: { requiresAuth: false }
+      }
+    ]
+  }
+]
+
+router.beforeEach((to, from) => {
+  // 而不是去检查每条路由记录
+  // to.matched.some(record => record.meta.requiresAuth)
+  if (to.meta.requiresAuth && !auth.isLoggedIn()) {
+    // 此路由需要授权，请检查是否已登录
+    // 如果没有，则重定向到登录页面
+    return {
+      path: '/login',
+      // 保存我们所在的位置，以便以后再来
+      query: { redirect: to.fullPath },
+    }
+  }
+})
+```
+
+## 过渡效果
+
+```js
+const routes = [
+  {
+    path: "/custom-transition",
+    component: PanelLeft,
+    meta: { transition: "slide-left" },
+  },
+  {
+    path: "/other-transition",
+    component: PanelRight,
+    meta: { transition: "slide-right" },
+  },
+];
+```
+
+```html
+<router-view v-slot="{ Component, route }">
+  <!-- 使用任何自定义过渡和回退到 `fade` -->
+  <transition :name="route.meta.transition || 'fade'">
+    <component :is="Component" />
+  </transition>
+</router-view>
+```
+
+```css
+/*
+  进入和离开动画可以使用不同
+  持续时间和速度曲线。
+*/
+.slide-left-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-left-leave-active {
+  transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-left-enter-from,
+.slide-left-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+
+/* 动画 */
+.slide-left-enter-active {
+  animation: bounce-in 0.5s;
+}
+.slide-left-leave-active {
+  animation: bounce-in 0.5s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+```
+
+## 滚动行为
+
+```js
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes: [...],
+  scrollBehavior (to, from, savedPosition) {
+    // return 期望滚动到哪个的位置
+  }
+})
+
+const router = createRouter({
+  scrollBehavior(to, from, savedPosition) {
+    // 始终滚动到顶部
+    return { top: 0 }
+  },
+})
+
+// 你也可以通过 el 传递一个 CSS 选择器或一个 DOM 元素。在这种情况下，top 和 left 将被视为该元素的相对偏移量。
+const router = createRouter({
+  scrollBehavior(to, from, savedPosition) {
+    // 始终在元素 #main 上方滚动 10px
+    return {
+      // 也可以这么写
+      // el: document.getElementById('main'),
+      el: '#main',
+      top: -10,
+    }
+  },
+})
+
+// 如果你的浏览器支持滚动行为，你可以让它变得更流畅
+const router = createRouter({
+  scrollBehavior(to, from, savedPosition) {
+    if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: 'smooth',
+      }
+    }
+  }
+})
 ```
