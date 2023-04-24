@@ -8,3 +8,48 @@
 8. 注释：单行 # 代码，多行 """ 代码 """
 9. 变量名 = 数据
 10. type(数据) 查看数据类型
+11. int()、str()、float()
+12. 标识符：英文，中文，数字，下划线，不能以数字开头
+13. 运算符：+，-，\*，/,//, %, \*\*
+14. 字符串拼接："%s,%d,%f" % ('字符串', '整数', "浮点数")
+15. 精度控制："%7d, %7.2f, %.2f"
+16. 格式化：f"我是{name}, 今年{age}"
+17. input("你是谁啊？")
+18. if
+
+```py
+if 判断条件:
+    为True时执行语句
+elif xxx:
+    xxx
+else:
+  xxxx
+```
+
+19. while
+
+```py
+while xxx:
+  xxxx
+```
+
+20. \t 对齐
+21. for
+
+```py
+for x in list
+  print(x)
+```
+
+22. range(num1, num2, step)
+23. continue 中断本次，直接下一次，用于 for，while
+24. break 直接结束所在所在循环
+25. def 定义函数
+
+```py
+def fn(xx):
+  xxx
+  return xx
+```
+
+26. global 函数内变量升级为全局变量
