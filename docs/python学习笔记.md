@@ -53,3 +53,77 @@ def fn(xx):
 ```
 
 26. global 函数内变量升级为全局变量
+27. list、tuple、str、set、dict
+
+```py
+列表 = [] 或 list([])
+列表[下标] 或 列表[-下标] # 下标
+
+列表.append(元素) # 添加
+列表.extend(容器) # 添加
+列表.insert(下标, 元素) # 插入
+del 列表[下标] # 删除
+列表.pop(下标) # 删除
+列表.remove(元素) # 删除
+列表.clear() # 清空
+列表.count(元素) # 计算某个元素个数
+列表.index(元素) # 查看下标
+len(列表) # 列表长度
+
+# 遍历列表
+i = 0
+while i < len(列表):
+  xxx
+  i += i
+
+for item in 列表
+  xxx
+```
+
+```py
+# 元组不可修改
+元组 = () 或 tuple(())
+列表[下标] 或 列表[-下标] # 下标
+
+元组.index(元素) # 查看下标
+元组.count(元素) # 计算某个元素个数
+len(元组) # 元组长度
+```
+
+```py
+# 字符串 无法修改
+字符串 = ""
+字符串[下标] 或 字符串[-下标] # 下标
+
+字符串.index(字符) # 指定下标
+字符串.replace(字符1, 字符2) # 替换
+字符串.split(字符) # 分割成新列表
+字符串.strip(字符) # 移除首位空格或指定字符
+字符串.count(字符) # 计算某个元素个数
+len(字符串) # 元组长度
+```
+
+28. 序列：list、tuple、str
+29. 序列切片: 序列[起始:结束:步长] 或 序列[起始:结束:-步长]
+30. 集合 set()：不可重复，无序
+
+```py
+set.add(item)
+set.remove(item)
+set.pop(item) # 取出
+set.clear()
+
+set1.difference(set2) # 差集
+set1.difference_update(set2) # 集合1删除集合2中元素，1变2不变
+set1.union(set2) # 合并
+len(set)
+```
+
+31. 字典 {}dict {}
+
+```py
+dict.pop(key) # 移除
+dict.clear()
+dict.keys() # 获取全部key
+len(dict)
+```
