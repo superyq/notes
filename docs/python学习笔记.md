@@ -127,3 +127,80 @@ dict.clear()
 dict.keys() # 获取全部key
 len(dict)
 ```
+
+32. 通用方法
+
+```py
+len(容器)
+max(容器)
+min(容器)
+sorted(容器, reverse=True) # 倒叙
+sorted(容器, reverse=False) # 正叙
+```
+
+33. 函数多返回
+
+```py
+def test():
+  return 1,True,'yq'
+
+x,y,z = test()
+```
+
+34. 函数参数
+
+```py
+def test(name, age, gender):
+  print(f"${name}${age}${gender}")
+
+# 位置参数
+test('yq', 18, 'man')
+# 关键字参数
+test(gender='man', name='yq', age=18)
+# 不定长
+def test1(*args):
+  print(args)
+# 传 1，2，3就是元组(1,2,3)
+def test1(**args):
+# 传{name: 'yq', age: 18}就是字典
+
+```
+
+35. 匿名函数
+
+```py
+def test(fun):
+  result = fun(1,2)
+
+# 1
+def add(x,y):
+  return x+y
+test(add)
+
+# 2
+test(lambda x, y: x+y)
+```
+
+36. 文件
+
+```py
+# mode: r只读，w写入覆盖，a写入追加
+# encoding="UTF-8"
+file = open(name, mode, encoding)
+
+file.read()
+file.readline()
+file.readlines()
+
+# for循环读取
+for line in file:
+  print(line)
+
+# 关闭
+file.close()
+
+# 自动关闭
+with open() as file:
+  for line in file:
+    print(line)
+```
