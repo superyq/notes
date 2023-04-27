@@ -316,3 +316,19 @@ def __le__(self, other):
 def __eq__(self, other):
   return self.name == other.name
 ```
+
+42. 面向对象 3 大特性：封装，继承，多态
+
+```py
+# __xx 变私有
+# 私有变量、私有方法无法被实例使用，可以被类自己使用
+
+# 继承 单继承
+class 类名(父类名):
+  xxx
+# 多继承 谁先继承谁的优先级高
+class 类名(父级1, 父级2, ...):
+  pass
+
+# 覆盖后调用父级，父级1.name 或 super().name
+```
