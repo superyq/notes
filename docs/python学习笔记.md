@@ -203,4 +203,116 @@ file.close()
 with open() as file:
   for line in file:
     print(line)
+
+# 写入 或 创建
+file = open('demo.txt', 'w', encoding='UTF-8')
+file.write("无所事事")
+file.close()
+
+# 追加 或 创建
+file = open('demo.txt', 'a', encoding='UTF-8')
+file.write('asdfsf')
+file.close()
+```
+
+36. 捕获异常
+
+```py
+# 基础
+try:
+  xxx
+except:
+  xxx
+
+# 指定异常
+try:
+  xxx
+except NameError as e:
+  xxx
+
+# 合计异常
+try:
+  xxx
+except (NameError, ZeroDivisionError) as e:
+  xxx
+
+# 完整
+try:
+  xxx
+except:
+  xxx
+else:
+  xxx
+finally:
+  xxx
+
+```
+
+37. 模块
+
+```py
+# [from 模块名] import [模块 | 类 | 变量 | 函数 | *] [as 别名]
+from my_module import test
+test(1,2)
+
+# 或
+import my_module
+my_module.test(1,2)
+
+__name__ == "__main__" # 包自我调试
+__all__ = ['test']
+```
+
+38. 安装包
+
+```py
+pip install numpy
+# 或
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple numpy
+```
+
+39. json
+
+```py
+json.dumps(data, ensure_ascii=False) # 转json字符串,有中文 ensure_ascii=False
+json.loads() # 转列表
+```
+
+40. 对象
+
+```py
+# 基础
+class Student:
+  name = None
+  def say_hi(self, msg):
+    print(f"{self.name},{msg}")
+stu_1 = Student()
+stu_1.name = 'yq'
+stu_1.say_hi('哇哈哈哈')
+
+# 构造
+class Student:
+  name = None
+  age = None
+  def __init__(self, name, age):
+    self.name = name
+    self.age = age
+stu_2 = Student('yq', 18)
+stu_2.name
+```
+
+41. 类方法：魔术方法
+
+```py
+# init,str,lt,le,eq
+def __init__(self, name):
+  self.name = name
+def __str__(self):
+  return f"{self.name}"
+def __lt__(self, other):
+  return self.name < other.name
+def __le__(self, other):
+  return self.name < other.name
+def __eq__(self, other):
+  return self.name == other.name
 ```
