@@ -329,6 +329,22 @@ class 类名(父类名):
 # 多继承 谁先继承谁的优先级高
 class 类名(父级1, 父级2, ...):
   pass
-
 # 覆盖后调用父级，父级1.name 或 super().name
+
+# 多态：父级抽象类，子集具体实现
+class parent:
+  def say(self):
+    pass
+class child(parent):
+  def say(self):
+    print("八佰伴")
+def say(parent: Parent):
+  parent.say()
+```
+
+43. 注解
+
+```py
+var_1: int = 10 # float, bool, str
+var_2: list = [] # tuple, set, dict, str
 ```
