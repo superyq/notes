@@ -348,3 +348,69 @@ def say(parent: Parent):
 var_1: int = 10 # float, bool, str
 var_2: list = [] # tuple, set, dict, str
 ```
+
+44. mysql
+
+```py
+mysql -uroot -p # 登录
+show databases # 查看数据库
+use 数据库名 # 使用某个数据库
+show tables # 查看数据库有哪些表
+exit # 退出
+```
+
+45. sql 分 4 类
+
+```s
+# DDL: 库、表的创建，删除
+# 库
+show databases;
+create databse 库名 [charset utf8];
+use 数据库名;
+select database();
+drop database 库名;
+# 表
+show tables;
+create table 表名(
+  列名 列类型, # int, float, varchart(10),date, timestamp
+)
+drop table 表名;
+
+# DML: 数据的增，删，改
+insert into 表(列1, 列2, ...) values(值1, 值2, ...), (值1, 值2, ...)
+delete from 表 where 条件判断
+update 表 set 列=值 where 条件判断
+
+# DQL: 基于需求查询和计算数据
+select * from 表 where 条件
+select 列|聚合函数 from 表 [where 条件] group by 列 # sum(列)、avg(列)、min(列)、max(列)、count(列|*)
+select 列|聚合函数* from 表 where ... group by ... order by ... [asc|desc] limit n[,m] # from > where > group by > 聚合函数 > order by > limit
+
+# DCL: 用户的增，删，密码修改，权限管理
+```
+
+46. python 和 mysql
+
+```py
+pip install pymysql # 安装第三方库
+
+from pymysql import Connection # 导包
+conn = Connection(
+  host='localhost',
+  port=3306,
+  user='root',
+  password='123456'，
+  autocommit=True # 自动提交，sql 插入
+)
+conn.get_server_info() # 数据库软件数据
+conn.close() # 关闭链接
+
+cursor = conn.cursor() # 获取游标
+conn.select_db("test") # 选择数据库
+cursor.execute("create table test_mysql(id int, info varchar(255))") # 非查询 sql 语句
+
+cursor.execute("select * from user") # 查询 sql 语句
+results = cursor.fetchall() # 获取所有查询数据
+
+cursor.execute("inset into ad * values(1, '哈哈哈')")
+```
