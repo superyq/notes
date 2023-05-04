@@ -352,14 +352,18 @@ var_2: list = [] # tuple, set, dict, str
 44. mysql
 
 ```py
+# [mysql.com](https://dev.mysql.com/downloads/installer/) 下载 mysql
+# C:\Program Files\MySQL\MySQL Server 8.0\bin mysql添加到环境变量
 mysql -uroot -p # 登录
 show databases # 查看数据库
 use 数据库名 # 使用某个数据库
 show tables # 查看数据库有哪些表
 exit # 退出
+
+# https://dbeaver.io/download/ 下在 dbeaver
 ```
 
-45. sql 分 4 类
+1.  sql 分 4 类
 
 ```s
 # DDL: 库、表的创建，删除
