@@ -1,9 +1,13 @@
+<!-- 前言 -->
+
 1. python 简单、易学、开发效率高
 2. 适用于自动化脚本、自动化办公、web 应用程序、人工智能、大数据
 3. 3.1 写代码，3.2 翻译代码到二进制
+<!-- 安装 -->
 4. 4.1 python.org 下载安装 python， 4.2 命令行输入 python 查看是否已全局安装
 5. python 解释器 5.1 翻译代码，5.2 提交给计算机，5.3 python demo.py 运行 py 文件
 6. 安装配置 PyCharm 软件
+<!-- 基础 -->
 7. 字面量：数字 number，字符串 string，列表 list，元组 tuple，集合 set，字典 dictionary
 8. 注释：单行 # 代码，多行 """ 代码 """
 9. 变量名 = 数据
@@ -184,13 +188,13 @@ test(lambda x, y: x+y)
 36. 文件
 
 ```py
-# mode: r只读，w写入覆盖，a写入追加
+# mode: r只读，w写入覆盖，a写入追加, r+读写
 # encoding="UTF-8"
 file = open(name, mode, encoding)
 
-file.read()
-file.readline()
-file.readlines()
+file.read() # 全读
+file.readline() # 返回一行文件
+file.readlines() # 返回全部文件内容组成的列表
 
 # for循环读取
 for line in file:
@@ -330,6 +334,7 @@ class 类名(父类名):
 class 类名(父级1, 父级2, ...):
   pass
 # 覆盖后调用父级，父级1.name 或 super().name
+# 覆盖后调用父级，父级1.__init__() 调用父类的构造函数
 
 # 多态：父级抽象类，子集具体实现
 class parent:
