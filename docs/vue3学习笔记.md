@@ -189,7 +189,8 @@ watch(
   () => x.value + y.value,
   (sum) => {
     console.log(`sum of x + y is: ${sum}`);
-  }
+  },
+  { immediate: true, deep: true }
 );
 
 // 多个来源组成的数组

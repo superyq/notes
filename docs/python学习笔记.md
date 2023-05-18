@@ -46,6 +46,16 @@ for x in list
 ```
 
 22. range(num1, num2, step)
+
+```py
+for item in range(0, 50, 1):
+  pass
+# 类似于
+index = 0
+while index < 50:
+  index += 1
+```
+
 23. continue 中断本次，直接下一次，用于 for，while
 24. break 直接结束所在所在循环
 25. def 定义函数
@@ -421,5 +431,20 @@ cursor.execute("create table test_mysql(id int, info varchar(255))") # 非查询
 cursor.execute("select * from user") # 查询 sql 语句
 results = cursor.fetchall() # 获取所有查询数据
 
-cursor.execute("inset into ad * values(1, '哈哈哈')")
+cursor.execute("insert into ad * values(1, '哈哈哈')")
+```
+
+47. 爬虫
+
+```py
+# pip install requests 安装
+import requests
+headers = { "User-Agent": "xxx" }
+res = requests(url, headers = headers)
+if res.ok:
+  print(res.text)
+else:
+  print(xx)
+
+# pip install bs4 安装
 ```
