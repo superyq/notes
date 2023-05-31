@@ -1,5 +1,8 @@
 <h1 align="center">vue-router</h1>
 
+vue-router 版本为4的是为vue3准备的
+如果是vue2 安装版本为vue-router@3
+
 ## 基础用法
 
 ```js
