@@ -2,6 +2,10 @@
 
 [学习地址 2.0](https://edu.csdn.net/skill/vue/vue-d80da0184cd44dfd94e41e61e934a6cd?typeId=28491&ops_request_misc=%257B%2522request%255Fid%2522%253A%2522168549930316800182198673%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=168549930316800182198673&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-1-115665717-null-null.142^v88^control_2,239^v2^insert_chatgpt&utm_term=vue.config.js%20publicpath%E4%BD%BF%E7%94%A8&spm=1018.2226.3001.4187)
 
+configureWebpack 通过操作对象的形式，来修改默认的 webpack 配置，该对象将会被 webpack-merge 合并入最终的 webpack 配置。
+
+chainWebpack 通过链式编程的形式，来修改默认的 webpack 配置。
+
 ```js
 const { defineConfig } = require("@vue/cli-service");
 module.exports = defineConfig({
