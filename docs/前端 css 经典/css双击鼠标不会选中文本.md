@@ -1,3 +1,5 @@
-# css双击不会选中文本
+# css 双击不会选中文本
 
-- user-select:none;
+```css
+user-select: none;
+```
