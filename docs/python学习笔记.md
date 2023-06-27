@@ -384,14 +384,14 @@ exit # 退出
 # DDL: 库、表的创建，删除
 # 库
 show databases;
-create databse 库名 [charset utf8];
+create database 库名 [charset utf8];
 use 数据库名;
 select database();
 drop database 库名;
 # 表
 show tables;
 create table 表名(
-  列名 列类型, # int, float, varchart(10),date, timestamp
+  列名 列类型, # int, float, varchar(10),date, timestamp
 )
 drop table 表名;
 
