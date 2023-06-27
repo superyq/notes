@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      @keyframes demo {
+        0% {
+          width: 0px;
+        }
+        25% {
+          width: 25px;
+        }
+        50% {
+          width: 50px;
+        }
+        75% {
+          width: 75px;
+        }
+        100% {
+          width: 100px;
+        }
+      }
+      .father {
+        perspective: 500px;
+      }
+      .demo {
+        margin: 200px auto;
+        width: 100px;
+        height: 100px;
+        border: 1px solid;
+        transition: all 1s linear 0s;
+        /* animation: demo 2s ease-in-out; */
+      }
+      .new {
+        transform: translate(100px, 100px) rotate(60deg) scale(0.5)
+          skew(30deg, 30deg);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="father">
+      <div class="demo"></div>
+    </div>
+    <button class="btn">点我</button>
+  </body>
+  <script>
+    document.querySelector(".btn").onclick = function () {
+      document.querySelector(".demo").classList.add("new");
+    };
+  </script>
+</html>
