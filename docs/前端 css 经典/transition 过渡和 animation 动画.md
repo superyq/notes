@@ -1,4 +1,4 @@
-# css 过渡及动画
+# transition 过渡和 animation 动画
 
 1. transition 过渡动画
 
@@ -30,25 +30,47 @@
 2. keyframes 自定义动画
 
 ```css
+/* 定义动画 */
 @keyframes demo {
   0% {
-    width: 0px;
-  }
-  25% {
-    width: 25px;
-  }
-  50% {
-    width: 50px;
-  }
-  75% {
-    width: 75px;
+    transform: translate(0px);
   }
   100% {
-    width: 100px;
+    transform: translate(200px);
+  }
+}
+/* or */
+@keyframes demo {
+  from {
+    transform: translate(0px);
+  }
+  to {
+    transform: translate(200px);
   }
 }
 
+/* 使用动画 */
 div {
-  animation: demo 2s ease-in-out;
+  /* 简写 */
+  /* animation：动画名称 动画时长（有这两个即可以完成动画，其它未设置，有默认值） */
+  animation: demo 2s;
+  /* animation：动画名称 动画时长 动画运动速度 延迟时间 执行次数 往返动画 */
+  animation: demo 2s linear 0 infinite;
+
+  /* 详写 */
+  /* 动画名称 */
+  animation-name: demo;
+  /* 持续时间 */
+  animation-duration: 1s;
+  /* 运动曲线 和 transition 的运动曲线一样 */
+  animation-timing-function: linear;
+  /* 何时开始 */
+  animation-delay: 0;
+  /* 重复次数 iteration 重复的   count 次数  infinite无限 */
+  animation-iteration-count: infinite;
+  /* 是否反方向播放  默认normal  想反方向就写alternate*/
+  animation-direction: alternate;
+  /* 动画结束后状态默认backwards  回到起始状态 我们可以让他停留在结束状态forwards */
+  animation-fill-mode: forwards;
 }
 ```

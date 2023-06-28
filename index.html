@@ -6,20 +6,11 @@
     <title>Document</title>
     <style>
       @keyframes demo {
-        0% {
-          width: 0px;
+        from {
+          transform: translate(0px);
         }
-        25% {
-          width: 25px;
-        }
-        50% {
-          width: 50px;
-        }
-        75% {
-          width: 75px;
-        }
-        100% {
-          width: 100px;
+        to {
+          transform: translate(200px);
         }
       }
       .father {
@@ -31,7 +22,20 @@
         height: 100px;
         border: 1px solid;
         transition: all 1s linear 0s;
-        /* animation: demo 2s ease-in-out; */
+        /* 动画名称 */
+        animation-name: demo;
+        /* 持续时间 */
+        animation-duration: 1s;
+        /* 运动曲线 */
+        animation-timing-function: linear;
+        /* 何时开始 */
+        animation-delay: 0;
+        /* 重复次数 iteration 重复的   count 次数  infinite无限 */
+        animation-iteration-count: infinite;
+        /* 是否反方向播放  默认normal  想反方向就写alternate*/
+        animation-direction: alternate;
+        /* 动画结束后状态默认backwards  回到起始状态 我们可以让他停留在结束状态forwards */
+        animation-fill-mode: forwards;
       }
       .new {
         transform: translate(100px, 100px) rotate(60deg) scale(0.5)

@@ -1,26 +1,26 @@
-<h1 align="center">git学习笔记</h1>
+# git
 
-## 提交,拉取
+1. 提交,拉取
 
 ```js
 创建版本库: git init
-克隆远程仓库: git clone ...
+克隆远程仓库: git clone 仓库地址
 拉取代码: git pull
-提交到暂存区: git add
-提交到版本库: git commit -m ""
+提交到暂存区: git add . 
+提交到版本库: git commit -m "xxx"
 提交到远程仓库: git push
 ```
 
-## 查看操作
+2. 查看操作
 
 ```js
 查看工作区修改: git status
-查看工作区和版本库的不同: git diff
+查看工作区和版本库的不同: git diff .
 查看commit: git log --pretty=oneline
 查看所有所有所有commit: git reflog
 ```
 
-## 后悔操作
+3. 后悔操作
 
 ```js
 并且把这次撤销作为一次最新的提交: git revert ...
@@ -29,7 +29,7 @@
 丢弃工作区修改: git checkout ...
 ```
 
-## 处理冲突
+4. 处理冲突
 
 ```js
 当pull远程仓库时.报冲突错误,直接合并远程仓库和本地仓库: git rebase
@@ -40,7 +40,7 @@
 将存储的list删除: git stash drop
 ```
 
-## 分支
+5. 分支
 
 ```js
 创建分支: git branch ...
