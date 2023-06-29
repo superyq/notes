@@ -14,5 +14,3 @@ files.keys().forEach((key) => {
 // main.js
 import "@/utils/components.js";
 ```
-
-2. vue3

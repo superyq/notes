@@ -1,25 +1,25 @@
-<h1 align="center">从0开始学习vue3.0</h1>
+# 从0开始学习vue3.0
 
-## **1.vue3.0 和 vue2.0 的区别**
+1. vue3.0 和 vue2.0 的区别
 
 我们要学习 vue3，就要知道为什么要学习它，vue3 和 vue2 的区别在哪，对于我们开发的优势在哪。
 
 vue3.0 与 2020/9/18 正式发布，vue2.0 与 2023/12/31 日停止维护。
 
-1. 双向数据绑定原理
+双向数据绑定原理
    vue2: es5 中的 Object.definepropert()劫持数据，结合发布订阅模式
    vue3: es6 中的 proxyAPI
    优势: proxyAPI 可以进行全对象监听，可以检测到对象内部的数据变化
-2. 根节点
+根节点
    vue2: 只能有一个根节点
    vue3: 可以有多个根节点
    优势: html 结构不需要一个无用父节点来包裹
-3. API
+API
    vue2: Options API（选项式 API）
    vue3: Composition API（组合式 API）
    优势: 一个功能模块的 js 代码，定义变量，方法，计算属性，都可以放在一块，更方便后期的维护和复用。同时选项式 API 是在组合式 API 的基础上实现的！
 
-## 创建应用
+2. 创建应用
 
 ```js
 // 单个应用
@@ -44,7 +44,7 @@ const app2 = createApp(App2);
 app2.mount("#container-2");
 ```
 
-## 模板语法
+3. 模板语法
 
 以下是 vue 中变量在 template 中的用法
 
@@ -59,7 +59,7 @@ app2.mount("#container-2");
 ></div>
 ```
 
-## 响应式基础
+4. 响应式基础
 
 ```js
 // reactive: 仅对对象类型有效
@@ -76,7 +76,7 @@ console.log(count.value) // 0
 <div>{{ count }}</div>
 ```
 
-## 计算属性
+5. 计算属性
 
 ```js
 // computed: 需要.value取值
@@ -91,7 +91,7 @@ console.log(nameLength.value); // 7
 <div>{{ nameLength }}</div>;
 ```
 
-## Class 与 Style 绑定
+6. Class 与 Style 绑定
 
 ```html
 <div :class="{ active: isActive, 'text-danger': hasError }"></div>
@@ -102,7 +102,7 @@ console.log(nameLength.value); // 7
 <div :style="{ color: activeColor, fontSize: fontSize + 'px' }"></div>
 ```
 
-## 条件渲染
+7. 条件渲染
 
 v-if 是惰性的：如果在初次渲染时条件值为 false，则不会做任何事。条件区块只有当条件首次变为 true 时才被渲染。
 v-show 简单许多，元素无论初始条件如何，始终会被渲染，只有 CSS display 属性会被切换。
@@ -112,7 +112,7 @@ v-show 简单许多，元素无论初始条件如何，始终会被渲染，只�
 <h1 v-show="ok">Hello!</h1>
 ```
 
-## 列表渲染
+8. 列表渲染
 
 Vue 默认按照“就地更新”的策略来更新通过 v-for 渲染的元素列表。当数据项的顺序改变时，Vue 不会随之移动 DOM 元素的顺序，而是就地更新每个元素，确保它们在原本指定的索引位置上渲染。
 为了给 Vue 一个提示，以便它可以跟踪每个节点的标识，从而重用和重新排序现有的元素，你需要为每个元素对应的块提供一个唯一的 key attribute。
@@ -123,7 +123,7 @@ Vue 默认按照“就地更新”的策略来更新通过 v-for 渲染的元素
 </li>
 ```
 
-## 事件处理
+9. 事件处理
 
 ```html
 <button @click="say('hello')">Say hello</button>
@@ -144,7 +144,7 @@ Vue 默认按照“就地更新”的策略来更新通过 v-for 渲染的元素
 <input @keyup.enter="submit" />
 ```
 
-## 生命周期
+10. 生命周期
 
 beforecate 和 created，它们被 setup 方法本身所取代。
 
@@ -171,7 +171,7 @@ onUpdated(() => {});
 onUnmounted(() => {});
 ```
 
-## 侦听器
+11. 侦听器
 
 ```js
 import { ref, watch } from "vue";
@@ -199,7 +199,7 @@ watch([x, () => y.value], ([newX, newY]) => {
 });
 ```
 
-## 模板引用
+12. 模板引用
 
 直接访问底层 DOM 元素
 
@@ -219,9 +219,9 @@ onMounted(() => {
 });
 ```
 
-## 深入组件
+13. 深入组件
 
-### Props 声明
+13.1 Props 声明
 
 ```js
 const props = defineProps(["foo"]);
@@ -279,7 +279,7 @@ defineProps({
 });
 ```
 
-### 事件
+13.2 事件
 
 ```js
 const emit = defineEmits(["inFocus", "submit"]);
@@ -289,7 +289,7 @@ function buttonClick() {
 }
 ```
 
-### 插槽
+13.3 插槽
 
 ```js
 // 子组件
@@ -323,7 +323,7 @@ function buttonClick() {
 </BaseLayout>
 ```
 
-## 自定义指令
+14. 自定义指令
 
 ```js
 // 在模板中启用 v-focus

@@ -5,53 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <style>
-      @keyframes demo {
-        from {
-          transform: translate(0px);
-        }
-        to {
-          transform: translate(200px);
-        }
-      }
-      .father {
-        perspective: 500px;
-      }
-      .demo {
-        margin: 200px auto;
-        width: 100px;
-        height: 100px;
+      .container {
+        width: 500px;
+        height: 500px;
         border: 1px solid;
-        transition: all 1s linear 0s;
-        /* 动画名称 */
-        animation-name: demo;
-        /* 持续时间 */
-        animation-duration: 1s;
-        /* 运动曲线 */
-        animation-timing-function: linear;
-        /* 何时开始 */
-        animation-delay: 0;
-        /* 重复次数 iteration 重复的   count 次数  infinite无限 */
-        animation-iteration-count: infinite;
-        /* 是否反方向播放  默认normal  想反方向就写alternate*/
-        animation-direction: alternate;
-        /* 动画结束后状态默认backwards  回到起始状态 我们可以让他停留在结束状态forwards */
-        animation-fill-mode: forwards;
+        display: grid;
+        grid-template-columns: 100px 200px 100px;
+        grid-gap: 5px;
+        grid-auto-rows: 50px;
       }
-      .new {
-        transform: translate(100px, 100px) rotate(60deg) scale(0.5)
-          skew(30deg, 30deg);
+      .container div {
+        border: 1px solid;
+      }
+      .one {
+        grid-column-start: 2;
+        grid-column-end: 4;
+        grid-row-start: 2;
+        grid-row-end: 3;
+        background: #19caad;
       }
     </style>
   </head>
   <body>
-    <div class="father">
-      <div class="demo"></div>
+    <div class="container">
+      <div class="one">one</div>
+      <div class="two">two</div>
+      <div class="three">three</div>
+      <div class="four">four</div>
+      <div class="five">five</div>
+      <div class="six">six</div>
     </div>
-    <button class="btn">点我</button>
   </body>
-  <script>
-    document.querySelector(".btn").onclick = function () {
-      document.querySelector(".demo").classList.add("new");
-    };
-  </script>
+  <script></script>
 </html>

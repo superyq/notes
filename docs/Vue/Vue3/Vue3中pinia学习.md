@@ -1,13 +1,15 @@
+# vue3 中使用 pinia
+
 1. 安装依赖
 
 ```js
 yarn add pinia
 ```
 
-2. 创建 src/store 文件夹，存放 .js的状态
+2. 创建 src/store 文件夹，存放 .js 的状态
 
 3. 例: src/store/user.js 编写
-   
+
 ```js
 import { defineStore } from "pinia";
 
@@ -17,25 +19,25 @@ import { defineStore } from "pinia";
 // getters：计算属性，用于需要二次加工的属性。
 
 export const useUserStore = defineStore({
-  id: 'userStore',
+  id: "userStore",
   state: () => {
     return {
-      token: ""
-    }
+      token: "",
+    };
   },
   getters: {
     tokenLength(state) {
-      return state.token.length
-    }
+      return state.token.length;
+    },
   },
   actions: {
     async login({ username, password }) {
       return new Promise((res, rej) => {
-        // 登录接口调用      
-      })
-    }
-  }
-})
+        // 登录接口调用
+      });
+    },
+  },
+});
 ```
 
 4. main.js 编写
@@ -55,18 +57,18 @@ app.use(createPinia()).mount("#app");
 
 ```html
 <script setup>
-import { computed } from "vue";
-import { useUserStore } from "@/store/user.js";
+  import { computed } from "vue";
+  import { useUserStore } from "@/store/user.js";
 
-let userStore = useUserStore();
+  let userStore = useUserStore();
 
-let token = computed(() => {
-  return userStore.token
-})
+  let token = computed(() => {
+    return userStore.token;
+  });
 
-let login = () => {
-  userStore.login().then(() =>{})
-}
+  let login = () => {
+    userStore.login().then(() => {});
+  };
 </script>
 <template>
   <div>

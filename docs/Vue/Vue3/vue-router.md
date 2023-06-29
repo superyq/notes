@@ -1,9 +1,9 @@
-<h1 align="center">vue-router</h1>
+# vue3中使用vue-router
 
 vue-router 版本为4的是为vue3准备的
 如果是vue2 安装版本为vue-router@3
 
-## 基础用法
+1. 基础用法
 
 ```js
 // router -> index.js
@@ -33,14 +33,12 @@ export default router;
 import router from "./router/index.js";
 const app = createApp(App);
 app.use(router);
-```
 
-```html
-<!-- App.vue -->
+// App.vue 
 <router-view></router-view>;
 ```
 
-## 路由跳转
+2. 路由跳转
 
 ```html
 <router-link to="/">Go to Home</router-link>
@@ -78,7 +76,7 @@ router.push({ name: "user", params: { username } }); // -> /user/eduardo
 router.push({ path: "/user", params: { username } }); // -> /user
 ```
 
-## 动态路由
+3. 动态路由
 
 ```js
 // router->index.js
@@ -95,7 +93,7 @@ console.log(route.params); // { id: 1 }
 {{ $route.params }}
 ```
 
-## 嵌套路由
+4. 嵌套路由
 
 ```js
 const routes = [
@@ -120,7 +118,7 @@ const routes = [
 ];
 ```
 
-## 命名路由
+5. 命名路由
 
 ```js
 // 除了 path 之外，你还可以为任何路由提供 name
@@ -133,7 +131,7 @@ const routes = [
 ];
 ```
 
-## 命名视图
+6. 命名视图
 
 ```js
 const router = createRouter({
@@ -159,7 +157,7 @@ const router = createRouter({
 <router-view class="view right-sidebar" name="RightSidebar"></router-view>
 ```
 
-## 重定向
+7. 重定向
 
 ```js
 const routes = [{ path: "/home", redirect: "/" }];
@@ -193,14 +191,14 @@ const routes = [
 ];
 ```
 
-## 别名
+8. 别名
 
 ```js
 // 当用户访问 /home 时，URL 仍然是 /home，但会被匹配为用户正在访问 /
 const routes = [{ path: "/", component: Homepage, alias: "/home" }];
 ```
 
-## 路由组件传参
+9. 路由组件传参
 
 ```js
 const User = {
@@ -220,7 +218,7 @@ const routes = [
 ];
 ```
 
-## 导航守卫
+10. 导航守卫
 
 ```js
 const router = createRouter({ ... })
@@ -274,7 +272,7 @@ router.afterEach((to, from) => {
 });
 ```
 
-## 路由元信息
+11. 路由元信息
 
 ```js
 // 有时，你可能希望将任意信息附加到路由上，如过渡名称、谁可以访问路由等,并且它可以在路由地址和导航守卫上都被访问到
@@ -314,7 +312,7 @@ router.beforeEach((to, from) => {
 })
 ```
 
-## 过渡效果
+12. 过渡效果
 
 ```js
 const routes = [
@@ -379,7 +377,7 @@ const routes = [
 }
 ```
 
-## 滚动行为
+13. 滚动行为
 
 ```js
 const router = createRouter({
