@@ -156,15 +156,70 @@ body {
 }
 ```
 
+3. 共用样式 src/assets/style/common.scss
+
+```css
+::-webkit-scrollbar {
+  width: 14px;
+  height: 12px;
+  background-color: #fff;
+}
+
+::-webkit-scrollbar-thumb {
+  display: block;
+  min-height: 12px;
+  min-width: 8px;
+  border-radius: 6px;
+  background-color: rgb(217, 217, 217);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  display: block;
+  min-height: 12px;
+  min-width: 8px;
+  border-radius: 6px;
+  background-color: rgb(159, 159, 159);
+}
+```
+
+4. 工具样式 src/assets/style/utils.scss
+
+```css
+/* 工具css style */
+.c-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.c-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c-margin-r20 {
+  margin-right: 20px;
+}
+.c-margin-r10 {
+  margin-right: 10px;
+}
+.c-margin-b20 {
+  margin-bottom: 20px;
+}
+```
+
 ```css
 /* 新建 src/assets/style/index.scss */
 /* 共用scss的集合 */
 @import "./reset.scss";
+@import "./common.scss";
+@import "./utils.scss";
 ```
 
 <!-- 图片 2-2 -->
 
-3. vite.config.js 中 @ 快捷键创建
+5. vite.config.js 中 @ 快捷键创建
 
 ```js
 // vite.config.js
@@ -184,7 +239,7 @@ export default defineConfig({
 });
 ```
 
-4. 在 main.js 中引入 src/assets/style/index.scss
+6. 在 main.js 中引入 src/assets/style/index.scss
 
 ```js
 // main.js
@@ -196,7 +251,7 @@ import "@/assets/style/index.scss";
 createApp(App).mount("#app");
 ```
 
-5. 在组件中使用 scss
+7. 在组件中使用 scss
 
 ```vue
 <!-- App.vue -->
