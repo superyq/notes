@@ -115,4 +115,56 @@ path.extname(str); // .js
 
 6. IP
 
-概念：32 位的二进制
+概念：本质 32 bit 的二进制，每 8bit 一组，转换成 10 进制，例如：192.168.0.1，表示 2 的 32 次方的 IP 地址，最多可以构成 42.9 亿的 IP 地址。全球 80 亿人口，每人一个 IP 地址是不够用的，为了解决就有了家庭共用 IP，区域共用 IP。
+
+本地回环 IP ： 127.0.0.1 ~ 127.255.255.254
+局域网 IP ：192.168.0.0 ~ 192.168.255.255、172.16.0.0 ~ 172.31.255.255、10.0.0.0 ~ 10.255.255.255
+公网 IP ：除上述以外
+
+端口：应用程序的数值标识，实现不同主机之间应用程序的通信。有 65536 个端口 0~65535
+
+7. HTTP 模块
+
+```js
+// 1. 导入模块
+const http = require("http");
+// 2. 创建服务
+const server = http.createServer((request, response) => {
+  // 获取请求方法
+  request.method;
+  // 获取请求 url（只包含url中的路径和查询字符串）
+  request.url;
+  // 获取 HTTP 协议版本号
+  request.httpVersion;
+  // 获取 HTTP 请求头
+  request.headers;
+
+  // 提取路径与参数
+  let url = new URL(Request.url, "http://127.0.0.1");
+  // 路径
+  url.pathname;
+  // 参数
+  url.searchParams.get("keyword");
+
+  // 设置响应报文
+  // 响应状态码
+  response.statusCode = 200;
+  // 响应状态描述
+  response.statusMessage = "msg";
+  // 响应头
+  response.setHeader("key", "value");
+  // 响应体
+  response.write();
+  response.end();
+
+  // 设置响应头处理中文乱码
+  response.setHeader("content-type", "text/html;charset=utf-8");
+  // 设置响应体
+  response.end("hello");
+});
+
+// 3. 启服务
+server.listen(9000, () => {
+  console.log("已启动");
+});
+```
