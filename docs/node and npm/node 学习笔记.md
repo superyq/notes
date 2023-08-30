@@ -168,3 +168,87 @@ server.listen(9000, () => {
   console.log("已启动");
 });
 ```
+
+8. 模块化
+
+require("demo"): 导入文件夹，首先会检测文件夹下的 package.json 中的 main 属性对应的文件，如果 main 属性对应的文件不存在则报错，如果存在则导入，如果 main 属性不存在，或者 package.json 不存在，导入文件夹下的 index.js 和 index.json
+
+9. 包管理
+
+```js
+// 创建包
+npm init
+// 快速创建
+npm init -y
+// 指定版本包
+npm i <包名@版本号>
+// 删除
+npm remove <包名>
+```
+
+windows 执行策略：1. 管理员身份打开 powershell 2. 输入命令 set-ExecutionPolicy remoteSigned
+
+10. express 框架
+
+```js
+// 导入
+const express = require("express");
+const app = express();
+// 创建路由
+app.get("/home", (req, res) => {});
+// 获取参数
+req.path; // /demo
+req.query; // { name: 'yq' }
+req.ip; // ::ffff:127.0.0.1
+req.get("host"); // 127.0.0.1:3000
+// 获取id
+app.get("/:id", (req, res) => {
+  req.params.id;
+});
+// 响应
+res.status(500); // 状态码
+res.set("xxx", "xxx"); // 响应头
+res.send("demo"); // 响应体
+// 其他响应
+res.redirect("http://www.baidu.com"); // 重定向
+res.download(__dirname + "./demo.js"); // 下载
+res.json({ name: "yq" }); // json
+res.sendFile(__dirname + "./demo.js"); // 文件
+
+// express 中间件
+// 全局中间件
+function middleware(req, res, next) {
+  // 获取 url 和 ip
+  let { url, ip } = req;
+  fs.appendFileSync(__dirname + "./demo.json", `${url} ${ip}\r\n`);
+  next();
+}
+app.use(middleware);
+// 路由中间件
+app.get("/home", middleware, (req, res) => {});
+// 静态资源中间件设置
+app.use(express.static(__dirname + "/public")); // 页面上访问静态资源
+
+// 获取请求体
+const bodyParser = require("body-parser");
+const jsonParser = bodyParser.json(); // 解析Json格式请求体的中间件
+const urlParser = bodyParser.urlencoded({ extended: false }); // 解析 querystring 格式请求体的中间件
+app.post("/login", urlParser, (req, res) => {
+  console.log(req.body); // { name: 'yq', password: 123 }
+  res.send("success");
+});
+
+// 防盗链
+app.use((req, res, next) => {
+  // 检测请求头中 referer 是否为 127.0.0.1
+  let referer = req.get("referer");
+  if (referer) {
+    let url = new URL(referer);
+    let hostname = url.hostname;
+    if (hostname !== "127.0.0.1") {
+      res.status(500).send("404");
+    }
+  }
+  next();
+});
+```
