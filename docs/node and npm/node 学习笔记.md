@@ -241,7 +241,7 @@ app.post("/login", urlParser, (req, res) => {
 // 防盗链
 app.use((req, res, next) => {
   // 检测请求头中 referer 是否为 127.0.0.1
-  let referer = req.get("referer");
+  let referer = req.get(" ");
   if (referer) {
     let url = new URL(referer);
     let hostname = url.hostname;
@@ -251,4 +251,51 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// 路由模块化
+// adminRouter.js
+const express = require("express");
+const router = express.Router();
+router.get("/home", (req, res) => {});
+module.exports = router;
+
+// index.js
+app.use(adminRouter);
+```
+
+11. ejs 模板引擎
+
+```js
+// 生成模板
+const ejs = require("ejs");
+const result = ejs.render(str, { name });
+// 列表渲染
+<% list.forEach(item => { %>
+  <li> <%= item  %> </li>
+<% }) %>
+// 条件渲染
+<% if(isBoolean) { %>
+<div> true </div>
+<% }else { %>
+<div>false</div>
+<% } %>
+```
+
+```js
+// 在 express 使用 ejs
+app.set("view engine", "ejs");
+app.set("views", path.resolve(__dirname, "./views"));
+
+app.get("/home", (req, res) => {
+  const name = "yqcoder";
+  res.render("home", { name });
+});
+// views/home.ejs
+```
+
+12. express-generator 工具
+
+```js
+npm install -g express-generator
+express -e 文件名
 ```

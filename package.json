@@ -6,5 +6,8 @@
   "repository": "git@github.com:superyq/notes.git",
   "author": "superyq <447845126@qq.com>",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "ejs": "^3.1.9",
+    "express": "^4.18.2"
+  }
 }
