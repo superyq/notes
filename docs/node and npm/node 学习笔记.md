@@ -296,6 +296,75 @@ app.get("/home", (req, res) => {
 12. express-generator 工具
 
 ```js
+// 快速生成 express + ejs 的框架
 npm install -g express-generator
 express -e 文件名
+```
+
+13. Mongodb 数据库
+
+下载地址：https://www.mongodb.com/try/download/community
+v：5.0.20 platform：window package：zip
+
+在 bin 目录下启动数据库 mongod, 客户端连接数据库 mongo
+
+```js
+show dbs // 所有数据库
+use 数据库名 // 指定数据库,可创建
+db // 当前数据库
+db.dropDatabase() // 删除数据库
+
+db.createCollection('集合名') // 创建集合
+show collections // 数据库集合
+db.集合名.drop() // 删除集合
+db.集合名.renameCollection('new name') // 重命名集合
+
+db.集合名.insert(新文档) // 增
+db.集合名.remove(条件) // 删
+db.集合名.update({name: '张三'}, {$set: {age: 13}}) // 改
+db.集合名.find(条件) // 查
+```
+
+14. mongoose 操作数据库
+
+```js
+npm i mongoose;
+// 导入
+const mongoose = require("mongoose");
+// 连接数据库，先启动数据库服务
+mongoose.connect('mongodb://127.0.0.1:27017/bilibili');
+// 成功回调
+mongoose.connection.once('open', () => {});
+// 失败回调
+mongoose.connection.on('error', () => {});
+// 关闭回调
+mongoose.connection.on('close', () => {});
+// 断开链接
+mongoose.disconnect();
+
+// 创建文档对象
+const bookScheme = new mongoose.Scheme({
+  name: String,
+  author: String,
+  price: mongoose.Scheme.Types.Mixed // 不限制类型
+})
+// 创建模型对象
+const bookModel = mongoose.model('books', bookScheme);
+// 增
+bookModel.create({
+  name: '金瓶梅',
+  author: 'yqcoder'
+})
+// 删
+bookModel.deleteOne({})
+bookModel.deleteMany({})
+// 改
+bookModel.updateOne({}, {})
+bookModel.updateMany({}, {})
+// 查
+bookModel.findOne({});
+bookModel.findById();
+bookModel.find({price: {$lt: 20}}); // $lt <, $lte <=,  $gt >, $gte >=, $ne !==, $or 或, $and 与
+bookModel.find().select({name: 1, author: 1, _id: 0}) // 只返回name，author 
+bookModel.find().sort({price: 1}) // 正序
 ```
