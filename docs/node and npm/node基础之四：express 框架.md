@@ -1,9 +1,14 @@
 # express 框架
 
 ```js
+npm i express;
 // 导入
 const express = require("express");
 const app = express();
+// 启动服务
+app.listen(8080, () => {
+  console.log('http://localhost:8080/')
+})
 // 创建路由
 app.get("/home", (req, res) => {});
 // 获取参数

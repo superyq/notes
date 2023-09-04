@@ -12,3 +12,9 @@ npm who am i
 // 输入用户名、密码、邮箱、一次性登录密码（邮箱接收）
 npm login
 ```
+
+3. 使用 nodemon
+
+```js
+npm install -g nodemon
+```
