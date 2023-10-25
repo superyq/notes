@@ -1,4 +1,4 @@
-# vue3中使用vue-router
+# vue-router
 
 vue-router 版本为4的是为vue3准备的
 如果是vue2 安装版本为vue-router@3

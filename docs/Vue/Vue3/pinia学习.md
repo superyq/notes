@@ -1,4 +1,4 @@
-# vue3 中使用 pinia
+# pinia
 
 1. 安装依赖
 

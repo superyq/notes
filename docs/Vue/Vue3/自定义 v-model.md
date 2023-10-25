@@ -1,4 +1,4 @@
-# vue3 自定义组件 v-model 原理解析
+# 自定义 v-model
 
 1. input 中的 v-model
 

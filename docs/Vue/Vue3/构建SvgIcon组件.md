@@ -1,4 +1,4 @@
-在 vue3 中构建 SvgIcon 组件
+# 构建 SvgIcon 组件
 
 1. 组件编写 components/SvgIcon.vue
 
