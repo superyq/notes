@@ -1,9 +1,15 @@
-```vue
+# 自定义 v-model
+
+1. input 中的 v-model
+
+```html
 <!-- 表单双向绑定 -->
 <input :value="username" @input="username = $event.target.value" />
 <!-- 等于 -->
 <input v-model="username" />
 ```
+
+2. 自定义组件 v-model
 
 ```vue
 <!-- 组件双向绑定 -->
