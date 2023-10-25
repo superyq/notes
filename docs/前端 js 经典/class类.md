@@ -109,23 +109,7 @@ P1.type; // 'person'
 P1.eat(); // 开饭了
 ```
 
-6. 私有属性、方法
-
-```js
-// 私有方法和私有属性，是只能在类的内部访问的方法和属性，外部不能访问。
-// 属性或方法前加#关键字，就变成私有的了。
-class Person {
-  constructor(name) {
-    this.name = name;
-  }
-  #type = "person";
-  #eat() {
-    console.log("开饭了");
-  }
-}
-```
-
-7. 类继承
+6. 类继承
 
 ```js
 // 语法：class 子类 extends 父类
