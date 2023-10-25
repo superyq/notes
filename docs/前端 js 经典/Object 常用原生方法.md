@@ -1,4 +1,4 @@
-# Object 原始方法
+# Object 常用原生方法
 
 1. Object 属性描述符
 
@@ -8,15 +8,16 @@
 let obj = {
   name: "yqcoder",
 };
+// 单个属性
 Object.defineProperty(obj, "name", {
   // 数据描述符
   // 属性值，默认 undefined
   value: "yq",
-  // 可写，默认 false，为 true 时可修改
+  // 可写，默认 false，true 时可修改
   writable: true,
-  // 可删除，默认 false，为 true 时可删除
+  // 可删除，默认 false，true 时可删除
   configurable: true,
-  // 可枚举，默认 false，问 true 时可枚举
+  // 可枚举，默认 false，true 时可枚举
   enumerable: true,
 
   // 存取描述符
@@ -29,9 +30,18 @@ Object.defineProperty(obj, "name", {
     this.value = value;
   },
 });
+// 多个属性
+Object.defineProperties(obj, {
+  name: {
+    value: "yqcoder",
+    writable: true,
+    configurable: true,
+    enumerable: true,
+  },
+});
 
 // 获取属性描述符
-Object.getOwnPropertyDescriptor(obj, "name");
+Object.getOwnPropertyDescriptor(obj, "name"); // {value: 'yqcoder', writable: true, enumerable: true, configurable: true}
 ```
 
 2. Object.assign
@@ -48,70 +58,45 @@ let _obj = {
 Object.assign({}, obj, _obj); // {name: 'yqcoder', age: 18}
 ```
 
-2. Object.create
+3. Object.create
 
 创建一个新对象
 
 ```js
-
-```
-
-```js
-// Object.defineProperty 修改对象属性值
-let obj = {
-  name: "yqcoder",
-  _name: "yy",
-};
-Object.defineProperty(obj, "name", {
-  value: "yq",
-}); // {name: 'yq'}
-Object.defineProperty(obj, "name", {
-  // 禁止delete 删除name
-  configurable: false,
-  // 可以赋值
-  writable: true,
-  enumerable: true,
-});
-Object.defineProperty(obj, "name", {
-  get() {
-    return "I am " + this._name;
-  },
-  set(newValue) {
-    this._name = newValue;
-  },
-});
-// 定义多个属性
-Object.defineProperties(obj, {
-  _name: {
-    value: "Tom",
-    writable: true,
+let obj = Object.create(null, {
+  name: {
+    value: "yqcoder",
+    enumerable: true,
   },
   age: {
     value: 18,
-    enumerable: false,
-  },
-  name: {
-    get() {
-      return "I am " + this._name;
-    },
-    set(newValue) {
-      this._name = newValue;
-    },
+    enumerable: true,
   },
 });
+obj; // {name: 'yqcoder', age: 18}
+```
 
-// Object.assign 合并两个对象，更改原对象
-let targetObj = {
+4. Object.keys
+
+遍历对象，返回由 key 组成的数组
+
+```js
+let obj = {
+  name: "yqcoder",
   age: 18,
 };
-Object.assign(obj, targetObj); // {name: 'yq', age: 18}
-
-// Object.keys 对象转数组
 Object.keys(obj); // ['name', 'age']
+```
 
+5. obj 对象方法 
+
+```js
+let obj = {
+  name: 'yqcoder',
+  age: 18
+}
 // delete obj.key 删除对象属性
 delete obj.name; // {age: 18}
-
 // hasOwnProperty 判断对象是否有属性
 obj.hasOwnProperty("age"); // true
 ```
