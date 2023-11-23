@@ -55,7 +55,7 @@
 本地分支和远端分支创建链接：git branch --set-upstream-to=origin/feat feat
 ```
 
-## 进阶
+6. 进阶
 
 ```js
 变基同步分支commit: ... rebase ...
@@ -70,7 +70,7 @@
 跳过：git rebase --skip
 ```
 
-## git flow
+7. git flow
 
 ```js
 创建：git flow init
@@ -78,14 +78,14 @@
 结束新功能：git flow feature end name
 ```
 
-## 其他
+8. 其他
 
 ```js
 更改文件名称：git mv oldName newName
 提交格式化：yarn lint --fix
 ```
 
-## git ssh添加
+9. git ssh添加
 
 ```
 // 第一步：查看有无id_rsa.pub文件
@@ -98,7 +98,7 @@ ssh-keygen -t rsa -C "1234@qq.com"
 复制里面id_rsa.pub到ssh上
 ```
 
-## git commit 提交格式
+10. git commit 提交格式
 
 ```
 feat: 新功能
