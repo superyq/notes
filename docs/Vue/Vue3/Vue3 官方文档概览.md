@@ -1,4 +1,4 @@
-# Vue3 官方文档概览
+# Vue3 官方文档速通
 
 一 开始
 
@@ -496,9 +496,7 @@ function increment() {
 </template>
 ```
 
-3.2 为什么使用 ref
-
-为什么我们需要使用带有 .value 的 ref，而不是普通的变量？为了解释这一点，我们需要简单地讨论一下 Vue 的响应式系统是如何工作的。
+为什么我们需要使用带有 .value 的 ref，而不是普通的变量？需要了解 Vue 的响应式系统是如何工作的。
 
 .value 属性给予了 Vue 一个机会来检测 ref 何时被访问或修改。在其内部，Vue 在它的 getter 中执行追踪，在它的 setter 中执行触发。从概念上讲，你可以将 ref 看作是一个像这样的对象：
 
@@ -519,12 +517,679 @@ const myRef = {
 };
 ```
 
+Ref 会使它的值具有深层响应性。这意味着即使改变嵌套对象或数组时，变化也会被检测到：
+
+提示：也可以通过 shallow ref 来放弃深层响应性。对于浅层 ref，只有 .value 的访问会被追踪。浅层 ref 可以用于避免对大型数据的响应性开销来优化性能、或者有外部库管理其内部状态的情况。
+
+```js
+import { ref } from "vue";
+
+const obj = ref({
+  nested: { count: 0 },
+  arr: ["foo", "bar"],
+});
+
+function mutateDeeply() {
+  // 以下都会按照期望工作
+  obj.value.nested.count++;
+  obj.value.arr.push("baz");
+}
+```
+
+DOM 更新时机
+
+当你修改响应式状态时，DOM 会被自动更新。但 DOM 更新不是同步的。Vue 会在“next tick”更新周期中缓冲所有状态的修改，以确保不管进行了多少次状态修改，每个组件都只会被更新一次。
+
+要等待 DOM 更新完成后再执行额外的代码，可以使用 nextTick() 全局 API：
+
+```js
+import { nextTick } from 'vue'
+
+async function increment() {
+  count.value++
+  await nextTick()
+  // 现在 DOM 已经更新了
+}
+```
+
+3.2 reactive()
+
+响应式对象是 JavaScript 代理，其行为就和普通对象一样。不同的是，Vue 能够拦截对响应式对象所有属性的访问和修改，以便进行依赖追踪和触发更新。
+
+reactive() 将深层地转换对象：当访问嵌套对象时，它们也会被 reactive() 包装。当 ref 的值是一个对象时，ref() 也会在内部调用它。与浅层 ref 类似，这里也有一个 shallowReactive() API 可以选择退出深层响应性。
+
+值得注意的是，reactive() 返回的是一个原始对象的 Proxy，它和原始对象是不相等的：
+
+```js
+const raw = {}
+const proxy = reactive(raw)
+
+// 代理对象和原始对象不是全等的
+console.log(proxy === raw) // false
+```
+
+为保证访问代理的一致性，对同一个原始对象调用 reactive() 会总是返回同样的代理对象，而对一个已存在的代理对象调用 reactive() 会返回其本身：
+
+```js
+// 在同一个对象上调用 reactive() 会返回相同的代理
+console.log(reactive(raw) === proxy) // true
+
+// 在一个代理上调用 reactive() 会返回它自己
+console.log(reactive(proxy) === proxy) // true
+```
+
+这个规则对嵌套对象也适用。依靠深层响应性，响应式对象内的嵌套对象依然是代理：
+
+```js
+const proxy = reactive({})
+
+const raw = {}
+proxy.nested = raw
+
+console.log(proxy.nested === raw) // false
+```
+
+reactive() API 有一些局限性,由于这些限制，我们建议使用 ref() 作为声明响应式状态的主要 API。
+
+有限的值类型：它只能用于对象类型 (对象、数组和如 Map、Set 这样的集合类型)。它不能持有如 string、number 或 boolean 这样的原始类型。
+
+不能替换整个对象：由于 Vue 的响应式跟踪是通过属性访问实现的，因此我们必须始终保持对响应式对象的相同引用。这意味着我们不能轻易地“替换”响应式对象，因为这样的话与第一个引用的响应性连接将丢失：
+
+```js
+let state = reactive({ count: 0 })
+
+// 上面的 ({ count: 0 }) 引用将不再被追踪
+// (响应性连接已丢失！)
+state = reactive({ count: 1 })
+```
+
+对解构操作不友好：当我们将响应式对象的原始类型属性解构为本地变量时，或者将该属性传递给函数时，我们将丢失响应性连接：
+
+```js
+const state = reactive({ count: 0 })
+
+// 当解构时，count 已经与 state.count 断开连接
+let { count } = state
+// 不会影响原始的 state
+count++
+
+// 该函数接收到的是一个普通的数字
+// 并且无法追踪 state.count 的变化
+// 我们必须传入整个对象以保持响应性
+callSomeFunction(state.count)
+```
+
+3.3 额外的 ref 解包细节
+
+一个 ref 会在作为响应式对象的属性被访问或修改时自动解包。换句话说，它的行为就像一个普通的属性：
+
+```js
+const count = ref(0)
+const state = reactive({
+  count
+})
+
+console.log(state.count) // 0
+
+state.count = 1
+console.log(count.value) // 1
+```
+
+如果将一个新的 ref 赋值给一个关联了已有 ref 的属性，那么它会替换掉旧的 ref：
+
+```js
+const otherCount = ref(2)
+
+state.count = otherCount
+console.log(state.count) // 2
+// 原始 ref 现在已经和 state.count 失去联系
+console.log(count.value) // 1
+```
+
+与 reactive 对象不同的是，当 ref 作为响应式数组或原生集合类型(如 Map) 中的元素被访问时，它不会被解包：
+
+```js
+const books = reactive([ref('Vue 3 Guide')])
+// 这里需要 .value
+console.log(books[0].value)
+
+const map = reactive(new Map([['count', ref(0)]]))
+// 这里需要 .value
+console.log(map.get('count').value)
+```
+
+在模板渲染上下文中，只有顶级的 ref 属性才会被解包。
+
+在下面的例子中，count 和 object 是顶级属性，但 object.id 不是：
+
+```js
+const count = ref(0)
+const object = { id: ref(1) }
+```
+
+这个表达式按预期工作：
+
+```html
+{{ count + 1 }}
+```
+
+但这个不会
+
+```html
+{{ object.id + 1 }}
+<!-- [object Object]1 -->
+```
+
+另一个需要注意的点是，如果 ref 是文本插值的最终计算值 (即 {{ }} 标签)，那么它将被解包，因此以下内容将渲染为 1：
+
+```html
+{{ object.id }}
+<!-- 等价于 {{ object.id.value }}。 -->
+```
+
 4. 计算属性
+
+4.1 基础示例
+
+使用计算属性来描述依赖响应式状态的复杂逻辑。
+
+computed() 方法期望接收一个 getter 函数，返回值为一个计算属性 ref。示例：
+
+```vue
+<script setup>
+import { reactive, computed } from 'vue'
+
+const author = reactive({
+  name: 'John Doe',
+  books: [
+    'Vue 2 - Advanced Guide',
+    'Vue 3 - Basic Guide',
+    'Vue 4 - The Mystery'
+  ]
+})
+
+// 一个计算属性 ref
+const publishedBooksMessage = computed(() => {
+  return author.books.length > 0 ? 'Yes' : 'No'
+})
+</script>
+
+<template>
+  <p>Has published books:</p>
+  <span>{{ publishedBooksMessage }}</span>
+</template>
+```
+
+4.2 计算属性缓存 vs 方法
+
+计算属性值会基于其响应式依赖被缓存。相比之下，方法调用总是会在重渲染发生时再次执行函数。
+
+这也解释了为什么下面的计算属性永远不会更新，因为 Date.now() 并不是一个响应式依赖：
+
+```js
+const now = computed(() => Date.now())
+```
+
+4.3 可写计算属性
+
+计算属性默认是只读的。可以通过同时提供 getter 和 setter 来创建：
+
+```vue
+<script setup>
+import { ref, computed } from 'vue'
+
+const firstName = ref('John')
+const lastName = ref('Doe')
+
+const fullName = computed({
+  // getter
+  get() {
+    return firstName.value + ' ' + lastName.value
+  },
+  // setter
+  set(newValue) {
+    // 注意：我们这里使用的是解构赋值语法
+    [firstName.value, lastName.value] = newValue.split(' ')
+  }
+})
+</script>
+```
+
+4.4 最佳实践
+
+计算属性的 getter 应只做计算而没有任何其他的副作用，这一点非常重要，请务必牢记。举例来说，不要在 getter 中做异步请求或者更改 DOM！
+
+计算属性返回的值是派生状态。可以把它看作是一个“临时快照”，每当源状态发生变化时，就会创建一个新的快照。更改快照是没有意义的，因此计算属性的返回值应该被视为只读的，并且永远不应该被更改——应该更新它所依赖的源状态以触发新的计算。
+
 5. 类与样式绑定
+
+5.1 绑定 HTML class
+
+我们可以给 :class (v-bind:class 的缩写) 传递一个对象来动态切换 class：
+
+```html
+<div :class="{ active: isActive }"></div>
+```
+
+绑定的对象并不一定需要写成内联字面量的形式，也可以直接绑定一个对象：
+
+```js
+const classObject = reactive({
+  active: true,
+  'text-danger': false
+})
+```
+
+```vue
+<div :class="classObject"></div>
+```
+
+我们可以给 :class 绑定一个数组来渲染多个 CSS class：
+
+```js
+const activeClass = ref('active')
+const errorClass = ref('text-danger')
+```
+
+```vue
+<div :class="[activeClass, errorClass]"></div>
+```
+
+如果你也想在数组中有条件地渲染某个 class，你可以使用三元表达式：
+
+```vue
+<div :class="[isActive ? activeClass : '', errorClass]"></div>
+<!-- 等于 -->
+<div :class="[{ active: isActive }, errorClass]"></div>
+```
+
+如果你的组件有多个根元素，你将需要指定哪个根元素来接收这个 class。你可以通过组件的 $attrs 属性来实现指定：
+
+```vue
+<!-- MyComponent 模板使用 $attrs 时 -->
+<p :class="$attrs.class">Hi!</p>
+<span>This is a child component</span>
+```
+
+```vue
+<MyComponent class="baz" />
+```
+
+```vue
+<p class="baz">Hi!</p>
+<span>This is a child component</span>
+```
+
+5.2 绑定内联样式
+
+:style 支持绑定 JavaScript 对象值，对应的是 HTML 元素的 style 属性：
+
+```js
+const activeColor = ref('red')
+const fontSize = ref(30)
+```
+
+```vue
+<div :style="{ color: activeColor, fontSize: fontSize + 'px' }"></div>
+```
+
+直接绑定一个样式对象通常是一个好主意，这样可以使模板更加简洁：
+
+```js
+const styleObject = reactive({
+  color: 'red',
+  fontSize: '13px'
+})
+```
+
+```vue
+<div :style="styleObject"></div>
+```
+
+我们还可以给 :style 绑定一个包含多个样式对象的数组。这些对象会被合并后渲染到同一元素上：
+
+```vue
+<div :style="[baseStyles, overridingStyles]"></div>
+```
+
 6. 条件渲染
+
+6.1 v-if、v-else、v-else-if
+
+v-if 指令用于条件性地渲染一块内容。这块内容只会在指令的表达式返回真值时才被渲染。
+
+```vue
+<h1 v-if="awesome">Vue is awesome!</h1>
+```
+
+你也可以使用 v-else 为 v-if 添加一个“else 区块”。
+
+一个 v-else 元素必须跟在一个 v-if 或者 v-else-if 元素后面，否则它将不会被识别。
+
+```vue
+<button @click="awesome = !awesome">Toggle</button>
+
+<h1 v-if="awesome">Vue is awesome!</h1>
+<h1 v-else>Oh no 😢</h1>
+```
+
+v-else-if 提供的是相应于 v-if 的“else if 区块”。它可以连续多次重复使用：
+
+和 v-else 类似，一个使用 v-else-if 的元素必须紧跟在一个 v-if 或一个 v-else-if 元素后面。
+
+```vue
+<div v-if="type === 'A'">
+  A
+</div>
+<div v-else-if="type === 'B'">
+  B
+</div>
+<div v-else-if="type === 'C'">
+  C
+</div>
+<div v-else>
+  Not A/B/C
+</div>
+```
+
+如果我们想要切换不止一个元素呢？在这种情况下我们可以在一个 <template> 元素上使用 v-if，这只是一个不可见的包装器元素，最后渲染的结果并不会包含这个 <template> 元素。
+
+v-else 和 v-else-if 也可以在 <template> 上使用。
+
+```vue
+<template v-if="ok">
+  <h1>Title</h1>
+  <p>Paragraph 1</p>
+  <p>Paragraph 2</p>
+</template>
+```
+
+6.2 v-show
+
+另一个可以用来按条件显示一个元素的指令是 v-show。其用法基本一样。
+
+不同之处在于 v-show 会在 DOM 渲染中保留该元素；v-show 仅切换了该元素上名为 display 的 CSS 属性。
+
+v-show 不支持在 <template> 元素上使用，也不能和 v-else 搭配使用。
+
+6.3 v-if vs v-show
+
+v-if 是“真实的”按条件渲染，因为它确保了在切换时，条件区块内的事件监听器和子组件都会被销毁与重建。
+
+v-if 也是惰性的：如果在初次渲染时条件值为 false，则不会做任何事。条件区块只有当条件首次变为 true 时才被渲染。
+
+相比之下，v-show 简单许多，元素无论初始条件如何，始终会被渲染，只有 CSS display 属性会被切换。
+
+总的来说，v-if 有更高的切换开销，而 v-show 有更高的初始渲染开销。因此，如果需要频繁切换，则使用 v-show 较好；如果在运行时绑定条件很少改变，则 v-if 会更合适。
+
+6.3 v-if 和 v-for
+
+同时使用 v-if 和 v-for 是不推荐的，因为这样二者的优先级不明显。
+
+当 v-if 和 v-for 同时存在于一个元素上的时候，v-if 会首先被执行。
+
 7. 列表渲染
+
+7.1 v-for
+
+使用 v-for 指令基于一个数组来渲染一个列表。
+
+```js
+const parentMessage = ref('Parent')
+const items = ref([{ message: 'Foo' }, { message: 'Bar' }])
+```
+
+```vue
+<li v-for="(item, index) in items">
+  {{ parentMessage }} - {{ index }} - {{ item.message }}
+</li>
+```
+
+你也可以使用 of 作为分隔符来替代 in，这更接近 JavaScript 的迭代器语法：
+
+```vue
+<div v-for="item of items"></div>
+```
+
+7.2 v-for 与对象
+
+你也可以使用 v-for 来遍历一个对象的所有属性。遍历的顺序会基于对该对象调用 Object.keys() 的返回值来决定。
+
+```js
+const myObject = reactive({
+  title: 'How to do lists in Vue',
+  author: 'Jane Doe',
+  publishedAt: '2016-04-10'
+})
+```
+
+```vue
+<!-- 第二个参数表示属性名,第三个参数表示位置索引 -->
+<li v-for="(value, key, index) in myObject">
+  {{ index }}. {{ key }}: {{ value }}
+</li>
+```
+
+7.3 在 v-for 里使用范围值
+
+v-for 可以直接接受一个整数值。在这种用例中，会将该模板基于 1...n 的取值范围重复多次。
+
+注意此处 n 的初值是从 1 开始而非 0。
+
+```vue
+<span v-for="n in 10">{{ n }}</span>
+```
+
+7.4 <template> 上的 v-for
+
+```html
+<ul>
+  <template v-for="item in items">
+    <li>{{ item.msg }}</li>
+    <li class="divider" role="presentation"></li>
+  </template>
+</ul>
+```
+
+7.5 v-for 与 v-if
+
+当它们同时存在于一个节点上时，v-if 比 v-for 的优先级更高。这意味着 v-if 的条件将无法访问到 v-for 作用域内定义的变量别名：
+
+```html
+<!--
+ 这会抛出一个错误，因为属性 todo 此时
+ 没有在该实例上定义
+-->
+<li v-for="todo in todos" v-if="!todo.isComplete">
+  {{ todo.name }}
+</li>
+```
+
+在外新包装一层 <template> 再在其上使用 v-for 可以解决这个问题 (这也更加明显易读)：
+
+```html
+<template v-for="todo in todos">
+  <li v-if="!todo.isComplete">
+    {{ todo.name }}
+  </li>
+</template>
+```
+
+7.6 通过 key 管理状态
+
+Vue 默认按照“就地更新”的策略来更新通过 v-for 渲染的元素列表。当数据项的顺序改变时，Vue 不会随之移动 DOM 元素的顺序，而是就地更新每个元素，确保它们在原本指定的索引位置上渲染。
+
+默认模式是高效的，但只适用于列表渲染输出的结果不依赖子组件状态或者临时 DOM 状态 (例如表单输入值) 的情况。
+
+为了给 Vue 一个提示，以便它可以跟踪每个节点的标识，从而重用和重新排序现有的元素，你需要为每个元素对应的块提供一个唯一的 key attribute。
+
+推荐在任何可行的时候为 v-for 提供一个 key attribute。
+
+key 绑定的值期望是一个基础类型的值，例如字符串或 number 类型。不要用对象作为 v-for 的 key。
+
+```html
+<div v-for="item in items" :key="item.id">
+  <!-- 内容 -->
+</div>
+```
+
+7.7 数组变化侦测
+
+Vue 能够侦听响应式数组的变更方法，并在它们被调用时触发相关的更新。这些变更方法包括：push()，pop()，shift()，unshift()，splice()，sort()，reverse()。
+
+不可变 (immutable) 方法，例如 filter()，concat() 和 slice()，这些都不会更改原数组，而总是返回一个新数组。
+
+7.8 展示过滤或排序后的结果
+
+有时，我们希望显示数组经过过滤或排序后的内容，而不实际变更或重置原始数据。在这种情况下，你可以创建返回已过滤或已排序数组的计算属性。
+
+```js
+const numbers = ref([1, 2, 3, 4, 5])
+
+const evenNumbers = computed(() => {
+  return numbers.value.filter((n) => n % 2 === 0)
+})
+```
+
+```html
+<li v-for="n in evenNumbers">{{ n }}</li>
+```
+
 8. 事件处理
-9. 表单输入绑定
+
+8.1 监听事件
+
+使用 v-on 指令 (简写为 @) 来监听 DOM 事件
+
+内联事件处理器：事件被触发时执行的内联 JavaScript 语句 (与 onclick 类似)。
+
+方法事件处理器：一个指向组件上定义的方法的属性名或是路径。
+
+8.2 内联事件处理器
+
+```js
+const count = ref(0)
+```
+
+```html
+<button @click="count++">Add 1</button>
+```
+
+8.3 方法事件处理器
+
+```js
+const name = ref('Vue.js')
+
+function greet(event) {
+  alert(`Hello ${name.value}!`)
+  // `event` 是 DOM 原生事件
+  if (event) {
+    alert(event.target.tagName)
+  }
+}
+```
+
+```html
+<!-- `greet` 是上面定义过的方法名 -->
+<button @click="greet">Greet</button>
+```
+
+模板编译器会通过检查 v-on 的值是否是合法的 JavaScript 标识符或属性访问路径来断定是何种形式的事件处理器。举例来说，foo、foo.bar 和 foo['bar'] 会被视为方法事件处理器，而 foo() 和 count++ 会被视为内联事件处理器。
+
+8.4 在内联处理器中调用方法
+
+允许我们向方法传入自定义参数以代替原生事件：
+
+```js
+function say(message) {
+  alert(message)
+}
+```
+
+```html
+<button @click="say('hello')">Say hello</button>
+<button @click="say('bye')">Say bye</button>
+```
+
+8.5 在内联事件处理器中访问事件参数
+
+在内联事件处理器中访问原生 DOM 事件。向该处理器方法传入一个特殊的 $event 变量，或者使用内联箭头函数：
+
+```html
+<!-- 使用特殊的 $event 变量 -->
+<button @click="warn('Form cannot be submitted yet.', $event)">
+  Submit
+</button>
+
+<!-- 使用内联箭头函数 -->
+<button @click="(event) => warn('Form cannot be submitted yet.', event)">
+  Submit
+</button>
+```
+
+```js
+function warn(message, event) {
+  // 这里可以访问原生事件
+  if (event) {
+    event.preventDefault()
+  }
+  alert(message)
+}
+```
+
+8.6 事件修饰符
+
+在处理事件时调用 event.preventDefault() 或 event.stopPropagation() 是很常见的。尽管我们可以直接在方法内调用，但如果方法能更专注于数据逻辑而不用去处理 DOM 事件的细节会更好。
+
+为解决这一问题，Vue 为 v-on 提供了事件修饰符。修饰符是用 . 表示的指令后缀，包含以下这些：.stop，.prevent，.self，.capture，.once，.passive
+
+```html
+<!-- 单击事件将停止传递 -->
+<a @click.stop="doThis"></a>
+
+<!-- 提交事件将不再重新加载页面 -->
+<form @submit.prevent="onSubmit"></form>
+
+<!-- 修饰语可以使用链式书写 -->
+<a @click.stop.prevent="doThat"></a>
+
+<!-- 也可以只有修饰符 -->
+<form @submit.prevent></form>
+
+<!-- 仅当 event.target 是元素本身时才会触发事件处理器 -->
+<!-- 例如：事件处理器不来自子元素 -->
+<div @click.self="doThat">...</div>
+```
+
+.capture、.once 和 .passive 修饰符与原生 addEventListener 事件相对应：
+
+```html
+<!-- 添加事件监听器时，使用 `capture` 捕获模式 -->
+<!-- 例如：指向内部元素的事件，在被内部元素处理前，先被外部处理 -->
+<div @click.capture="doThis">...</div>
+
+<!-- 点击事件最多被触发一次 -->
+<a @click.once="doThis"></a>
+
+<!-- 滚动事件的默认行为 (scrolling) 将立即发生而非等待 `onScroll` 完成 -->
+<!-- 以防其中包含 `event.preventDefault()` -->
+<!-- .passive 修饰符一般用于触摸事件的监听器，可以用来改善移动端设备的滚屏性能。 -->
+<div @scroll.passive="onScroll">...</div>
+```
+
+8.7 按键修饰符
+
+.enter，.tab，.delete (捕获“Delete”和“Backspace”两个按键)，.esc，.space，.up，.down，.left，.right
+
+```html
+<!-- 仅在 `key` 为 `Enter` 时调用 `submit` -->
+<input @keyup.enter="submit" />
+```
+
+9.  表单输入绑定
+
+
+
 10. 生命周期
 11. 侦听器
 12. 模板引用
