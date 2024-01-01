@@ -543,11 +543,11 @@ DOM 更新时机
 要等待 DOM 更新完成后再执行额外的代码，可以使用 nextTick() 全局 API：
 
 ```js
-import { nextTick } from 'vue'
+import { nextTick } from "vue";
 
 async function increment() {
-  count.value++
-  await nextTick()
+  count.value++;
+  await nextTick();
   // 现在 DOM 已经更新了
 }
 ```
@@ -561,32 +561,32 @@ reactive() 将深层地转换对象：当访问嵌套对象时，它们也会被
 值得注意的是，reactive() 返回的是一个原始对象的 Proxy，它和原始对象是不相等的：
 
 ```js
-const raw = {}
-const proxy = reactive(raw)
+const raw = {};
+const proxy = reactive(raw);
 
 // 代理对象和原始对象不是全等的
-console.log(proxy === raw) // false
+console.log(proxy === raw); // false
 ```
 
 为保证访问代理的一致性，对同一个原始对象调用 reactive() 会总是返回同样的代理对象，而对一个已存在的代理对象调用 reactive() 会返回其本身：
 
 ```js
 // 在同一个对象上调用 reactive() 会返回相同的代理
-console.log(reactive(raw) === proxy) // true
+console.log(reactive(raw) === proxy); // true
 
 // 在一个代理上调用 reactive() 会返回它自己
-console.log(reactive(proxy) === proxy) // true
+console.log(reactive(proxy) === proxy); // true
 ```
 
 这个规则对嵌套对象也适用。依靠深层响应性，响应式对象内的嵌套对象依然是代理：
 
 ```js
-const proxy = reactive({})
+const proxy = reactive({});
 
-const raw = {}
-proxy.nested = raw
+const raw = {};
+proxy.nested = raw;
 
-console.log(proxy.nested === raw) // false
+console.log(proxy.nested === raw); // false
 ```
 
 reactive() API 有一些局限性,由于这些限制，我们建议使用 ref() 作为声明响应式状态的主要 API。
@@ -596,27 +596,27 @@ reactive() API 有一些局限性,由于这些限制，我们建议使用 ref() 
 不能替换整个对象：由于 Vue 的响应式跟踪是通过属性访问实现的，因此我们必须始终保持对响应式对象的相同引用。这意味着我们不能轻易地“替换”响应式对象，因为这样的话与第一个引用的响应性连接将丢失：
 
 ```js
-let state = reactive({ count: 0 })
+let state = reactive({ count: 0 });
 
 // 上面的 ({ count: 0 }) 引用将不再被追踪
 // (响应性连接已丢失！)
-state = reactive({ count: 1 })
+state = reactive({ count: 1 });
 ```
 
 对解构操作不友好：当我们将响应式对象的原始类型属性解构为本地变量时，或者将该属性传递给函数时，我们将丢失响应性连接：
 
 ```js
-const state = reactive({ count: 0 })
+const state = reactive({ count: 0 });
 
 // 当解构时，count 已经与 state.count 断开连接
-let { count } = state
+let { count } = state;
 // 不会影响原始的 state
-count++
+count++;
 
 // 该函数接收到的是一个普通的数字
 // 并且无法追踪 state.count 的变化
 // 我们必须传入整个对象以保持响应性
-callSomeFunction(state.count)
+callSomeFunction(state.count);
 ```
 
 3.3 额外的 ref 解包细节
@@ -624,38 +624,38 @@ callSomeFunction(state.count)
 一个 ref 会在作为响应式对象的属性被访问或修改时自动解包。换句话说，它的行为就像一个普通的属性：
 
 ```js
-const count = ref(0)
+const count = ref(0);
 const state = reactive({
-  count
-})
+  count,
+});
 
-console.log(state.count) // 0
+console.log(state.count); // 0
 
-state.count = 1
-console.log(count.value) // 1
+state.count = 1;
+console.log(count.value); // 1
 ```
 
 如果将一个新的 ref 赋值给一个关联了已有 ref 的属性，那么它会替换掉旧的 ref：
 
 ```js
-const otherCount = ref(2)
+const otherCount = ref(2);
 
-state.count = otherCount
-console.log(state.count) // 2
+state.count = otherCount;
+console.log(state.count); // 2
 // 原始 ref 现在已经和 state.count 失去联系
-console.log(count.value) // 1
+console.log(count.value); // 1
 ```
 
 与 reactive 对象不同的是，当 ref 作为响应式数组或原生集合类型(如 Map) 中的元素被访问时，它不会被解包：
 
 ```js
-const books = reactive([ref('Vue 3 Guide')])
+const books = reactive([ref("Vue 3 Guide")]);
 // 这里需要 .value
-console.log(books[0].value)
+console.log(books[0].value);
 
-const map = reactive(new Map([['count', ref(0)]]))
+const map = reactive(new Map([["count", ref(0)]]));
 // 这里需要 .value
-console.log(map.get('count').value)
+console.log(map.get("count").value);
 ```
 
 在模板渲染上下文中，只有顶级的 ref 属性才会被解包。
@@ -663,8 +663,8 @@ console.log(map.get('count').value)
 在下面的例子中，count 和 object 是顶级属性，但 object.id 不是：
 
 ```js
-const count = ref(0)
-const object = { id: ref(1) }
+const count = ref(0);
+const object = { id: ref(1) };
 ```
 
 这个表达式按预期工作：
@@ -697,21 +697,21 @@ computed() 方法期望接收一个 getter 函数，返回值为一个计算属�
 
 ```vue
 <script setup>
-import { reactive, computed } from 'vue'
+import { reactive, computed } from "vue";
 
 const author = reactive({
-  name: 'John Doe',
+  name: "John Doe",
   books: [
-    'Vue 2 - Advanced Guide',
-    'Vue 3 - Basic Guide',
-    'Vue 4 - The Mystery'
-  ]
-})
+    "Vue 2 - Advanced Guide",
+    "Vue 3 - Basic Guide",
+    "Vue 4 - The Mystery",
+  ],
+});
 
 // 一个计算属性 ref
 const publishedBooksMessage = computed(() => {
-  return author.books.length > 0 ? 'Yes' : 'No'
-})
+  return author.books.length > 0 ? "Yes" : "No";
+});
 </script>
 
 <template>
@@ -727,7 +727,7 @@ const publishedBooksMessage = computed(() => {
 这也解释了为什么下面的计算属性永远不会更新，因为 Date.now() 并不是一个响应式依赖：
 
 ```js
-const now = computed(() => Date.now())
+const now = computed(() => Date.now());
 ```
 
 4.3 可写计算属性
@@ -736,22 +736,22 @@ const now = computed(() => Date.now())
 
 ```vue
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed } from "vue";
 
-const firstName = ref('John')
-const lastName = ref('Doe')
+const firstName = ref("John");
+const lastName = ref("Doe");
 
 const fullName = computed({
   // getter
   get() {
-    return firstName.value + ' ' + lastName.value
+    return firstName.value + " " + lastName.value;
   },
   // setter
   set(newValue) {
     // 注意：我们这里使用的是解构赋值语法
-    [firstName.value, lastName.value] = newValue.split(' ')
-  }
-})
+    [firstName.value, lastName.value] = newValue.split(" ");
+  },
+});
 </script>
 ```
 
@@ -776,8 +776,8 @@ const fullName = computed({
 ```js
 const classObject = reactive({
   active: true,
-  'text-danger': false
-})
+  "text-danger": false,
+});
 ```
 
 ```vue
@@ -787,8 +787,8 @@ const classObject = reactive({
 我们可以给 :class 绑定一个数组来渲染多个 CSS class：
 
 ```js
-const activeClass = ref('active')
-const errorClass = ref('text-danger')
+const activeClass = ref("active");
+const errorClass = ref("text-danger");
 ```
 
 ```vue
@@ -825,8 +825,8 @@ const errorClass = ref('text-danger')
 :style 支持绑定 JavaScript 对象值，对应的是 HTML 元素的 style 属性：
 
 ```js
-const activeColor = ref('red')
-const fontSize = ref(30)
+const activeColor = ref("red");
+const fontSize = ref(30);
 ```
 
 ```vue
@@ -837,9 +837,9 @@ const fontSize = ref(30)
 
 ```js
 const styleObject = reactive({
-  color: 'red',
-  fontSize: '13px'
-})
+  color: "red",
+  fontSize: "13px",
+});
 ```
 
 ```vue
@@ -935,8 +935,8 @@ v-if 也是惰性的：如果在初次渲染时条件值为 false，则不会做
 使用 v-for 指令基于一个数组来渲染一个列表。
 
 ```js
-const parentMessage = ref('Parent')
-const items = ref([{ message: 'Foo' }, { message: 'Bar' }])
+const parentMessage = ref("Parent");
+const items = ref([{ message: "Foo" }, { message: "Bar" }]);
 ```
 
 ```vue
@@ -957,10 +957,10 @@ const items = ref([{ message: 'Foo' }, { message: 'Bar' }])
 
 ```js
 const myObject = reactive({
-  title: 'How to do lists in Vue',
-  author: 'Jane Doe',
-  publishedAt: '2016-04-10'
-})
+  title: "How to do lists in Vue",
+  author: "Jane Doe",
+  publishedAt: "2016-04-10",
+});
 ```
 
 ```vue
@@ -1000,18 +1000,14 @@ v-for 可以直接接受一个整数值。在这种用例中，会将该模板�
  这会抛出一个错误，因为属性 todo 此时
  没有在该实例上定义
 -->
-<li v-for="todo in todos" v-if="!todo.isComplete">
-  {{ todo.name }}
-</li>
+<li v-for="todo in todos" v-if="!todo.isComplete">{{ todo.name }}</li>
 ```
 
 在外新包装一层 <template> 再在其上使用 v-for 可以解决这个问题 (这也更加明显易读)：
 
 ```html
 <template v-for="todo in todos">
-  <li v-if="!todo.isComplete">
-    {{ todo.name }}
-  </li>
+  <li v-if="!todo.isComplete">{{ todo.name }}</li>
 </template>
 ```
 
@@ -1044,11 +1040,11 @@ Vue 能够侦听响应式数组的变更方法，并在它们被调用时触发�
 有时，我们希望显示数组经过过滤或排序后的内容，而不实际变更或重置原始数据。在这种情况下，你可以创建返回已过滤或已排序数组的计算属性。
 
 ```js
-const numbers = ref([1, 2, 3, 4, 5])
+const numbers = ref([1, 2, 3, 4, 5]);
 
 const evenNumbers = computed(() => {
-  return numbers.value.filter((n) => n % 2 === 0)
-})
+  return numbers.value.filter((n) => n % 2 === 0);
+});
 ```
 
 ```html
@@ -1068,7 +1064,7 @@ const evenNumbers = computed(() => {
 8.2 内联事件处理器
 
 ```js
-const count = ref(0)
+const count = ref(0);
 ```
 
 ```html
@@ -1078,13 +1074,13 @@ const count = ref(0)
 8.3 方法事件处理器
 
 ```js
-const name = ref('Vue.js')
+const name = ref("Vue.js");
 
 function greet(event) {
-  alert(`Hello ${name.value}!`)
+  alert(`Hello ${name.value}!`);
   // `event` 是 DOM 原生事件
   if (event) {
-    alert(event.target.tagName)
+    alert(event.target.tagName);
   }
 }
 ```
@@ -1102,7 +1098,7 @@ function greet(event) {
 
 ```js
 function say(message) {
-  alert(message)
+  alert(message);
 }
 ```
 
@@ -1117,9 +1113,7 @@ function say(message) {
 
 ```html
 <!-- 使用特殊的 $event 变量 -->
-<button @click="warn('Form cannot be submitted yet.', $event)">
-  Submit
-</button>
+<button @click="warn('Form cannot be submitted yet.', $event)">Submit</button>
 
 <!-- 使用内联箭头函数 -->
 <button @click="(event) => warn('Form cannot be submitted yet.', event)">
@@ -1131,9 +1125,9 @@ function say(message) {
 function warn(message, event) {
   // 这里可以访问原生事件
   if (event) {
-    event.preventDefault()
+    event.preventDefault();
   }
-  alert(message)
+  alert(message);
 }
 ```
 
@@ -1188,12 +1182,606 @@ function warn(message, event) {
 
 9.  表单输入绑定
 
+前端处理表单时，手动连接值绑定和更改事件监听器可能会很麻烦：
 
+```html
+<input :value="text" @input="event => text = event.target.value" />
+```
+
+v-model 指令帮我们简化了这一步骤：
+
+```html
+<input v-model="text" />
+```
+
+v-model 可根据所使用的元素自动使用对应的 DOM 属性和事件组合：
+
+```docs
+文本类型的 <input> 和 <textarea> 元素会绑定 value property 并侦听 input 事件；
+<input type="checkbox"> 和 <input type="radio"> 会绑定 checked property 并侦听 change 事件；
+<select> 会绑定 value property 并侦听 change 事件。
+```
+
+9.1 基本用法
+
+```html
+<!-- 文本 -->
+<input v-model="message" placeholder="edit me" />
+
+<!-- 多行文本 -->
+<textarea v-model="message" placeholder="add multiple lines"></textarea>
+
+<!-- 复选框 -->
+<input type="checkbox" id="checkbox" v-model="checked" />
+
+<!-- 单选按钮 -->
+<input type="radio" id="one" value="One" v-model="picked" />
+
+<!-- 选择器 -->
+<select v-model="selected">
+  <option disabled value="">Please select one</option>
+  <option>A</option>
+  <option>B</option>
+  <option>C</option>
+</select>
+```
+
+9.2 值绑定
+
+```html
+<!-- 复选框 -->
+<!-- true-value 和 false-value 是 Vue 特有的 attributes，仅支持和 v-model 配套使用。 -->
+<input type="checkbox" v-model="toggle" true-value="yes" false-value="no" />
+
+<!-- 单选按钮 -->
+<!-- pick 会在第一个按钮选中时被设为 first，在第二个按钮选中时被设为 second。 -->
+<input type="radio" v-model="pick" :value="first" />
+<input type="radio" v-model="pick" :value="second" />
+
+<!-- 选择器选项 -->
+<!-- v-model 同样也支持非字符串类型的值绑定！在上面这个例子中，当某个选项被选中，selected 会被设为该对象字面量值 { number: 123 }。 -->
+<select v-model="selected">
+  <!-- 内联对象字面量 -->
+  <option :value="{ number: 123 }">123</option>
+</select>
+```
+
+9.3 修饰符
+
+```html
+<!-- .lazy -->
+<!-- 在 "change" 事件后同步更新而不是 "input" -->
+<input v-model.lazy="msg" />
+
+<!-- .number -->
+<!-- 让用户输入自动转换为数字 -->
+<input v-model.number="age" />
+
+<!-- .trim -->
+<!-- 默认自动去除用户输入内容中两端的空格 -->
+<input v-model.trim="msg" />
+```
 
 10. 生命周期
+
+Vue 组件实例在创建时的初始化步骤，比如数据侦听，编译模板，挂载实例到 DOM，以及在数据改变时更新 DOM。
+在此过程中，它也会运行被称为生命周期钩子的函数，让开发者有机会在特定阶段运行自己的代码。
+
+10.1 注册周期钩子
+
+最常用的是 onMounted、onUpdated 和 onUnmounted
+
+```html
+<script setup>
+  import { onMounted, onUpdated, onUnmounted } from "vue";
+
+  // onMounted 钩子可以用来在组件完成初始渲染并创建 DOM 节点后运行代码：
+  onMounted(() => {
+    console.log(`the component is now mounted.`);
+  });
+
+  // 在组件因为响应式状态变更而更新其 DOM 树之后调用。
+  onUpdated(() => {
+    // 文本内容应该与当前的 `count.value` 一致
+    console.log(document.getElementById("count").textContent);
+  });
+
+  // 在组件实例被卸载之后调用。
+  let intervalId;
+  onMounted(() => {
+    intervalId = setInterval(() => {
+      // ...
+    });
+  });
+  onUnmounted(() => clearInterval(intervalId));
+</script>
+```
+
 11. 侦听器
+
+11.1 基本示例
+
+```html
+<script setup>
+  import { ref, watch } from "vue";
+
+  const question = ref("");
+  const answer = ref("Questions usually contain a question mark. ;-)");
+  const loading = ref(false);
+
+  // 可以直接侦听一个 ref
+  watch(question, async (newQuestion, oldQuestion) => {
+    if (newQuestion.includes("?")) {
+      loading.value = true;
+      answer.value = "Thinking...";
+      try {
+        const res = await fetch("https://yesno.wtf/api");
+        answer.value = (await res.json()).answer;
+      } catch (error) {
+        answer.value = "Error! Could not reach the API. " + error;
+      } finally {
+        loading.value = false;
+      }
+    }
+  });
+</script>
+
+<template>
+  <p>
+    Ask a yes/no question:
+    <input v-model="question" :disabled="loading" />
+  </p>
+  <p>{{ answer }}</p>
+</template>
+```
+
+watch 的第一个参数可以是不同形式的“数据源”：它可以是一个 ref (包括计算属性)、一个响应式对象、一个 getter 函数、或多个数据源组成的数组：
+
+```js
+const x = ref(0);
+const y = ref(0);
+
+// 单个 ref
+watch(x, (newX) => {
+  console.log(`x is ${newX}`);
+});
+
+// getter 函数
+watch(
+  () => x.value + y.value,
+  (sum) => {
+    console.log(`sum of x + y is: ${sum}`);
+  }
+);
+
+// 多个来源组成的数组
+watch([x, () => y.value], ([newX, newY]) => {
+  console.log(`x is ${newX} and y is ${newY}`);
+});
+```
+
+注意，你不能直接侦听响应式对象的属性值，例如:
+
+```js
+const obj = reactive({ count: 0 });
+
+// 错误，因为 watch() 得到的参数是一个 number
+watch(obj.count, (count) => {
+  console.log(`count is: ${count}`);
+});
+```
+
+这里需要用一个返回该属性的 getter 函数：
+
+```js
+// 提供一个 getter 函数
+watch(
+  () => obj.count,
+  (count) => {
+    console.log(`count is: ${count}`);
+  }
+);
+```
+
+11.2 深层侦听器
+
+直接给 watch() 传入一个响应式对象，会隐式地创建一个深层侦听器——该回调函数在所有嵌套的变更时都会被触发：
+
+```js
+const obj = reactive({ count: 0 });
+
+watch(obj, (newValue, oldValue) => {
+  // 在嵌套的属性变更时触发
+  // 注意：`newValue` 此处和 `oldValue` 是相等的
+  // 因为它们是同一个对象！
+});
+
+obj.count++;
+```
+
+11.3 即时回调的侦听器
+
+watch 默认是懒执行的：仅当数据源变化时，才会执行回调。但在某些场景中，我们希望在创建侦听器时，立即执行一遍回调。举例来说，我们想请求一些初始数据，然后在相关状态更改时重新请求数据。
+
+```js
+watch(
+  source,
+  (newValue, oldValue) => {
+    // 立即执行，且当 `source` 改变时再次执行
+  },
+  { immediate: true }
+);
+```
+
+11.4 watchEffect()
+
+侦听器的回调使用与源完全相同的响应式状态是很常见的。如下：
+
+```js
+const todoId = ref(1);
+const data = ref(null);
+
+watch(
+  todoId,
+  async () => {
+    const response = await fetch(
+      `https://jsonplaceholder.typicode.com/todos/${todoId.value}`
+    );
+    data.value = await response.json();
+  },
+  { immediate: true }
+);
+```
+
+可以用 watchEffect 函数 来简化上面的代码。
+
+```js
+watchEffect(async () => {
+  const response = await fetch(
+    `https://jsonplaceholder.typicode.com/todos/${todoId.value}`
+  );
+  data.value = await response.json();
+});
+```
+
+11.5 回调的触发时机
+
+当你更改了响应式状态，它可能会同时触发 Vue 组件更新和侦听器回调。
+
+默认情况下，用户创建的侦听器回调，都会在 Vue 组件更新之前被调用。这意味着你在侦听器回调中访问的 DOM 将是被 Vue 更新之前的状态。
+
+如果想在侦听器回调中能访问被 Vue 更新之后的 DOM，你需要指明 flush: 'post' 选项：
+
+```js
+watch(source, callback, {
+  flush: "post",
+});
+
+watchEffect(callback, {
+  flush: "post",
+});
+```
+
+后置刷新的 watchEffect() 有个更方便的别名 watchPostEffect()：
+
+```js
+import { watchPostEffect } from "vue";
+
+watchPostEffect(() => {
+  /* 在 Vue 更新后执行 */
+});
+```
+
+11.6 停止侦听器
+
+要手动停止一个侦听器，请调用 watch 或 watchEffect 返回的函数：
+
+```js
+const unwatch = watchEffect(() => {});
+
+// ...当该侦听器不再需要时
+unwatch();
+```
+
+注意，需要异步创建侦听器的情况很少，请尽可能选择同步创建。如果需要等待一些异步数据，你可以使用条件式的侦听逻辑：
+
+```js
+// 需要异步请求得到的数据
+const data = ref(null);
+
+watchEffect(() => {
+  if (data.value) {
+    // 数据加载后执行某些操作...
+  }
+});
+```
+
 12. 模板引用
+
+当我们需要直接访问底层 DOM 元素。我们可以使用特殊的 ref attribute：
+
+ref 是一个特殊的 attribute，它允许我们在一个特定的 DOM 元素或子组件实例被挂载后，获得对它的直接引用。这可能很有用，比如说在组件挂载时将焦点设置到一个 input 元素上，或在一个元素上初始化一个第三方库。
+
+```html
+<input ref="input" />
+```
+
+12.1 访问模板引用
+
+为了通过组合式 API 获得该模板引用，我们需要声明一个同名的 ref：
+
+```html
+<script setup>
+  import { ref, onMounted } from "vue";
+
+  // 声明一个 ref 来存放该元素的引用
+  // 必须和模板里的 ref 同名
+  const input = ref(null);
+
+  onMounted(() => {
+    input.value.focus();
+  });
+</script>
+
+<template>
+  <input ref="input" />
+</template>
+```
+
+注意，你只可以在组件挂载后才能访问模板引用。如果你想在模板中的表达式上访问 input，在初次渲染时会是 null。这是因为在初次渲染前这个元素还不存在呢！
+
+如果你需要侦听一个模板引用 ref 的变化，确保考虑到其值为 null 的情况：
+
+```js
+watchEffect(() => {
+  if (input.value) {
+    input.value.focus();
+  } else {
+    // 此时还未挂载，或此元素已经被卸载（例如通过 v-if 控制）
+  }
+});
+```
+
+12.2 v-for 中的模板引用
+
+当在 v-for 中使用模板引用时，对应的 ref 中包含的值是一个数组，它将在元素被挂载后包含对应整个列表的所有元素：
+
+```html
+<script setup>
+  import { ref, onMounted } from "vue";
+
+  const list = ref([
+    /* ... */
+  ]);
+
+  const itemRefs = ref([]);
+
+  onMounted(() => console.log(itemRefs.value));
+</script>
+
+<template>
+  <ul>
+    <li v-for="item in list" ref="itemRefs">{{ item }}</li>
+  </ul>
+</template>
+```
+
+12.3 函数模板引用
+
+除了使用字符串值作名字，ref attribute 还可以绑定为一个函数，会在每次组件更新时都被调用。该函数会收到元素引用作为其第一个参数：
+
+注意我们这里需要使用动态的 :ref 绑定才能够传入一个函数。当绑定的元素被卸载时，函数也会被调用一次，此时的 el 参数会是 null。你当然也可以绑定一个组件方法而不是内联函数。
+
+```html
+<input :ref="(el) => { /* 将 el 赋值给一个数据属性或 ref 变量 */ }" />
+```
+
+12.4 组件上的 ref
+
+如果一个子组件使用的是选项式 API 或没有使用 <script setup>，被引用的组件实例和该子组件的 this 完全一致，这意味着父组件对子组件的每一个属性和方法都有完全的访问权。
+
+使用了 <script setup> 的组件是默认私有的：一个父组件无法访问到一个使用了 <script setup> 的子组件中的任何东西，除非子组件在其中通过 defineExpose 宏显式暴露：
+
+当父组件通过模板引用获取到了该组件的实例时，得到的实例类型为 { a: number, b: number }
+
+```html
+<script setup>
+  import { ref } from "vue";
+
+  const a = 1;
+  const b = ref(2);
+
+  // 像 defineExpose 这样的编译器宏不需要导入
+  defineExpose({
+    a,
+    b,
+  });
+</script>
+```
+
 13. 组件基础
+
+组件允许我们将 UI 划分为独立的、可重用的部分，并且可以对每个部分进行单独的思考。
+
+13.1 定义一个组件
+
+当使用构建步骤时，一个单独的 .vue 文件被叫做单文件组件 (简称 SFC)：
+
+```html
+<script setup>
+  import { ref } from "vue";
+
+  const count = ref(0);
+</script>
+
+<template>
+  <button @click="count++">You clicked me {{ count }} times.</button>
+</template>
+```
+
+当不使用构建步骤时，一个 Vue 组件以一个包含 Vue 特定选项的 JavaScript 对象来定义：
+
+```js
+import { ref } from "vue";
+
+export default {
+  setup() {
+    const count = ref(0);
+    return { count };
+  },
+  template: `
+    <button @click="count++">
+      You clicked me {{ count }} times.
+    </button>`,
+  // 也可以针对一个 DOM 内联模板：
+  // template: '#my-template-element'
+};
+```
+
+13.2 使用组件
+
+每一个组件都维护着自己的状态，这是因为每当你使用一个组件，就创建了一个新的实例。
+
+通过 <script setup>，导入的组件都在模板中直接可用。
+
+```vue
+<script setup>
+import ButtonCounter from "./ButtonCounter.vue";
+</script>
+
+<template>
+  <h1>Here is a child component!</h1>
+  <ButtonCounter />
+</template>
+```
+
+在单文件组件中，推荐为子组件使用 PascalCase 的标签名，以此来和原生的 HTML 元素作区分。
+
+```vue
+<ButtonCounter />
+```
+
+在 DOM 中书写模板 (例如原生 <template> 元素的内容)，模板的编译需要遵从浏览器中 HTML 的解析行为。需要使用 kebab-case 形式并显式地关闭这些组件的标签。
+
+```html
+<button-counter></button-counter>
+```
+
+13.3 传递 props
+
+相同的组件，展示不同的数据，就会使用到 props。
+
+Props 是一种特别的 attributes，在组件上声明注册，要用到 defineProps 宏：
+
+```vue
+<!-- BlogPost.vue -->
+<script setup>
+defineProps(["title"]);
+</script>
+
+<template>
+  <h4>{{ title }}</h4>
+</template>
+```
+
+defineProps 是一个仅 <script setup> 中可用的编译宏命令，并不需要显式地导入。defineProps 会返回一个对象，其中包含了可以传递给组件的所有 props：
+
+```js
+const props = defineProps(["title"]);
+console.log(props.title);
+```
+
+如果你没有使用 <script setup>，props 必须以 props 选项的方式声明，props 对象会作为 setup() 函数的第一个参数被传入：
+
+```js
+export default {
+  props: ["title"],
+  setup(props) {
+    console.log(props.title);
+  },
+};
+```
+
+13.4 监听事件
+
+子组件可以通过调用内置的 $emit 方法，通过传入事件名称来抛出一个事件：
+
+```vue
+<!-- BlogPost.vue, 省略了 <script> -->
+<template>
+  <div class="blog-post">
+    <h4>{{ title }}</h4>
+    <button @click="$emit('enlarge-text')">Enlarge text</button>
+  </div>
+</template>
+```
+
+我们可以通过 defineEmits 宏来声明需要抛出的事件：
+
+```vue
+<!-- BlogPost.vue -->
+<script setup>
+defineProps(["title"]);
+defineEmits(["enlarge-text"]);
+</script>
+```
+
+和 defineProps 类似，defineEmits 仅可用于 <script setup> 之中，并且不需要导入，它返回一个等同于 $emit 方法的 emit 函数。它可以被用于在组件的 <script setup> 中抛出事件，因为此处无法直接访问 $emit：
+
+```vue
+<script setup>
+const emit = defineEmits(["enlarge-text"]);
+
+emit("enlarge-text");
+</script>
+```
+
+如果你没有在使用 <script setup>，你可以通过 emits 选项定义组件会抛出的事件。你可以从 setup() 函数的第二个参数，即 setup 上下文对象上访问到 emit 函数：
+
+```js
+export default {
+  emits: ["enlarge-text"],
+  setup(props, ctx) {
+    ctx.emit("enlarge-text");
+  },
+};
+```
+
+13.5 通过插槽来分配内容
+
+一些情况下我们会希望能和 HTML 元素一样向组件中传递内容：
+
+```vue
+<AlertBox> Something bad happened. </AlertBox>
+```
+
+可以通过 Vue 的自定义 <slot> 元素来实现：
+
+```vue
+<template>
+  <div class="alert-box">
+    <strong>This is an Error for Demo Purposes</strong>
+    <slot />
+  </div>
+</template>
+
+<style scoped>
+.alert-box {
+  /* ... */
+}
+</style>
+```
+
+13.6 动态组件
+
+有些场景会需要在两个组件间来回切换，比如 Tab 界面：
+
+当使用 <component :is="..."> 来在多个组件间作切换时，被切换掉的组件会被卸载。我们可以通过 <KeepAlive> 组件强制被切换掉的组件仍然保持“存活”的状态。
+
+```vue
+<!-- currentTab 改变时组件也改变 -->
+<component :is="tabs[currentTab]"></component>
+```
 
 三 深入组件
 
