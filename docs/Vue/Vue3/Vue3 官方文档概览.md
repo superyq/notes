@@ -2025,14 +2025,14 @@ defineProps({
 ```js
 class Person {
   constructor(firstName, lastName) {
-    this.firstName = firstName
-    this.lastName = lastName
+    this.firstName = firstName;
+    this.lastName = lastName;
   }
 }
 
 defineProps({
-  author: Person
-})
+  author: Person,
+});
 ```
 
 2.5 Boolean 类型转换
@@ -2046,7 +2046,102 @@ defineProps({
 ```
 
 3. 事件
+
+3.1 触发与监听事件
+
+在组件的模板表达式中，可以直接使用 $emit 方法触发自定义事件
+
+```vue
+<!-- MyComponent -->
+<button @click="$emit('someEvent')">click me</button>
+```
+
+父组件通过@来监听事件：
+
+```vue
+<MyComponent @some-event="callback" />
+```
+
+3.2 事件参数
+
+```vue
+<button @click="$emit('increaseBy', 1)">
+  Increase by 1
+</button>
+```
+
+```vue
+<MyButton @increase-by="(n) => (count += n)" />
+```
+
+3.3 声明触发的事件
+
+通过 defineEmits() 宏来声明要触发的事件：
+
+```vue
+<script setup>
+defineEmits(["inFocus", "submit"]);
+</script>
+```
+
+在 <template> 中使用的 $emit 方法不能在组件的 <script setup> 部分中使用，但 defineEmits() 会返回一个相同作用的函数供我们使用：
+
+defineEmits() 宏不能在子函数中使用。它必须直接放置在 <script setup> 的顶级作用域下。
+
+```vue
+<script setup>
+const emit = defineEmits(["inFocus", "submit"]);
+
+function buttonClick() {
+  emit("submit");
+}
+</script>
+```
+
+如果你显式地使用了 setup 函数而不是 <script setup>，则事件需要通过 emits 选项来定义
+
+```js
+export default {
+  emits: ["inFocus", "submit"],
+  setup(props, ctx) {
+    ctx.emit("submit");
+  },
+};
+```
+
+3.4 事件校验
+
+要为事件添加校验，那么事件可以被赋值为一个函数，接受的参数就是抛出事件时传入 emit 的内容，返回一个布尔值来表明事件是否合法。
+
+```vue
+<script setup>
+const emit = defineEmits({
+  // 没有校验
+  click: null,
+
+  // 校验 submit 事件
+  submit: ({ email, password }) => {
+    if (email && password) {
+      return true;
+    } else {
+      console.warn("Invalid submit event payload!");
+      return false;
+    }
+  },
+});
+
+function submitForm(email, password) {
+  emit("submit", { email, password });
+}
+</script>
+```
+
 4. 组件 v-model
+
+4.1 v-model 的参数
+4.2 多个 v-model 的绑定
+4.3 处理 v-model 修饰符
+
 5. 透传 Attributes
 6. 插槽
 7. 依赖注入
