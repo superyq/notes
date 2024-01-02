@@ -1786,7 +1786,265 @@ export default {
 三 深入组件
 
 1. 注册
+
+1.1 全局注册
+
+使用 .component() 方法，让组件在全局可用。
+
+```js
+import { createApp } from "vue";
+
+const app = createApp({});
+
+app.component(
+  // 注册的名字
+  "MyComponent",
+  // 组件的实现
+  {
+    /* ... */
+  }
+);
+```
+
+.component() 方法可以被链式调用：
+
+```js
+app
+  .component("ComponentA", ComponentA)
+  .component("ComponentB", ComponentB)
+  .component("ComponentC", ComponentC);
+```
+
+注意：全局注册虽然很方便，但有以下几个问题：1. 如果你全局注册了一个组件，即使它并没有被实际使用，它仍然会出现在打包后的 JS 文件中。2. 全局注册使依赖关系变得不那么明确。不太容易定位子组件的实现。
+
+1.2 局部注册
+
+在使用 <script setup> 的单文件组件中，导入的组件可以直接在模板中使用，无需注册：
+
+```vue
+<script setup>
+import ComponentA from "./ComponentA.vue";
+</script>
+
+<template>
+  <ComponentA />
+</template>
+```
+
+如果没有使用 <script setup>，则需要使用 components 选项来显式注册：
+
+```js
+import ComponentA from "./ComponentA.js";
+
+export default {
+  components: {
+    ComponentA,
+  },
+  setup() {
+    // ...
+  },
+};
+```
+
+1.3 组件名格式
+
+使用 PascalCase 作为组件名的注册格式。
+
 2. Props
+
+2.1 Props 声明
+
+显示声明 props，用以区分 props 和透传 attribute
+
+在 <script setup> 中，使用 defineProps() 宏来声明：
+
+```vue
+<script setup>
+const props = defineProps(["foo"]);
+
+console.log(props.foo);
+</script>
+```
+
+在没有 <script setup> 中，使用 props 选项来声明：
+
+```js
+export default {
+  props: ["foo"],
+  setup(props) {
+    // setup() 接收 props 作为第一个参数
+    console.log(props.foo);
+  },
+};
+```
+
+可以使用对象的形式声明 prop：
+
+```js
+// 使用 <script setup>
+defineProps({
+  title: String,
+  likes: Number,
+});
+```
+
+```js
+// 非 <script setup>
+export default {
+  props: {
+    title: String,
+    likes: Number,
+  },
+};
+```
+
+2.2 传递 prop 的细节
+
+如果一个 prop 的名字很长，应使用 camelCase 形式
+
+```js
+defineProps({
+  greetingMessage: String,
+});
+```
+
+向子组件传递 props 时，通常会将其写为 kebab-case 形式
+
+```vue
+<MyComponent greeting-message="hello" />
+```
+
+传递不同类型的值
+
+```vue
+<!-- 虽然 `42` 是个常量，我们还是需要使用 v-bind -->
+<!-- 因为这是一个 JavaScript 表达式而不是一个字符串 -->
+<BlogPost :likes="42" />
+
+<!-- 根据一个变量的值动态传入 -->
+<BlogPost :likes="post.likes" />
+
+<!-- 仅写上 prop 但不传值，会隐式转换为 `true` -->
+<BlogPost is-published />
+
+<!-- 虽然 `false` 是静态的值，我们还是需要使用 v-bind -->
+<!-- 因为这是一个 JavaScript 表达式而不是一个字符串 -->
+<BlogPost :is-published="false" />
+
+<!-- 根据一个变量的值动态传入 -->
+<BlogPost :is-published="post.isPublished" />
+
+<!-- 虽然这个数组是个常量，我们还是需要使用 v-bind -->
+<!-- 因为这是一个 JavaScript 表达式而不是一个字符串 -->
+<BlogPost :comment-ids="[234, 266, 273]" />
+
+<!-- 根据一个变量的值动态传入 -->
+<BlogPost :comment-ids="post.commentIds" />
+
+<!-- 虽然这个对象字面量是个常量，我们还是需要使用 v-bind -->
+<!-- 因为这是一个 JavaScript 表达式而不是一个字符串 -->
+<!-- <BlogPost
+  :author="{
+    name: 'Veronica',
+    company: 'Veridian Dynamics',
+  }"
+/> -->
+```
+
+一个对象绑定多个 prop
+
+```js
+const post = {
+  id: 1,
+  title: "My Journey with Vue",
+};
+```
+
+```vue
+<BlogPost v-bind="post" />
+<!-- 等价于： -->
+<BlogPost :id="post.id" :title="post.title" />
+```
+
+2.3 单向数据流
+
+所有的 props 都遵循着单向绑定原则，若你在子组件中去更改一个 prop，Vue 会在控制台上向你抛出警告
+
+两个场景可能导致你想要修改 prop：1.prop 被用于传入初始值；而子组件想在之后将其作为一个局部数据属性。2. 需要对传入的 prop 值做进一步的转换。
+
+2.4 Prop 校验
+
+```js
+defineProps({
+  // 基础类型检查
+  // （给出 `null` 和 `undefined` 值则会跳过任何类型检查）
+  propA: Number,
+  // 多种可能的类型
+  propB: [String, Number],
+  // 必传，且为 String 类型
+  propC: {
+    type: String,
+    required: true,
+  },
+  // Number 类型的默认值
+  propD: {
+    type: Number,
+    default: 100,
+  },
+  // 对象类型的默认值
+  propE: {
+    type: Object,
+    // 对象或数组的默认值
+    // 必须从一个工厂函数返回。
+    // 该函数接收组件所接收到的原始 prop 作为参数。
+    default(rawProps) {
+      return { message: "hello" };
+    },
+  },
+  // 自定义类型校验函数
+  propF: {
+    validator(value) {
+      // The value must match one of these strings
+      return ["success", "warning", "danger"].includes(value);
+    },
+  },
+  // 函数类型的默认值
+  propG: {
+    type: Function,
+    // 不像对象或数组的默认，这不是一个
+    // 工厂函数。这会是一个用来作为默认值的函数
+    default() {
+      return "Default function";
+    },
+  },
+});
+```
+
+也可以用自定义的类或者构造函数去验证，校验 author prop 的值是否是 Person 类的一个实例。
+
+```js
+class Person {
+  constructor(firstName, lastName) {
+    this.firstName = firstName
+    this.lastName = lastName
+  }
+}
+
+defineProps({
+  author: Person
+})
+```
+
+2.5 Boolean 类型转换
+
+```vue
+<!-- 等同于传入 :disabled="true" -->
+<MyComponent disabled />
+
+<!-- 等同于传入 :disabled="false" -->
+<MyComponent />
+```
+
 3. 事件
 4. 组件 v-model
 5. 透传 Attributes
