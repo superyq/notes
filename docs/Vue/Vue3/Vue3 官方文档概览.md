@@ -2071,7 +2071,7 @@ defineProps({
 ```
 
 ```vue
-<MyButton @increase-by="(n) => (count += n)" />
+<!-- <MyButton @increase-by="(n) => (count += n)" /> -->
 ```
 
 3.3 声明触发的事件
@@ -2138,9 +2138,156 @@ function submitForm(email, password) {
 
 4. 组件 v-model
 
+v-model 在原生元素上的用法
+
+```vue
+<input v-model="searchText" />
+<!-- 展开 -->
+<input :value="searchText" @input="searchText = $event.target.value" />
+```
+
+v-model 在组件上的用法
+
+```vue
+<!-- <CustomInput
+  :model-value="searchText"
+  @update:model-value="newValue => searchText = newValue"
+/> -->
+```
+
+```vue
+<!-- CustomInput.vue -->
+<script setup>
+defineProps(["modelValue"]);
+defineEmits(["update:modelValue"]);
+</script>
+
+<template>
+  <input
+    :value="modelValue"
+    @input="$emit('update:modelValue', $event.target.value)"
+  />
+</template>
+```
+
+```vue
+<CustomInput v-model="searchText" />
+```
+
+```vue
+<!-- CustomInput.vue -->
+<script setup>
+import { computed } from "vue";
+
+const props = defineProps(["modelValue"]);
+const emit = defineEmits(["update:modelValue"]);
+
+const value = computed({
+  get() {
+    return props.modelValue;
+  },
+  set(value) {
+    emit("update:modelValue", value);
+  },
+});
+</script>
+
+<template>
+  <input v-model="value" />
+</template>
+```
+
 4.1 v-model 的参数
+
+```vue
+<MyComponent v-model:title="bookTitle" />
+```
+
+```vue
+<!-- MyComponent.vue -->
+<script setup>
+defineProps(["title"]);
+defineEmits(["update:title"]);
+</script>
+
+<template>
+  <input
+    type="text"
+    :value="title"
+    @input="$emit('update:title', $event.target.value)"
+  />
+</template>
+```
+
 4.2 多个 v-model 的绑定
+
+```html
+<UserName v-model:first-name="first" v-model:last-name="last" />
+```
+
+```vue
+<script setup>
+defineProps({
+  firstName: String,
+  lastName: String,
+});
+
+defineEmits(["update:firstName", "update:lastName"]);
+</script>
+
+<template>
+  <input
+    type="text"
+    :value="firstName"
+    @input="$emit('update:firstName', $event.target.value)"
+  />
+  <input
+    type="text"
+    :value="lastName"
+    @input="$emit('update:lastName', $event.target.value)"
+  />
+</template>
+```
+
 4.3 处理 v-model 修饰符
+
+```vue
+<MyComponent v-model.capitalize="myText" />
+```
+
+```vue
+<script setup>
+const props = defineProps({
+  modelValue: String,
+  modelModifiers: { default: () => ({}) },
+});
+
+const emit = defineEmits(["update:modelValue"]);
+
+function emitValue(e) {
+  let value = e.target.value;
+  if (props.modelModifiers.capitalize) {
+    value = value.charAt(0).toUpperCase() + value.slice(1);
+  }
+  emit("update:modelValue", value);
+}
+</script>
+
+<template>
+  <input type="text" :value="modelValue" @input="emitValue" />
+</template>
+```
+
+对于又有参数又有修饰符的 v-model 绑定，生成的 prop 名将是 arg + "Modifiers"。举例来说：
+
+```html
+<MyComponent v-model:title.capitalize="myText"></MyComponent>
+```
+
+```js
+const props = defineProps(['title', 'titleModifiers'])
+defineEmits(['update:title']) console.log(props.titleModifiers) // { capitalize: true }
+```
 
 5. 透传 Attributes
 6. 插槽
