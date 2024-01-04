@@ -2290,9 +2290,345 @@ defineEmits(['update:title']) console.log(props.titleModifiers) // { capitalize:
 ```
 
 5. 透传 Attributes
+
+5.1 Attributes 继承
+
+“透传 attribute”指的是传递给一个组件，却没有被该组件声明为 props 或 emits 的 attribute 或者 v-on 事件监听器。最常见的例子就是 class、style 和 id。
+
+5.2 禁用 Attributes 继承
+
+最常见的需要禁用 attribute 继承的场景就是 attribute 需要应用在根节点以外的其他元素上。
+
+通过设置 inheritAttrs 选项为 false，你可以完全控制透传进来的 attribute 被如何使用。
+
+```vue
+<script setup>
+defineOptions({
+  inheritAttrs: false,
+});
+// ...setup 逻辑
+</script>
+
+<template>
+  <div class="btn-wrapper">
+    <button class="btn" v-bind="$attrs">click me</button>
+  </div>
+</template>
+```
+
+5.3 多根节点的 Attributes 继承
+
+多个根节点的组件没有自动 attribute 透传行为。如果 $attrs 没有被显式绑定，将会抛出一个运行时警告。
+
+如果 $attrs 被显式绑定，则不会有警告：
+
+```html
+<header>...</header>
+<main v-bind="$attrs">...</main>
+<footer>...</footer>
+```
+
+5.4 在 JS 中访问透传 Attributes
+
+使用 useAttrs() API 来访问一个组件的所有透传 attribute：
+
+```vue
+<script setup>
+import { useAttrs } from "vue";
+
+const attrs = useAttrs();
+</script>
+```
+
 6. 插槽
+
+6.1 插槽内容与出口
+
+<slot> 元素是一个插槽出口 (slot outlet)，标示了父元素提供的插槽内容 (slot content) 将在哪里被渲染。
+
+```html
+<button class="fancy-btn">
+  <slot></slot>
+  <!-- 插槽出口 -->
+</button>
+```
+
+```html
+<FancyButton>
+  Click me!
+  <!-- 插槽内容 -->
+</FancyButton>
+```
+
+6.2 渲染作用域
+
+插槽内容可以访问到父组件的数据作用域，因为插槽内容本身是在父组件模板中定义的。举例来说：
+
+插槽内容无法访问子组件的数据。
+
+```vue
+<span>{{ message }}</span>
+<FancyButton>{{ message }}</FancyButton>
+```
+
+6.3 默认内容
+
+在外部没有提供任何内容的情况下，可以为插槽指定默认内容。
+
+```html
+<button type="submit">
+  <slot>
+    Submit
+    <!-- 默认内容 -->
+  </slot>
+</button>
+```
+
+6.4 具名插槽
+
+一个组件中包含多个插槽出口，可以使用<slot> 元素的 attribute name，没有提供 name 的 <slot> 出口会隐式地命名为“default”。
+
+```html
+<div class="container">
+  <header>
+    <slot name="header"></slot>
+  </header>
+  <main>
+    <slot></slot>
+  </main>
+  <footer>
+    <slot name="footer"></slot>
+  </footer>
+</div>
+```
+
+要为具名插槽传入内容，我们需要使用一个含 v-slot 指令的 <template> 元素，并将目标插槽的名字传给该指令：
+
+v-slot 有对应的简写 #，因此 <template v-slot:header> 可以简写为 <template #header>。
+
+```html
+<BaseLayout>
+  <template #header>
+    <!-- header 插槽的内容放这里 -->
+  </template>
+</BaseLayout>
+```
+
+6.5 动态插槽名
+
+```html
+<base-layout>
+  <template v-slot:[dynamicSlotName]> ... </template>
+
+  <!-- 缩写为 -->
+  <template #[dynamicSlotName]> ... </template>
+</base-layout>
+```
+
+6.6 作用域插槽
+
+在某些场景下插槽的内容可能想要同时使用父组件域内和子组件域内的数据。
+
+默认作用域插槽
+
+```html
+<!-- <MyComponent> 的模板 -->
+<div>
+  <slot :text="greetingMessage" :count="1"></slot>
+</div>
+```
+
+```html
+<MyComponent v-slot="slotProps">
+  {{ slotProps.text }} {{ slotProps.count }}
+</MyComponent>
+```
+
+具名作用域插槽，插槽 props 可以作为 v-slot 指令的值被访问到：v-slot:name="slotProps"。当使用缩写时是这样：
+
+```html
+<MyComponent>
+  <template #header="headerProps"> {{ headerProps }} </template>
+
+  <template #default="defaultProps"> {{ defaultProps }} </template>
+
+  <template #footer="footerProps"> {{ footerProps }} </template>
+</MyComponent>
+```
+
+向具名插槽中传入 props：
+
+```html
+<slot name="header" message="hello"></slot>
+```
+
 7. 依赖注入
+
+7.1 Prop 逐级透传问题
+
+多层级嵌套的组件，某个深层的子组件需要一个较远的祖先组件中的部分数据。如果仅使用 props 则必须将其沿着组件链逐级传递下去，这一问题被称为“prop 逐级透传”。
+
+provide 和 inject 可以帮助我们解决这一问题。
+
+7.2 Provide（提供）
+
+```vue
+<script setup>
+import { provide } from "vue";
+
+provide(/* 注入名 */ "message", /* 值 */ "hello!");
+</script>
+```
+
+```js
+import { provide } from "vue";
+
+export default {
+  setup() {
+    provide(/* 注入名 */ "message", /* 值 */ "hello!");
+  },
+};
+```
+
+7.3 应用层 Provide
+
+除了在一个组件中提供依赖，我们还可以在整个应用层面提供依赖：
+
+```js
+import { createApp } from "vue";
+
+const app = createApp({});
+
+app.provide(/* 注入名 */ "message", /* 值 */ "hello!");
+```
+
+7.4 Inject（注入）
+
+```vue
+<script setup>
+import { inject } from "vue";
+
+const message = inject("message");
+</script>
+```
+
+```js
+import { inject } from "vue";
+
+export default {
+  setup() {
+    const message = inject("message");
+    return { message };
+  },
+};
+```
+
+在注入一个值时不要求必须有提供者，那么我们应该声明一个默认值
+
+```js
+// 如果没有祖先组件提供 "message"
+// `value` 会是 "这是默认值"
+const value = inject("message", "这是默认值");
+```
+
+7.5 和响应数据配合使用
+
+建议尽可能将任何对响应式状态的变更都保持在供给方组件中。
+
+```vue
+<!-- 在供给方组件内 -->
+<script setup>
+import { provide, ref } from "vue";
+
+const location = ref("North Pole");
+
+function updateLocation() {
+  location.value = "South Pole";
+}
+
+provide("location", {
+  location,
+  updateLocation,
+});
+</script>
+```
+
+```vue
+<!-- 在注入方组件 -->
+<script setup>
+import { inject } from "vue";
+
+const { location, updateLocation } = inject("location");
+</script>
+
+<template>
+  <button @click="updateLocation">{{ location }}</button>
+</template>
+```
+
+如果你想确保提供的数据不能被注入方的组件更改，你可以使用 readonly()
+
+```vue
+<script setup>
+import { ref, provide, readonly } from "vue";
+
+const count = ref(0);
+provide("read-only-count", readonly(count));
+</script>
+```
+
 8. 异步组件
+
+8.1 基本用法
+
+仅在页面需要它渲染时才会调用加载内部实际组件的函数。实现延迟加载。
+
+与普通组件一样，异步组件可以使用 app.component() 全局注册：
+
+```js
+app.component(
+  "MyComponent",
+  defineAsyncComponent(() => import("./components/MyComponent.vue"))
+);
+```
+
+也可以直接在父组件中直接定义它们
+
+```vue
+<script setup>
+import { defineAsyncComponent } from "vue";
+
+const AdminPage = defineAsyncComponent(() =>
+  import("./components/AdminPageComponent.vue")
+);
+</script>
+
+<template>
+  <AdminPage />
+</template>
+```
+
+8.2 加载与错误状态
+
+异步操作不可避免地会涉及到加载和错误状态
+
+```js
+const AsyncComp = defineAsyncComponent({
+  // 加载函数
+  loader: () => import("./Foo.vue"),
+
+  // 加载异步组件时使用的组件
+  loadingComponent: LoadingComponent,
+  // 展示加载组件前的延迟时间，默认为 200ms
+  delay: 200,
+
+  // 加载失败后展示的组件
+  errorComponent: ErrorComponent,
+  // 如果提供了一个 timeout 时间限制，并超时了
+  // 也会显示这里配置的报错组件，默认值是：Infinity
+  timeout: 3000,
+});
+```
 
 四 逻辑复用
 
