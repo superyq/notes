@@ -48,6 +48,14 @@ arr.sort((num1, num2) => num1 - num2); // 返回: [1,2,3]，改变原数组 [1,2
 
 // 反转排序
 arr.reverse(); // 返回：[3,2,1]，改变原数组 [3,2,1]
+
+// 将数组的所有元素"缩减"为一个单独的值
+// reduce()方法接受一个回调函数作为参数，该回调函数可以接受四个参数：累加器（accumulator）、当前值（current value）、当前索引（current index）和原始数组（original array）。
+// reduce()方法可选第二个参数是累加器默认值，默认为0。
+// 回调函数通过对每个元素的操作来更新累加器的值，并返回更新后的累加器。
+arr.reduce((accumulator, currentValue) => {
+  return accumulator + currentValue;
+}, 0); // 6
 ```
 
 <!-- 数组遍历 -->

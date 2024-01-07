@@ -2633,12 +2633,642 @@ const AsyncComp = defineAsyncComponent({
 四 逻辑复用
 
 1. 组合式函数
+
+1.1 什么是 “组合式函数”
+
+“组合式函数”(Composables) 是一个利用 Vue 的组合式 API 来封装和复用有状态逻辑的函数。
+
+例如日期格式化函数。封装了无状态的逻辑，接收一些输入立刻返回所期望的输出。lodash 或是 date-fns 就是复用无状态逻辑的库。
+
+1.2 鼠标跟踪器示例
+
+使用组合式 API 实现鼠标跟踪功能
+
+```js
+// mouse.js
+import { ref, onMounted, onUnmounted } from "vue";
+
+// 按照惯例，组合式函数名以“use”开头
+export function useMouse() {
+  // 被组合式函数封装和管理的状态
+  const x = ref(0);
+  const y = ref(0);
+
+  // 组合式函数可以随时更改其状态。
+  function update(event) {
+    x.value = event.pageX;
+    y.value = event.pageY;
+  }
+
+  // 一个组合式函数也可以挂靠在所属组件的生命周期上
+  // 来启动和卸载副作用
+  onMounted(() => window.addEventListener("mousemove", update));
+  onUnmounted(() => window.removeEventListener("mousemove", update));
+
+  // 通过返回值暴露所管理的状态
+  return { x, y };
+}
+```
+
+在组件中使用的方式：
+
+```vue
+<script setup>
+import { useMouse } from "./mouse.js";
+
+const { x, y } = useMouse();
+</script>
+
+<template>Mouse position is at: {{ x }}, {{ y }}</template>
+```
+
+一个组合式函数可以调用一个或多个其他的组合式函数。这样我们就可以用多个较小且逻辑独立的单元来组合形成复杂的逻辑。实际上，这正是为什么我们决定将实现了这一设计模式的 API 集合命名为组合式 API。
+
+举例来说，我们可以将添加和清除 DOM 事件监听器的逻辑也封装进一个组合式函数中：
+
+```js
+// event.js
+import { onMounted, onUnmounted } from "vue";
+
+export function useEventListener(target, event, callback) {
+  // 如果你想的话，
+  // 也可以用字符串形式的 CSS 选择器来寻找目标 DOM 元素
+  onMounted(() => target.addEventListener(event, callback));
+  onUnmounted(() => target.removeEventListener(event, callback));
+}
+```
+
+```js
+// mouse.js
+import { ref } from "vue";
+import { useEventListener } from "./event";
+
+export function useMouse() {
+  const x = ref(0);
+  const y = ref(0);
+
+  useEventListener(window, "mousemove", (event) => {
+    x.value = event.pageX;
+    y.value = event.pageY;
+  });
+
+  return { x, y };
+}
+```
+
+1.3 异步状态示例
+
+在做异步数据请求时，我们常常需要处理不同的状态：加载中、加载成功和加载失败。
+
+1.4 约定和最佳实践
+
+组合式函数约定用驼峰命名法命名，并以“use”作为开头。
+
+使用 toValue() 工具函数处理 ref 或 getter 的参数。
+
+```js
+import { toValue } from "vue";
+
+function useFeature(maybeRefOrGetter) {
+  // 如果 maybeRefOrGetter 是一个 ref 或 getter，
+  // 将返回它的规范化值。
+  // 否则原样返回。
+  const value = toValue(maybeRefOrGetter);
+}
+```
+
+建议使用 ref 返回值，这样解包会保持响应性
+
+```js
+// x 和 y 是两个 ref
+const { x, y } = useMouse();
+```
+
+确保在 onUnmounted() 时清理副作用。举例来说，如果一个组合式函数设置了一个事件监听器，它就应该在 onUnmounted() 中被移除 (就像我们在 useMouse() 示例中看到的一样)。
+
+1.5 通过抽取组合式函数改变代码结构
+
+组合式 API 会给予你足够的灵活性，让你可以基于逻辑问题将组件代码拆分成更小的函数
+
+1.6 在选项式 API 中使用组合式函数
+
+如果你正在使用选项式 API，组合式函数必须在 setup() 中调用。且其返回的绑定必须在 setup() 中返回，以便暴露给 this 及其模板：
+
+```js
+import { useMouse } from "./mouse.js";
+import { useFetch } from "./fetch.js";
+
+export default {
+  setup() {
+    const { x, y } = useMouse();
+    const { data, error } = useFetch("...");
+    return { x, y, data, error };
+  },
+  mounted() {
+    // setup() 暴露的属性可以在通过 `this` 访问到
+    console.log(this.x);
+  },
+  // ...其他选项
+};
+```
+
+1.7 与其他模式的比较
+
+和 Mixin 的对比，mixins 有三个主要的短板：不清晰的数据来源、命名空间冲突、隐式的跨 mixin 交流
+
+和无渲染组件的对比：组合式函数不会产生额外的组件实例开销。当在整个应用中使用时，由无渲染组件产生的额外组件实例会带来无法忽视的性能开销。我们推荐在纯逻辑复用时使用组合式函数，在需要同时复用逻辑和视图布局时使用无渲染组件。
+
 2. 自定义指令
+
+2.1 介绍
+
+自定义指令主要是为了重用涉及普通元素的底层 DOM 访问的逻辑。
+
+一个自定义指令由一个包含类似组件生命周期钩子的对象来定义。钩子函数会接收到指令所绑定元素作为其参数。
+
+```vue
+<script setup>
+// 在模板中启用 v-focus
+const vFocus = {
+  mounted: (el) => el.focus(),
+};
+</script>
+
+<template>
+  <input v-focus />
+</template>
+```
+
+在 <script setup> 中，任何以 v 开头的驼峰式命名的变量都可以被用作一个自定义指令。
+
+在没有使用 <script setup> 的情况下，自定义指令需要通过 directives 选项注册：
+
+```js
+export default {
+  setup() {
+    /*...*/
+  },
+  directives: {
+    // 在模板中启用 v-focus
+    focus: {
+      /* ... */
+    },
+  },
+};
+```
+
+将一个自定义指令全局注册到应用层级也是一种常见的做法：
+
+```js
+const app = createApp({});
+
+// 使 v-focus 在所有组件中都可用
+app.directive("focus", {
+  /* ... */
+});
+```
+
+2.2 指令钩子
+
+一个指令的定义对象可以提供几种钩子函数 (都是可选的)：
+
+```js
+const myDirective = {
+  // 在绑定元素的 attribute 前
+  // 或事件监听器应用前调用
+  created(el, binding, vnode, prevVnode) {
+    // 下面会介绍各个参数的细节
+  },
+  // 在元素被插入到 DOM 前调用
+  beforeMount(el, binding, vnode, prevVnode) {},
+  // 在绑定元素的父组件
+  // 及他自己的所有子节点都挂载完成后调用
+  mounted(el, binding, vnode, prevVnode) {},
+  // 绑定元素的父组件更新前调用
+  beforeUpdate(el, binding, vnode, prevVnode) {},
+  // 在绑定元素的父组件
+  // 及他自己的所有子节点都更新后调用
+  updated(el, binding, vnode, prevVnode) {},
+  // 绑定元素的父组件卸载前调用
+  beforeUnmount(el, binding, vnode, prevVnode) {},
+  // 绑定元素的父组件卸载后调用
+  unmounted(el, binding, vnode, prevVnode) {},
+};
+```
+
+指令的钩子会传递以下几种参数：
+
+el：指令绑定到的元素。这可以用于直接操作 DOM。
+binding：一个对象，包含以下属性。
+| value：传递给指令的值。例如在 v-my-directive="1 + 1" 中，值是 2。
+| oldValue：之前的值，仅在 beforeUpdate 和 updated 中可用。无论值是否更改，它都可用。
+| arg：传递给指令的参数 (如果有的话)。例如在 v-my-directive:foo 中，参数是 "foo"。
+| modifiers：一个包含修饰符的对象 (如果有的话)。例如在 v-my-directive.foo.bar 中，修饰符对象是 { foo: true, bar: true }。
+| instance：使用该指令的组件实例。
+| dir：指令的定义对象。
+vnode：代表绑定元素的底层 VNode。
+prevNode：代表之前的渲染中指令所绑定元素的 VNode。仅在 beforeUpdate 和 updated 钩子中可用。
+
+例子如下：
+
+```html
+<div v-example:foo.bar="baz"></div>
+```
+
+```js
+{
+  arg: 'foo',
+  modifiers: { bar: true },
+  value: /* `baz` 的值 */,
+  oldValue: /* 上一次更新时 `baz` 的值 */
+}
+```
+
+2.3 简化形式
+
+一般情况下指令仅仅需要 mounted 和 updated 实现相同行为，可以直接用一个函数定义指令：
+
+```vue
+<div v-color="color"></div>
+```
+
+```js
+app.directive("color", (el, binding) => {
+  // 这会在 `mounted` 和 `updated` 时都调用
+  el.style.color = binding.value;
+});
+```
+
+2.4 对象字面量
+
+指令值可以接受一个 JS 对象字面量：
+
+```vue
+<div v-demo="{ color: 'white', text: 'hello!' }"></div>
+```
+
+```js
+app.directive("demo", (el, binding) => {
+  console.log(binding.value.color); // => "white"
+  console.log(binding.value.text); // => "hello!"
+});
+```
+
+2.5 在组件上使用
+
+不推荐
+
 3. 插件
+
+3.1 接受
+
+插件 (Plugins) 是一种能为 Vue 添加全局功能的工具代码。下面是如何安装一个插件的示例：
+
+```js
+import { createApp } from "vue";
+
+const app = createApp({});
+
+app.use(myPlugin, {
+  /* 可选的选项 */
+});
+```
+
+一个插件可以是一个拥有 install() 方法的对象，也可以直接是一个安装函数本身。
+
+安装函数会接收到安装它的应用实例和传递给 app.use() 的额外选项作为参数：
+
+```js
+const myPlugin = {
+  install(app, options) {
+    // 配置此应用
+  },
+};
+```
+
+插件没有严格定义的使用范围，但是插件发挥作用的常见场景主要包括以下几种：
+
+| 通过 app.component() 和 app.directive() 注册一到多个全局组件或自定义指令。
+| 通过 app.provide() 使一个资源可被注入进整个应用。
+| 向 app.config.globalProperties 中添加一些全局实例属性或方法
+| 一个可能上述三种都包含了的功能库 (例如 vue-router)。
+
+3.2 编写一个插件
+
+编写一个翻译函数，接收一个以 . 作为分隔符的 key 字符串。
+
+```vue
+<h1>{{ $translate('greetings.hello') }}</h1>
+```
+
+这个函数应当能够在任意模板中被全局调用。这一点可以通过在插件中将它添加到 app.config.globalProperties 上来实现：
+
+```js
+// plugins/i18n.js
+export default {
+  install: (app, options) => {
+    // 注入一个全局可用的 $translate() 方法
+    app.config.globalProperties.$translate = (key) => {
+      // 获取 `options` 对象的深层属性
+      // 使用 `key` 作为索引
+      return key.split(".").reduce((o, i) => {
+        if (o) return o[i];
+      }, options);
+    };
+  },
+};
+```
+
+用于查找的翻译字典对象则应当在插件被安装时作为 app.use() 的额外参数被传入：
+
+```js
+import i18nPlugin from "./plugins/i18n";
+
+app.use(i18nPlugin, {
+  greetings: {
+    hello: "Bonjour!",
+  },
+});
+```
+
+插件中的 Provide / Inject
+
+```js
+// plugins/i18n.js
+export default {
+  install: (app, options) => {
+    app.provide("i18n", options);
+  },
+};
+```
+
+插件用户就可以组件中以 i18n 为 key 注入并访问插件的选项对象了。
+
+```vue
+<script setup>
+import { inject } from "vue";
+
+const i18n = inject("i18n");
+
+console.log(i18n.greetings.hello);
+</script>
+```
 
 五 内置组件
 
 1. Transition
+
+Vue 提供了两个内置组件，可以帮助你制作基于状态变化的过渡和动画：
+
+| <Transition> 会在一个元素或组件进入和离开 DOM 时应用动画。
+| <TransitionGroup> 会在一个 v-for 列表中的元素或组件被插入，移动，或移除时应用动画。
+
+1.1 <Transition> 组件
+
+可以直接使用，无需注册。将过渡动画应用到通过默认插槽传递给的元素或组件上。动画过渡触发条件：v-if、v-show、<component>切换组件、改变特殊的 key 属性
+
+最基本用法的示例：
+
+```vue
+<button @click="show = !show">Toggle</button>
+<Transition>
+  <p v-if="show">hello</p>
+</Transition>
+```
+
+```css
+/* 下面我们会解释这些 class 是做什么的 */
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+```
+
+tip：<Transition> 仅支持单个元素或组件作为其插槽内容。如果内容是一个组件，这个组件必须仅有一个根元素。
+
+当一个 <Transition> 组件中的元素被插入或移除时，会发生下面这些事情：
+
+| Vue 自动检测是否有 css 动画过渡，如果有就应用
+| 如果有 JS 钩子，就自动调用
+| 都没有，DOM 的插入、删除就在下一个动作
+
+1.2 基于 CSS 的过渡效果
+
+一共有 6 个应用于进入与离开过渡效果的 CSS class。
+
+| v-enter-from：进入动画的起始状态。
+| v-enter-active：进入动画的生效状态。
+| v-enter-to：进入动画的结束状态。
+| v-leave-from：离开动画的起始状态。
+| v-leave-active：离开动画的生效状态。
+| v-leave-to：离开动画的结束状态。
+
+使用 name prop 自定义过渡效果名
+
+```vue
+<Transition name="fade">
+  ...
+</Transition>
+```
+
+```css
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+```
+
+CSS 的 transition，显示样式是 DOM 的 css 的样式，只需定义进入前，离开后的 css 即可。
+
+```vue
+<Transition name="slide-fade">
+  <p v-if="show">hello</p>
+</Transition>
+```
+
+```css
+/*
+  进入和离开动画可以使用不同
+  持续时间和速度曲线。
+*/
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+```
+
+CSS 的 animation
+
+```vue
+<Transition name="bounce">
+  <p v-if="show" style="text-align: center;">
+    Hello here is some bouncy text!
+  </p>
+</Transition>
+```
+
+```css
+.bounce-enter-active {
+  animation: bounce-in 0.5s;
+}
+.bounce-leave-active {
+  animation: bounce-in 0.5s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+```
+
+可以自定义过渡 class，在你想集成第三方 CSS 动画库时非常有用，比如 Animate.css：
+
+enter-from-class
+enter-active-class
+enter-to-class
+leave-from-class
+leave-active-class
+leave-to-class
+
+```vue
+<!-- 假设你已经在页面中引入了 Animate.css -->
+<Transition
+  name="custom-classes"
+  enter-active-class="animate__animated animate__tada"
+  leave-active-class="animate__animated animate__bounceOutRight"
+>
+  <p v-if="show">hello</p>
+</Transition>
+```
+
+在深层级的元素上触发过渡效果。
+
+```vue
+<Transition name="nested">
+  <div v-if="show" class="outer">
+    <div class="inner">
+      Hello
+    </div>
+  </div>
+</Transition>
+```
+
+```css
+/* 应用于嵌套元素的规则 */
+.nested-enter-active .inner,
+.nested-leave-active .inner {
+  transition: all 0.3s ease-in-out;
+}
+
+.nested-enter-from .inner,
+.nested-leave-to .inner {
+  transform: translateX(30px);
+  opacity: 0;
+}
+
+/* 延迟嵌套元素的进入以获得交错效果 */
+.nested-enter-active .inner {
+  transition-delay: 0.25s;
+}
+
+/* ... 省略了其他必要的 CSS */
+```
+
+等待所有内部元素的过渡完成，传入 duration prop 来显式指定过渡的持续时间 (以毫秒为单位)。
+
+```vue
+<Transition :duration="550">...</Transition>
+<Transition :duration="{ enter: 500, leave: 800 }">...</Transition>
+```
+
+1.3 JS 钩子
+
+```vue
+<Transition
+  @before-enter="onBeforeEnter"
+  @enter="onEnter"
+  @after-enter="onAfterEnter"
+  @enter-cancelled="onEnterCancelled"
+  @before-leave="onBeforeLeave"
+  @leave="onLeave"
+  @after-leave="onAfterLeave"
+  @leave-cancelled="onLeaveCancelled"
+>
+  <!-- ... -->
+</Transition>
+```
+
+```js
+// 在元素被插入到 DOM 之前被调用
+// 用这个来设置元素的 "enter-from" 状态
+function onBeforeEnter(el) {}
+
+// 在元素被插入到 DOM 之后的下一帧被调用
+// 用这个来开始进入动画
+function onEnter(el, done) {
+  // 调用回调函数 done 表示过渡结束
+  // 如果与 CSS 结合使用，则这个回调是可选参数
+  done();
+}
+
+// 当进入过渡完成时调用。
+function onAfterEnter(el) {}
+
+// 当进入过渡在完成之前被取消时调用
+function onEnterCancelled(el) {}
+
+// 在 leave 钩子之前调用
+// 大多数时候，你应该只会用到 leave 钩子
+function onBeforeLeave(el) {}
+
+// 在离开过渡开始时调用
+// 用这个来开始离开动画
+function onLeave(el, done) {
+  // 调用回调函数 done 表示过渡结束
+  // 如果与 CSS 结合使用，则这个回调是可选参数
+  done();
+}
+
+// 在离开过渡完成、
+// 且元素已从 DOM 中移除时调用
+function onAfterLeave(el) {}
+
+// 仅在 v-show 过渡中可用
+function onLeaveCancelled(el) {}
+```
+
+1.4 可复用过渡效果
+1.5 出现时过渡
+1.6 元素间过渡
+1.7 过渡模式
+1.8 组件间过渡
+1.9 动态过渡
+
 2. TransitionGroup
 3. KeepAlive
 4. Teleport
