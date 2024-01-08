@@ -3262,17 +3262,330 @@ function onAfterLeave(el) {}
 function onLeaveCancelled(el) {}
 ```
 
+如果仅有 JS 控制过渡，最好手动加上:css='false'，防止 CSS 规则意外干扰过渡。
+
+```vue
+<Transition ... :css="false">
+  ...
+</Transition>
+```
+
 1.4 可复用过渡效果
+
+将 <Transition> 封装成组件
+
+```vue
+<!-- MyTransition.vue -->
+<script>
+// JavaScript 钩子逻辑...
+</script>
+
+<template>
+  <!-- 包装内置的 Transition 组件 -->
+  <Transition name="my-transition" @enter="onEnter" @leave="onLeave">
+    <slot></slot>
+    <!-- 向内传递插槽内容 -->
+  </Transition>
+</template>
+
+<style>
+/*
+  必要的 CSS...
+  注意：避免在这里使用 <style scoped>
+  因为那不会应用到插槽内容上
+*/
+</style>
+```
+
+```vue
+<MyTransition>
+  <div v-if="show">Hello</div>
+</MyTransition>
+```
+
 1.5 出现时过渡
+
+在节点初次渲染时应用过渡效果，添加 appear
+
+```vue
+<Transition appear>
+  ...
+</Transition>
+```
+
 1.6 元素间过渡
+
+可以通过 v-if、v-else、v-else-if 进行元素之间的过渡，只要保证只有一个元素被渲染即可。
+
+```vue
+<Transition>
+  <button v-if="docState === 'saved'">Edit</button>
+  <button v-else-if="docState === 'edited'">Save</button>
+  <button v-else-if="docState === 'editing'">Cancel</button>
+</Transition>
+```
+
 1.7 过渡模式
+
+在几个元素切换时，进入和离开动画时同时开始的，就会出现布局问题，可以通过 position: absolute 解决，但是可能不符合需求，可以使用 mode 来解决。
+
+```vue
+<Transition mode="out-in">
+  ...
+</Transition>
+```
+
 1.8 组件间过渡
+
+```vue
+<Transition name="fade" mode="out-in">
+  <component :is="activeComponent"></component>
+</Transition>
+```
+
 1.9 动态过渡
 
+可以提前定义很多 css 动画和过渡，通过 name 进行动态过渡
+
+```vue
+<Transition :name="transitionName">
+  <!-- ... -->
+</Transition>
+```
+
 2. TransitionGroup
+
+用于给 v-for 列表元素的插入、移除、顺序改变添加动画。
+
+2.1 和 <Transition> 的区别
+
+有基本相同的 props、过渡 class、JS 钩子。
+
+区别如下：
+
+| 默认情况，不会渲染一个容器元素，可以指定 tag prop 作为一个容器渲染
+| 过渡模式不可用，因为不是在互斥元素之间切换
+| 列表元素必须有独一无二的 key
+| CSS 过渡实在列表元素上，不是容器元素上
+
+2.2 进入/离开动画
+
+```vue
+<TransitionGroup name="list" tag="ul">
+  <li v-for="item in items" :key="item">
+    {{ item }}
+  </li>
+</TransitionGroup>
+```
+
+```css
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+```
+
+2.3 移动动画
+
+上面的过渡，插入和移除元素周围元素会发生跳跃性的移动，不顺滑，可以添加额外的 CSS 规则来优化。
+
+```css
+.list-move, /* 对移动中的元素应用的过渡 */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+/* 确保将离开的元素从布局流中删除
+  以便能够正确地计算移动的动画。 */
+.list-leave-active {
+  position: absolute;
+}
+```
+
+2.4 渐进延迟列表动画
+
+通过 JS 钩子读取元素的 data，实现渐进延迟动画
+
+```vue
+<TransitionGroup
+  tag="ul"
+  :css="false"
+  @before-enter="onBeforeEnter"
+  @enter="onEnter"
+  @leave="onLeave"
+>
+  <li
+    v-for="(item, index) in computedList"
+    :key="item.msg"
+    :data-index="index"
+  >
+    {{ item.msg }}
+  </li>
+</TransitionGroup>
+```
+
+基于 [GreenSock library](https://gsap.com/) 的动画示例：
+
+```js
+function onEnter(el, done) {
+  gsap.to(el, {
+    opacity: 1,
+    height: "1.6em",
+    delay: el.dataset.index * 0.15,
+    onComplete: done,
+  });
+}
+```
+
 3. KeepAlive
+
+作用是缓存被移除的组件实例。
+
+3.1 基本使用
+
+动态组件<component :is="activeComponent" />切换时，组件实例会被销毁，组件的状态会丢失，在切回来时，状态都被重置。如果需要保留组件的状态可以使用<KeepAlive>将需要缓存的组件包裹。
+
+```vue
+<!-- 非活跃的组件将会被缓存！ -->
+<KeepAlive>
+  <component :is="activeComponent" />
+</KeepAlive>
+```
+
+3.2 包含/排除
+
+<KeepAlive> 默认缓存包含的所有组件，可以通过 include 和 exclude 来定制该行为。
+
+```vue
+<!-- 以英文逗号分隔的字符串 -->
+<KeepAlive include="a,b">
+  <component :is="view" />
+</KeepAlive>
+
+<!-- 正则表达式 (需使用 `v-bind`) -->
+<KeepAlive :include="/a|b/">
+  <component :is="view" />
+</KeepAlive>
+
+<!-- 数组 (需使用 `v-bind`) -->
+<KeepAlive :include="['a', 'b']">
+  <component :is="view" />
+</KeepAlive>
+```
+
+TIP: 因为是根据 name 进行匹配的，所以组件需要显示声明一个 name 选项。在<script setup> 中，会根据文件名自动生成一个 name，无需手动生成。
+
+3.3 最大缓存实例数
+
+通过 max 设置最大缓存组件数，如果超过指定数，则最近没有被访问的缓存实例将被销毁。
+
+```vue
+<KeepAlive :max="10">
+  <component :is="activeComponent" />
+</KeepAlive>
+```
+
+3.4 缓存实例的生命周期
+
+```vue
+<script setup>
+import { onActivated, onDeactivated } from "vue";
+
+onActivated(() => {
+  // 调用时机为首次挂载
+  // 以及每次从缓存中被重新插入时
+});
+
+onDeactivated(() => {
+  // 在从 DOM 上移除、进入缓存
+  // 以及组件卸载时调用
+});
+</script>
+```
+
+tips：onActivated 在组件挂载时也会调用，onDeactivated 组件卸载时也会调用。两个钩子不仅对根组件有效，对缓存树下的子孙组件也有效。
+
 4. Teleport
-5. Suspense
+
+可以传送组件内部模板到组件外部去。
+
+4.1 基本用法
+
+应用场景：组件的一部分在业务逻辑上看属于这个组件，但是在视图角度看，它应该被渲染在 Vue 应用的外部的其他地方。
+
+例子：全屏的模态框。理想情况下，我们希望模态框和按钮在同一个组件上，但这样有个问题，就是该模态框会和按钮一样渲染在 DOM 结构很很深的地方，导致模态框的 CSS 布局代码就很难写。
+
+带问题的写法，下面例子中，如果使用 position：fixed 有个条件，就是祖先元素不能设置 transform、perspective、filter 样式属性，如果设置了会破坏模态框的布局，还有个问题是模态框的 z-index 受限于它的容器，如果有其他元素与<div class="outer">重叠并有更高的 z-index，则模态框会被覆盖。
+
+```html
+<div class="outer">
+  <h3>Tooltips with Vue 3 Teleport</h3>
+  <div>
+    <MyModal />
+  </div>
+</div>
+```
+
+```vue
+<script setup>
+import { ref } from "vue";
+
+const open = ref(false);
+</script>
+
+<template>
+  <button @click="open = true">Open Modal</button>
+
+  <div v-if="open" class="modal">
+    <p>Hello from the modal!</p>
+    <button @click="open = false">Close</button>
+  </div>
+</template>
+
+<style scoped>
+.modal {
+  position: fixed;
+  z-index: 999;
+  top: 20%;
+  left: 50%;
+  width: 300px;
+  margin-left: -150px;
+}
+</style>
+```
+
+可以使用<Teleport>解决此类问题，接受一个 to prop 来指定传送的位置，to 值可以是 CSS 选择器，也可以是 DOM 元素，如下，就是将代码片段传送到 body 标签下。
+
+```vue
+<button @click="open = true">Open Modal</button>
+
+<Teleport to="body">
+  <div v-if="open" class="modal">
+    <p>Hello from the modal!</p>
+    <button @click="open = false">Close</button>
+  </div>
+</Teleport>
+```
+
+TIPS: to 目标必须已经存在与 DOM 中，理想是挂载到 VUE 应用 DOM 数外的元素，如果目标元素是 Vue 渲染的，需要确保挂载 Teleport 之前挂载该元素。
+
+4.2 搭配组件使用
+4.3 禁用 Teleport
+4.4 多个 Teleport 共享目标
+
+1. Suspense
 
 六 应用规模化
 
