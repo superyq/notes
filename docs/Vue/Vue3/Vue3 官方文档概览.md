@@ -3582,10 +3582,95 @@ const open = ref(false);
 TIPS: to 目标必须已经存在与 DOM 中，理想是挂载到 VUE 应用 DOM 数外的元素，如果目标元素是 Vue 渲染的，需要确保挂载 Teleport 之前挂载该元素。
 
 4.2 搭配组件使用
+
+<Teleport> 只改变了渲染的 DOM 结构，不影响组件间的逻辑关系，props 和触发的事件照常工作。父组件的注入也会按预期。
+
 4.3 禁用 Teleport
+
+桌面端和移动端需要不同的展示。
+
+```vue
+<Teleport :disabled="isMobile">
+  ...
+</Teleport>
+```
+
 4.4 多个 Teleport 共享目标
 
-1. Suspense
+多个 Teleport 组件可以挂载到相同的目标元素上，顺序就是简单的顺序叠加。
+
+```vue
+<Teleport to="#modals">
+  <div>A</div>
+</Teleport>
+<Teleport to="#modals">
+  <div>B</div>
+</Teleport>
+```
+
+渲染后
+
+```html
+<div id="modals">
+  <div>A</div>
+  <div>B</div>
+</div>
+```
+
+5. Suspense
+
+实验性功能，用来协调对异步依赖的处理。
+
+5.1 异步依赖
+
+如下结构，渲染这些组件需要一些异步数据，如果没有 <Suspense>，每个组件都有自己的加载、报错、完成等状态。最坏的情况下，可能看到三个加载旋转按钮，然后在不同时间报错。
+
+有了 <Suspense> 后，可以在等待多个组件异步依赖结果时，在顶层展示加载中或加载失败状态。
+
+<Suspense>可以等待的异步依赖有两种：1. 带有异步 setup()钩子的组件，包含使用<script setup>时有顶层 await 表达式的组件。2. 异步组件
+
+```
+<Suspense>
+└─ <Dashboard>
+   ├─ <Profile>
+   │  └─ <FriendStatus>（组件有异步的 setup()）
+   └─ <Content>
+      ├─ <ActivityFeed> （异步组件）
+      └─ <Stats>（异步组件）
+```
+
+async setup()
+
+```js
+export default {
+  async setup() {
+    const res = await fetch(...)
+    const posts = await res.json()
+    return {
+      posts
+    }
+  }
+}
+```
+
+如果使用 <script setup>，那么顶层 await 表达式会自动让该组件成为一个异步依赖：
+
+```vue
+<script setup>
+const res = await fetch(...)
+const posts = await res.json()
+</script>
+
+<template>
+  {{ posts }}
+</template>
+```
+
+5.2 加载中状态
+
+5.3 事件
+5.4 错误处理
+5.5 和其他组件结合
 
 六 应用规模化
 
