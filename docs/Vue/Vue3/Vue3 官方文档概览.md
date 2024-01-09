@@ -3668,18 +3668,236 @@ const posts = await res.json()
 
 5.2 加载中状态
 
+<Suspense> 有两个默认插槽：#default 和#fallback。
+
+在初始渲染时，展示默认插槽内容，当遇到异步依赖，则会进入挂起状态。挂起状态展示#fallbck 内容。
+
+进入完成状态后，只有默认插槽的根节点被替换时，<Suspense>才会重新挂起。组件树中新的深层次的异步依赖不会造成<Suspense>回退到挂起状态。
+
+发生回退时，后备内容不会立即展示出来，相反，在等待新内容和异步依赖完成时，会展示#defalut 内容，可以 timeout prop 进行配置，等待超时，才会展示后备内容，如果 timeout 为 0 将导致替换内容时立即显示后备内容。
+
+```vue
+<Suspense>
+  <!-- 具有深层异步依赖的组件 -->
+  <Dashboard />
+
+  <!-- 在 #fallback 插槽中显示 “正在加载中” -->
+  <template #fallback>
+    Loading...
+  </template>
+</Suspense>
+```
+
 5.3 事件
+
+有三个事件：1. pending 进入挂起状态时触发。2. resolve default 插槽完成获取新内容触发。3. fallback fallback 插槽的内容显示时触发。
+
+可以使用这些事件，在加载新组件时在之前的 DOM 最上层显示一个加载指示器。
+
 5.4 错误处理
+
+<Suspense> 组件自身目前还不提供错误处理，不过你可以使用 errorCaptured 选项或者 onErrorCaptured() 钩子，在使用到 <Suspense> 的父组件中捕获和处理异步错误。
+
 5.5 和其他组件结合
+
+通常会与 <Transition>、<KeepAlive>、<RouterView>等组件结合使用。这些组件的嵌套顺序很重要。
+
+```vue
+<RouterView v-slot="{ Component }">
+  <template v-if="Component">
+    <Transition mode="out-in">
+      <KeepAlive>
+        <Suspense>
+          <!-- 主要内容 -->
+          <component :is="Component"></component>
+
+          <!-- 加载中状态 -->
+          <template #fallback>
+            正在加载...
+          </template>
+        </Suspense>
+      </KeepAlive>
+    </Transition>
+  </template>
+</RouterView>
+```
 
 六 应用规模化
 
 1. 单文件组件
+
+1.1 介绍
+
+Vue 的单文件组件简称 SFC，是一种特殊的文件格式，使我们可以将 Vue 组件的模板、逻辑、样式封装在 SFC 中。如下：
+
+```vue
+<script setup>
+import { ref } from "vue";
+const greeting = ref("Hello World!");
+</script>
+
+<template>
+  <p class="greeting">{{ greeting }}</p>
+</template>
+
+<style>
+.greeting {
+  color: red;
+  font-weight: bold;
+}
+</style>
+```
+
+1.2 为什么使用 SFC
+
+使用 SFC 必须使用构建工具，作为回报带来了以下有点：
+
+| 编写模块化的组件
+| 让本来就强相关的关注点自然内聚
+| 预编译模板，避免运行时的编译开销
+| 组件作用域的 CSS
+| 在使用组合式 API 时语法更加简单
+| 通过交叉分析模板和逻辑代码能进行更多编译时优化
+| 更好的 IDE 支持，提供自动补全和对模板表达式的类型检查
+| 开箱即用的模块热更新(HMR)支持
+
+SFC 是 Vue 框架提供的一个功能，下列场景都是官方推荐的项目组织方式：
+
+| 单页面应用（SPA）
+| 静态站点构建（SSG）
+| 任何值得引入构建步骤以获得更好的开发体验（DX）的项目
+
+1.3 SFC 是如何工作的
+
+Vue SFC 是一个框架的文件格式，必须交由@vue/compiler-sfc 编译为标准的 JS 和 CSS，一个编译后的 SFC 是一个标准的 JS（ES）模块，意味着你可以像导入其他 ES 模块一样导入 SFC
+
+```js
+import MyComponent from "./MyComponent.vue";
+
+export default {
+  components: {
+    MyComponent,
+  },
+};
+```
+
+1.4 如何看待关注点分离
+
+前端开发的关注点不是完全基于文件类型分离的。前端工程化的最终目的都是为了能够更好地维护代码。
+
+关注点分离不应该是教条式的按文件类型区分和分离，这并不能帮助我们提高开发效率。
+
+在现代的 UI 开发中，建议将他们划分为松散耦合的组件，再按需组合起来。在一个组件中其模板、逻辑、样式就是又内在联系的、是耦合的，将他们放在一起使组件更具有内聚行和可维护性。
+
 2. 工具链
+
+2.1 在线尝试
+
+[Vue SFC 演练场](https://play.vuejs.org/#eNp9kUFLwzAUx7/KM5cqzBXZbXQDlYF6UFHBSy6je+sy0yQkL3NQ+t19SdncYezW9//9X/pL24l758a7iGIqqlB75QgCUnRzaVTrrCfowOMaelh720LB1UIaaWprAkEbGpglfl08odYWvq3Xq6viRpqqHI7jg3ggbJ1eEvIEUG3u5l2Xl/u+KnnKqTIuEuxuW7tCPZOCuRRQMqzKk30xEhT49WvVjLfBGjbv0r4UtW2d0ujfHCnWk2IKmSS2ZLvfl5yRjzg65PUG658z+TbsUybFu8eAfodSHBktfYM04MXnK+75+QjZPmpuX4AfGKyOyXGoPUSzYu2TXrZ9zt9fmeYrLPaEJhwulURTs899KfifPF64+r/uZDzJe9L0ov8DExSnNA==)
+
+[StackBlitz 中的 Vue + Vite](https://stackblitz.com/edit/vitejs-vite-avew3m?file=index.html&terminal=dev)
+
+2.2 项目脚手架
+
+[Vite](https://cn.vitejs.dev/)是一个轻量级的、速度极快的构建工具，对 Vue SFC 提供第一优先级支持，作者是尤雨溪，也是 VUE 的作者。
+
+使用 Vite 创建项目，这个命令会安装和执行 create-vue，它是 Vue 提供的官方脚手架工具。跟随命令行的提示继续操作即可。
+
+```js
+npm create vue@latest
+```
+
+[Vue CLI](https://cli.vuejs.org/zh/)是官方提供基于 webpack 的 Vue 工具链，现在处于维护阶段，官方建议使用 Vite 开始新项目。
+
+浏览器内模板编译注意事项
+
+当无构建步骤使用 Vue 时，组件模板要么写在 HTML 中，要么内联到 JS 中，Vue 都需要将模板编译器运行到浏览器中
+
+当使用构建步骤时，提前编译了模板，就不需要在浏览器运行了。
+
+Vue 提供了[多种格式的“构建文件”](https://unpkg.com/browse/vue@3.4.6/dist/)以适配不同场景的优化。
+
+| 前缀为 vue.runtime.\*的文件只包含运行时的版本：不含编译器，使用这个版本时，所有模板都需要由构建步骤预先编译。
+| 名称中不包含.runtime 的文件时完整版：包含编译器，支持在浏览器中直接编译模板，体积也会增长 14kb。
+
+默认的工具链中使用仅含运行时的版本，因为所有 SFC 都被预编译了。如果因为某些原因，在有构建步骤时，还需要再浏览器中编译模板，就需要更改构建工具配置，将 vue 改为相应版本 vue/dist/vue.esm-bundler.js。
+
+2.3 IDE 支持
+
+推荐使用的 IDE 是 VSCode，配合 Volar 插件，提供语法高亮。
+
+2.4 浏览器开发者插件
+
+[Chrome 扩展商店页](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)，安装这个插件可能需要科学上网，安装后我们可以浏览一个 Vue 应用的组件树，查看各组件的状态，追踪状态管理的事件。
+
+2.5 TS
+
+Volar 插件能够为<script lang="ts">块提供类型检测，也能对模板表达式和组件之间的 props 提供自动补全和类型检测
+
+使用 vue-tsc 可以在命令行中执行相同的类型检查，通常用来生成单文件组件的 d.ts 文件
+
+2.6 测试
+
+[Vitest](https://vitest.dev/)是一个追求更快运行速度的测试运行器，由 Vue/Vite 团队开发，主要针对基于 Vite 的应用设计，可以为组件提供即时响应的测试反馈。
+
+2.7 代码规范
+
+Vue 团队维护 eslint-plugin-vue 项目，是一个 ESLint 插件，会提供 SFC 相应规则定义。
+
+基于 Vite 构建，官方一般推荐：
+
+| npm install -D eslint eslint-plugin-vue，按[指引](https://eslint.vuejs.org/user-guide/#usage)配置
+| 启用 ESLint IDE 插件，比如 ESLint for VSCode，然后在开发时就可以进行规范检查
+| 将 ESLint 格式检查作为一个生产构建的步骤，保证最后的打包能获得完整的规范检查
+| （可选）启用类似 lint-staged 一类工具在 git commit 提交时自动执行代码规范检查
+
+2.8 格式化
+
+Volar VSCode 插件提供了开箱即用的格式化功能
+
+Prettier 提供了格式化支持
+
+2.9 SFC 自定义块集成
+
+自定义块被编译成导入到同一 Vue 文件的不同请求查询。取决于底层构建工具如何处理这类导入请求。
+
+| 使用 Vite，需要一个自定义 Vite 插件将自定义块转换为可执行的 JavaScript 代码。[示例](https://github.com/vitejs/vite-plugin-vue/tree/main/packages/plugin-vue#example-for-transforming-custom-blocks)。
+| 如果使用 Vue CLI 或只是 webpack，需要使用一个 loader 来配置如何转换匹配到的自定义块。[示例](https://vue-loader.vuejs.org/zh/guide/custom-blocks.html#example)。
+
+2.10 底层库
+
+[@vue/compiler-sfc](https://github.com/vuejs/core/tree/main/packages/compiler-sfc)这个包是 Vue 核心 monorepo 的一部分，提供了处理 Vue SFC 的底层的功能。
+
+[@vitejs/plugin-vue]()为 Vite 提供 Vue SFC 支持的官方插件。
+
+[vue-loader](https://vue-loader.vuejs.org/zh/)为 webpack 提供 Vue SFC 支持的官方 loader。可以看看[如何在 Vue CLI 中更改 vue-loader 选项的文档](https://cli.vuejs.org/zh/guide/webpack.html#%E4%BF%AE%E6%94%B9-loader-%E9%80%89%E9%A1%B9)
+
+2.11 其他在线演练场
+
+[VueUse Playground](https://play.vueuse.org/)
+[Vue + Vite on Repl.it](https://replit.com/@replit/VueJS)
+[Vue on CodeSandbox](https://codesandbox.io/s/vue-3)
+[Vue on Codepen](https://codepen.io/pen/editor/vue)
+[Vue on Components.studio](https://app.components.studio/create/vue3)
+[Vue on WebComponents.dev](https://studio.webcomponents.dev/create/cevue)
+
 3. 路由
-4. 状态管理
-5. 测试
-6. 服务端渲染（SSR）
+
+3.1 客户端 vs 服务端路由
+
+服务端路由指的是服务器根据用户访问的 URL 路径返回不同的响应结果。
+
+客户端路由指在单页面应用中，客户端的 JS 可以拦截页面的跳转请求，动态获取新的数据，然后在无需重新加载的情况下更新当前页面。可以给用户带来更流畅的体验。
+
+3.2 官方路由
+
+[Vue Router 的文档](https://router.vuejs.org/zh/)
+
+3.3 从头开始实现一个简单的路由
+
+1. 状态管理
+2. 测试
+3. 服务端渲染（SSR）
 
 七 最佳实践
 
