@@ -3895,9 +3895,264 @@ Prettier 提供了格式化支持
 
 3.3 从头开始实现一个简单的路由
 
-1. 状态管理
-2. 测试
-3. 服务端渲染（SSR）
+通过监听浏览器 hashchange 事件或使用 History API 更新当前组件。
+
+```vue
+<script setup>
+import { ref, computed } from "vue";
+import Home from "./Home.vue";
+import About from "./About.vue";
+import NotFound from "./NotFound.vue";
+const routes = {
+  "/": Home,
+  "/about": About,
+};
+const currentPath = ref(window.location.hash);
+window.addEventListener("hashchange", () => {
+  currentPath.value = window.location.hash;
+});
+const currentView = computed(() => {
+  return routes[currentPath.value.slice(1) || "/"] || NotFound;
+});
+</script>
+<template>
+  <a href="#/">Home</a> | <a href="#/about">About</a> |
+  <a href="#/non-existent-path">Broken Link</a>
+  <component :is="currentView" />
+</template>
+```
+
+4. 状态管理
+
+4.1 什么是状态管理
+
+多个组件共享一个共同的状态，应用场景：
+
+| 多个视图可能都依赖于同一份状态。
+| 来自不同视图的交互也可能需要更改同一份状态。
+
+可行方法 1：将共享状态“提升”到共同的祖先组件上去，再通过 props 传递下来。如果组件数结构很深，会导致 Prop 逐级透传问题。
+
+可行方法 2：通过模板引用获取父子组件实例，会导致代码难以维护。
+
+最简单直接的方法：抽取共享状态放在全局单例中管理。
+
+4.2 用响应式 API 做简单状态管理
+
+用 reactive() 来创建一个响应式对象，并将它导入到多个组件中：
+
+```js
+// store.js
+import { reactive } from "vue";
+
+export const store = reactive({
+  count: 0,
+});
+```
+
+```vue
+<!-- ComponentA.vue -->
+<script setup>
+import { store } from "./store.js";
+</script>
+
+<template>From A: {{ store.count }}</template>
+```
+
+```vue
+<!-- ComponentB.vue -->
+<script setup>
+import { store } from "./store.js";
+</script>
+
+<template>From B: {{ store.count }}</template>
+```
+
+但是这样做有个问题，任意一个导入了 store 的组件都可以随意修改它的状态，是不太容易维护的。
+
+建议在 store 上定义方法，方法的名称应该要能表达出行动的意图：
+
+```js
+// store.js
+import { reactive } from "vue";
+
+export const store = reactive({
+  count: 0,
+  increment() {
+    this.count++;
+  },
+});
+```
+
+```vue
+<template>
+  <button @click="store.increment()">From B: {{ store.count }}</button>
+</template>
+```
+
+4.3 SSR 相应细节
+
+服务端渲染 (SSR) 的应用，由于 store 是跨多个请求共享的单例，上述模式可能会导致问题。
+
+4.4 Pinia
+
+手动状态管理解决方案在简单的场景中已经足够了，但是在大规模的生产应用中还有很多其他事项需要考虑：
+
+| 更强的团队协作约定
+| 与 Vue DevTools 集成，包括时间轴、组件内部审查和时间旅行调试
+| 模块热更新 (HMR)
+| 服务端渲染支持
+
+Pinia 都实现了，有 Vue 核心团队维护。官方建议使用 Pinia。Pinia 提供了更简洁直接的 API，并提供了组合式风格的 API，最重要的是，在使用 TypeScript 时它提供了更完善的类型推导。
+
+5. 测试
+
+5.1 为什么需要测试
+
+自动化测试能够预防无意引入的 bug，并鼓励开发者将应用分解为可测试、可维护的函数、模块、类和组件。
+
+这能够帮助你和你的团队更快速、自信地构建复杂的 Vue 应用。
+
+5.2 何时测试
+
+越早越好！官方建议你尽快开始编写测试。拖得越久，应用就会有越多的依赖和复杂性，想要开始添加测试也就越困难。
+
+5.3 测试的类型
+
+单元测试：检查给定函数、类或组合式函数的输入是否产生预期的输出或副作用。
+
+组件测试：检查你的组件是否正常挂载和渲染、是否可以与之互动，以及表现是否符合预期。
+
+端到端测试：检查跨越多个页面的功能，并对生产构建的 Vue 应用进行实际的网络请求。这些测试通常涉及到建立一个数据库或其他后端。
+
+5.4 总览
+
+我们将简要地讨论这些测试是什么，以及如何在 Vue 应用中实现它们，并提供一些普适性建议。
+
+5.5 单元测试
+
+编写单元测试是为了验证小的、独立的代码单元是否按预期工作。
+
+单元测试侧重于逻辑上的正确性，只关注应用整体功能的一小部分。
+
+单元测试将捕获函数的业务逻辑和逻辑正确性的问题。
+
+以这个 increment 函数为例：
+
+```js
+// helpers.js
+export function increment(current, max = 10) {
+  if (current < max) {
+    return current + 1;
+  }
+  return current;
+}
+```
+
+如果任何一条断言失败了，那么问题一定是出在 increment 函数上。
+
+```js
+// helpers.spec.js
+import { increment } from "./helpers";
+
+describe("increment", () => {
+  test("increments the current number by 1", () => {
+    expect(increment(0, 10)).toBe(1);
+  });
+
+  test("does not increment the current number over the max", () => {
+    expect(increment(10, 10)).toBe(10);
+  });
+
+  test("has a default max of 10", () => {
+    expect(increment(10)).toBe(10);
+  });
+});
+```
+
+单元测试通常适用于独立的业务逻辑、组件、类、模块或函数，不涉及 UI 渲染、网络请求或其他环境问题。
+
+一个组件可以通过两种方式测试：
+
+| 白盒：单元测试，白盒测试知晓一个组件的实现细节和依赖关系。它们更专注于将组件进行更 独立 的测试。这些测试通常会涉及到模拟一些组件的部分子组件，以及设置插件的状态和依赖性（例如 Pinia）。
+
+| 黑盒：组件测试，黑盒测试不知晓一个组件的实现细节。这些测试尽可能少地模拟，以测试组件在整个系统中的集成情况。它们通常会渲染所有子组件，因而会被认为更像一种“集成测试”。请查看下方的组件测试建议作进一步了解。
+
+[Vitest](https://cn.vitest.dev/) 正是一个针对此目标设计的单元测试框架，它由 Vue / Vite 团队成员开发和维护。在 Vite 的项目集成它会非常简单，而且速度非常快。
+
+5.6 组件测试
+
+组件测试应该捕捉组件中的 prop、事件、提供的插槽、样式、CSS class 名、生命周期钩子，和其他相关的问题。
+
+当进行测试时，请记住，测试这个组件做了什么，而不是测试它是怎么做到的。
+
+5.7 端到端（E2E）测试
+
+端到端测试的重点是多页面的应用表现，针对你的应用在生产环境下进行网络请求。他们通常需要建立一个数据库或其他形式的后端，甚至可能针对一个预备上线的环境运行。
+
+端到端测试通常会捕捉到路由、状态管理库、顶级组件（常见为 App 或 Layout）、公共资源或任何请求处理方面的问题。如上所述，它们可以捕捉到单元测试或组件测试无法捕捉的关键问题。
+
+5.8 用例指南
+
+添加 Vitest 到项目中
+
+```sh
+npm install -D vitest happy-dom @testing-library/vue
+```
+
+更新 Vite 配置
+
+```js
+// vite.config.js
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  // ...
+  test: {
+    // 启用类似 jest 的全局测试 API
+    globals: true,
+    // 使用 happy-dom 模拟 DOM
+    // 这需要你安装 happy-dom 作为对等依赖（peer dependency）
+    environment: "happy-dom",
+  },
+});
+```
+
+接着，创建名字以 \*.test.js 结尾的文件。放在项目根目录下的 test 目录中，或者放在源文件旁边的 test 目录中。Vitest 会使用命名规则自动搜索它们。
+
+```js
+// MyComponent.test.js
+import { render } from "@testing-library/vue";
+import MyComponent from "./MyComponent.vue";
+
+test("it should work", () => {
+  const { getByText } = render(MyComponent, {
+    props: {
+      /* ... */
+    },
+  });
+
+  // 断言输出
+  getByText("...");
+});
+```
+
+最后，在 package.json 之中添加测试命令，然后运行它：
+
+```js
+{
+  // ...
+  "scripts": {
+    "test": "vitest"
+  }
+}
+```
+
+```sh
+npm run test
+```
+
+6. 服务端渲染（SSR）
 
 七 最佳实践
 
