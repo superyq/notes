@@ -4156,7 +4156,7 @@ npm run test
 
 6.1 总览
 
-6.1.1 什么是SSR？
+6.1.1 什么是 SSR？
 
 Vue 也支持将组件在服务端直接渲染成 HTML 字符串，作为服务端响应返回给浏览器，最后在浏览器端将静态的 HTML“激活”(hydrate) 为能够交互的客户端应用。
 
@@ -4168,7 +4168,7 @@ Vue 也支持将组件在服务端直接渲染成 HTML 字符串，作为服务�
 
 更好的 SEO：搜索引擎爬虫可以直接看到完全渲染的页面。
 
-6.1.3 SSR的弊端
+6.1.3 SSR 的弊端
 
 开发限制：浏览器端特定的代码只能在某些生命周期钩子中使用；一些外部库可能需要特殊处理才能在服务端渲染的应用中运行。
 
@@ -4198,18 +4198,18 @@ SSG 保留了和 SSR 应用相同的性能表现：它带来了优秀的首屏�
 
 ```js
 // 此文件运行在 Node.js 服务器上
-import { createSSRApp } from 'vue'
+import { createSSRApp } from "vue";
 // Vue 的服务端渲染 API 位于 `vue/server-renderer` 路径下
-import { renderToString } from 'vue/server-renderer'
+import { renderToString } from "vue/server-renderer";
 
 const app = createSSRApp({
   data: () => ({ count: 1 }),
-  template: `<button @click="count++">{{ count }}</button>`
-})
+  template: `<button @click="count++">{{ count }}</button>`,
+});
 
 renderToString(app).then((html) => {
-  console.log(html)
-})
+  console.log(html);
+});
 ```
 
 接着运行：
@@ -4230,17 +4230,17 @@ node example.js
 创建下面的 server.js 文件：
 
 ```js
-import express from 'express'
-import { createSSRApp } from 'vue'
-import { renderToString } from 'vue/server-renderer'
+import express from "express";
+import { createSSRApp } from "vue";
+import { renderToString } from "vue/server-renderer";
 
-const server = express()
+const server = express();
 
-server.get('/', (req, res) => {
+server.get("/", (req, res) => {
   const app = createSSRApp({
     data: () => ({ count: 1 }),
-    template: `<button @click="count++">{{ count }}</button>`
-  })
+    template: `<button @click="count++">{{ count }}</button>`,
+  });
 
   renderToString(app).then((html) => {
     res.send(`
@@ -4253,25 +4253,98 @@ server.get('/', (req, res) => {
         <div id="app">${html}</div>
       </body>
     </html>
-    `)
-  })
-})
+    `);
+  });
+});
 
 server.listen(3000, () => {
-  console.log('ready')
-})
+  console.log("ready");
+});
 ```
 
 最后，执行 node server.js，访问 http://localhost:3000。你应该可以看到页面中的按钮了。
 
 6.2.2 客户端激活
 
+点击按钮是无效的，因为这段 HTML 在客户端是完全静态的，浏览器中没有加载 Vue。
 
+为了让按钮可以交互，让 Vue 创建一个与服务端完全相同的应用实例，并将每个组件与它应该控制的 DOM 节点相匹配，并添加 DOM 事件监听器。
+
+使用 createSSRApp()：
+
+```js
+// 该文件运行在浏览器中
+import { createSSRApp } from "vue";
+
+const app = createSSRApp({
+  // ...和服务端完全一致的应用实例
+});
+
+// 在客户端挂载一个 SSR 应用时会假定
+// HTML 是预渲染的，然后执行激活过程，
+// 而不是挂载新的 DOM 节点
+app.mount("#app");
+```
 
 6.2.3 代码结构
 
+服务器和客户端共享相同的应用代码，称它们为通用代码。将应用的创建逻辑拆分到一个单独的文件 app.js 中：
+
+```js
+// app.js (在服务器和客户端之间共享)
+import { createSSRApp } from "vue";
+
+export function createApp() {
+  return createSSRApp({
+    data: () => ({ count: 1 }),
+    template: `<button @click="count++">{{ count }}</button>`,
+  });
+}
+```
+
+客户端导入通用代码
+
+```js
+// client.js
+import { createApp } from "./app.js";
+
+createApp().mount("#app");
+```
+
+服务器导入通用代码
+
+```js
+// server.js (不相关的代码省略)
+import { createApp } from "./app.js";
+
+server.get("/", (req, res) => {
+  const app = createApp();
+  renderToString(app).then((html) => {
+    // ...
+  });
+});
+```
+
+在浏览器中加载客户端文件，还需要：
+
+| 添加 server.use(express.static('.')) 到 server.js，托管客户端文件。
+| 将 <script type="module" src="/client.js"></script> 添加到 HTML 外壳以加载客户端入口文件。
+| 通过在 HTML 外壳中添加 Import Map 以支持在浏览器中使用 import \* from 'vue'。
+
 6.3 更通用的解决方案
-6.4 书写SSR友好的代码
+
+生产就绪一个完整的 SSR 应用，实现会非常复杂，官方推荐[Nuxt](https://nuxt.com/)，一个构建于 Vue 生态系统之上的全栈框架，官方强烈建议你试一试。
+
+6.4 书写 SSR 友好的代码
+
+遵循以下原则：
+
+| 响应性在服务端是不必要的。默认情况是禁用的。
+| 避免在 setup() 或者 <script setup> 的根作用域中使用会产生副作用且需要被清理的代码。如 setInterval
+| 通用代码不能访问平台特有的 API，如 window 或 document
+| SSR 环境下应用模块通常只在服务器启动时初始化一次。如果我们用单个用户特定的数据对共享的单例状态进行修改，那么这个状态可能会意外地泄露给另一个用户的请求。我们把这种情况称为跨请求状态污染。
+| 如果预渲染的 HTML 的 DOM 结构不符合客户端应用的期望，就会出现激活不匹配。
+| 服务端自定义指令和客户端不一样，服务器是 getSSRProps 指令钩子。
 
 七 最佳实践
 
