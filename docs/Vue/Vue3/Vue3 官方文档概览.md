@@ -4154,6 +4154,125 @@ npm run test
 
 6. 服务端渲染（SSR）
 
+6.1 总览
+
+6.1.1 什么是SSR？
+
+Vue 也支持将组件在服务端直接渲染成 HTML 字符串，作为服务端响应返回给浏览器，最后在浏览器端将静态的 HTML“激活”(hydrate) 为能够交互的客户端应用。
+
+6.1.2 为什么要用 SSR？
+
+更快的首屏加载：服务端渲染的 HTML 无需等到所有的 JavaScript 都下载并执行完成之后才显示，所以你的用户将会更快地看到完整渲染的页面。更快的数据库连接。
+
+统一的心智模型：你可以使用相同的语言以及相同的声明式、面向组件的心智模型来开发整个应用，而不需要在后端模板系统和前端框架之间来回切换。
+
+更好的 SEO：搜索引擎爬虫可以直接看到完全渲染的页面。
+
+6.1.3 SSR的弊端
+
+开发限制：浏览器端特定的代码只能在某些生命周期钩子中使用；一些外部库可能需要特殊处理才能在服务端渲染的应用中运行。
+
+更多的构建、部署要求：服务端渲染的应用需要一个能让 Node.js 服务器运行的环境，不像完全静态的 SPA 那样可以部署在任意的静态文件服务器上。
+
+更高的服务端负载：在 Node.js 中渲染一个完整的应用要比仅仅托管静态文件更加占用 CPU 资源，因此如果你预期有高流量，请为相应的服务器负载做好准备，并采用合理的缓存策略。
+
+6.1.4 SSR vs. SSG
+
+静态站点生成 (Static-Site Generation，缩写为 SSG)，也被称为预渲染，是另一种流行的构建快速网站的技术。
+
+如果用服务端渲染一个页面所需的数据对每个用户来说都是相同的，那么我们可以只渲染一次，提前在构建过程中完成，而不是每次请求进来都重新渲染页面。预渲染的页面生成后作为静态 HTML 文件被服务器托管。
+
+SSG 保留了和 SSR 应用相同的性能表现：它带来了优秀的首屏加载性能。同时，它比 SSR 应用的花销更小，也更容易部署，因为它输出的是静态 HTML 和资源文件。这里的关键词是静态：SSG 仅可以用于消费静态数据的页面，即数据在构建期间就是已知的，并且在多次部署期间不会改变。每当数据变化时，都需要重新部署。
+
+如果你调研 SSR 只是为了优化为数不多的营销页面的 SEO (例如 /、/about 和 /contact 等)，那么你可能需要 SSG 而不是 SSR。SSG 也非常适合构建基于内容的网站，比如文档站点或者博客。
+
+6.2 基础教程
+
+6.2.1 渲染一个应用
+
+创建一个新的文件夹，cd 进入
+执行 npm init -y
+在 package.json 中添加 "type": "module" 使 Node.js 以 ES modules mode 运行
+执行 npm install vue
+创建一个 example.js 文件：
+
+```js
+// 此文件运行在 Node.js 服务器上
+import { createSSRApp } from 'vue'
+// Vue 的服务端渲染 API 位于 `vue/server-renderer` 路径下
+import { renderToString } from 'vue/server-renderer'
+
+const app = createSSRApp({
+  data: () => ({ count: 1 }),
+  template: `<button @click="count++">{{ count }}</button>`
+})
+
+renderToString(app).then((html) => {
+  console.log(html)
+})
+```
+
+接着运行：
+
+```sh
+node example.js
+```
+
+它应该会在命令行中打印出如下内容：
+
+```js
+<button>1</button>
+```
+
+然后我们可以把 Vue SSR 的代码移动到一个服务器请求处理函数里，它将应用的 HTML 片段包装为完整的页面 HTML。接下来的几步我们将会使用 express：
+
+执行 npm install express
+创建下面的 server.js 文件：
+
+```js
+import express from 'express'
+import { createSSRApp } from 'vue'
+import { renderToString } from 'vue/server-renderer'
+
+const server = express()
+
+server.get('/', (req, res) => {
+  const app = createSSRApp({
+    data: () => ({ count: 1 }),
+    template: `<button @click="count++">{{ count }}</button>`
+  })
+
+  renderToString(app).then((html) => {
+    res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Vue SSR Example</title>
+      </head>
+      <body>
+        <div id="app">${html}</div>
+      </body>
+    </html>
+    `)
+  })
+})
+
+server.listen(3000, () => {
+  console.log('ready')
+})
+```
+
+最后，执行 node server.js，访问 http://localhost:3000。你应该可以看到页面中的按钮了。
+
+6.2.2 客户端激活
+
+
+
+6.2.3 代码结构
+
+6.3 更通用的解决方案
+6.4 书写SSR友好的代码
+
 七 最佳实践
 
 1. 生产部署
