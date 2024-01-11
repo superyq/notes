@@ -4349,17 +4349,143 @@ server.get("/", (req, res) => {
 七 最佳实践
 
 1. 生产部署
+
+1.1 开发环境 vs 生产环境
+
+开发环境中提供了许多功能来提升开发体验，这些功能在生产环境中并不会被使用，应该移除所有未使用的。
+
+1.2 不使用构建工具
+
+不适用构建工具，从 CDN 或其他源来加载 Vue，使用的是生产环境版本（以 .prod.js 结尾的构建文件）。
+
+1.3 使用构建工具
+
+通过 create-vue（基于 Vite）或是 Vue CLI（基于 webpack）搭建的项目都已经预先做好了针对生产环境的配置。
+
+1.4 追踪运行时错误
+
+```js
+import { createApp } from 'vue'
+const app = createApp(...)
+app.config.errorHandler = (err, instance, info) => {
+  // 向追踪服务报告错误
+}
+```
+
 2. 性能优化
+
+2.1 概述
+
+Vue 很优秀了，一般不用优化，但遇到特殊场景需要微调。
+
+页面加载性能：首次访问时，应用展示出内容与达到可交互状态的速度。
+
+更新性能：应用响应用户输入更新的速度。
+
+2.2 分析选项
+
+为了提高性能，我们首先需要知道如何衡量它。
+
+生产部署的负载性能分析：[PageSpeed Insights](https://pagespeed.web.dev/)、[WebPageTest](https://www.webpagetest.org/)
+
+本地开发性能分析：[Chrome 开发者工具“性能”面板](https://developer.chrome.com/docs/devtools/evaluate-performance/)
+
+2.3 页面加载优化
+
+| 如果用例对页面加载性能很敏感，请避免将其部署为纯客户端的 SPA，而是让服务器直接发送包含用户想要查看的内容的 HTML 代码。纯客户端渲染存在首屏加载缓慢的问题，这可以通过服务器端渲染 (SSR) 或静态站点生成 (SSG) 来缓解。
+| 尽可能的采用构建步骤
+| 引入新的依赖项时要小心包体积膨胀！
+| 代码分割：按需加载文件。页面加载时需要的功能可以立即下载，而额外的块只在需要时才加载，从而提高性能。
+
+2.4 更新优化
+
+在 Vue 之中，一个子组件只会在其至少一个 props 改变时才会更新。所以尽量让传给子组件的 props 尽量保持稳定。
+
+v-once 是一个内置的指令，可以用来渲染依赖运行时数据但无需再更新的内容。它的整个子树都会在未来的更新中被跳过。
+
+v-memo 是一个内置指令，可以用来有条件地跳过某些大型子树或者 v-for 列表的更新。
+
+2.5 通用优化
+
+渲染大型列表，会变得很慢，可以通过列表虚拟化来提升性能。现有库[vue-virtual-scroller](https://github.com/Akryum/vue-virtual-scroller)、[vue-virtual-scroll-grid](https://github.com/rocwang/vue-virtual-scroll-grid)、[vueuc/VVirtualList](https://github.com/07akioni/vueuc)
+
 3. 无障碍访问
+
+3.1 跳过链接
+
+你应该在每个页面的顶部添加一个直接指向主内容区域的链接，这样用户就可以跳过在多个网页上重复的内容。通常这个链接会放在 App.vue 的顶部。
+
+3.2 内容结构
+
+确保设计可以支持易于访问的实现是无障碍访问最重要的部分之一。设计不仅要考虑颜色对比度、字体选择、文本大小和语言，还要考虑应用中的内容是如何组织的。
+
+3.3 语义化表单
+
+当创建一个表单，你可能使用到以下几个元素：<form>、<label>、<input>、<textarea> 和 <button>。标签通常放置在表格字段的顶部或左侧。
+
+3.4 规范
+
+万维网联盟 (W3C) Web 无障碍访问倡议 (WAI) 为不同的组件制定了 Web 无障碍性标准
+
 4. 安全
 
-八 TypeScript
+4.1 报告漏洞
 
-1. 总览
-2. TS 与组合式 Api
-3. Ts 与选项式 Api
+建议始终使用最新版本的 Vue 及其官方配套库，以确保你的应用尽可能地安全。
 
-九 进阶主题
+4.2 首要规则：不要使用无法信赖的模板
+
+使用 Vue 时最基本的安全规则就是不要将无法信赖的内容作为你的组件模板。
+
+使用无法信赖的模板相当于允许任意的 JavaScript 在你的应用中执行。
+
+更糟糕的是，如果在服务端渲染时执行了这些代码，可能会导致服务器被攻击。举例来说：
+
+```js
+Vue.createApp({
+  template: `<div>` + userProvidedString + `</div>`, // 永远不要这样做！
+}).mount("#app");
+```
+
+4.3 Vue 自身的安全机制
+
+无论是使用模板还是渲染函数，内容都是自动转义的。从而防止脚本注入。这意味着在这个模板中：
+
+```vue
+<h1>{{ userProvidedString }}</h1>
+```
+
+如果 userProvidedString 包含了：
+
+```js
+'<script>alert("hi")</script>';
+```
+
+那么它将被转义为如下的 HTML：
+
+```html
+&lt;script&gt;alert(&quot;hi&quot;)&lt;/script&gt;
+```
+
+4.4 潜在的危险
+
+在任何 Web 应用中，允许以 HTML、CSS 或 JavaScript 形式执行未经无害化处理的、用户提供的内容都有潜在的安全隐患，因此这应尽可能避免。
+
+4.5 最佳实践
+
+最基本的规则就是只要你允许执行未经无害化处理的、用户提供的内容 (无论是 HTML、JavaScript 还是 CSS)，你就可能面临攻击。无论是使用 Vue、其他框架，或是不使用框架，道理都是一样的。
+
+建议你熟读这些资源：[HTML5 安全手册](https://html5sec.org/),[OWASP 的跨站脚本攻击 (XSS) 防护手册](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)
+
+4.6 后端协调
+
+类似跨站请求伪造 (CSRF/XSRF) 和跨站脚本引入 (XSSI) 这样的 HTTP 安全漏洞，主要由后端负责处理，因此它们不是 Vue 职责范围内的问题。
+
+4.7 服务端渲染（SSR）
+
+在使用 SSR 时请确保遵循[SSR 文档](https://cn.vuejs.org/guide/scaling-up/ssr.html)给出的最佳实践来避免产生漏洞。
+
+八 进阶主题
 
 1. 使用 Vue 的多种方式
 2. 组合式 Api 常见问答
