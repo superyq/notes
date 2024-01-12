@@ -4579,4 +4579,169 @@ whenDepsChange(update);
 4. 渲染机制
 5. 渲染函数 & JSX
 6. Vue 与 Web Components
-7. 动画技巧
+
+Web Components 是一组 web 原生 API 的统称，允许开发者创建可复用的自定义元素 (custom elements)。
+
+自定义元素的主要好处是，它们可以在使用任何框架，甚至是在不使用框架的场景下使用。
+
+6.1 在 Vue 中使用自定义元素
+
+默认情况下，Vue 会将非原生的 HTML 标签优先当作 Vue 组件处理，而将“渲染一个自定义元素”作为后备选项。要让 Vue 知晓特定元素应该被视为自定义元素并跳过组件解析，我们可以指定 compilerOptions.isCustomElement 这个选项。
+
+```js
+// 仅在浏览器内编译时才会工作
+// 如果使用了构建工具，请看下面的配置示例
+app.config.compilerOptions.isCustomElement = (tag) => tag.includes('-')
+```
+
+```js
+// vite.config.js
+import vue from '@vitejs/plugin-vue'
+
+export default {
+  plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          // 将所有带短横线的标签名都视为自定义元素
+          isCustomElement: (tag) => tag.includes('-')
+        }
+      }
+    })
+  ]
+}
+```
+
+```js
+// vue.config.js
+module.exports = {
+  chainWebpack: config => {
+    config.module
+      .rule('vue')
+      .use('vue-loader')
+      .tap(options => ({
+        ...options,
+        compilerOptions: {
+          // 将所有以 ion- 开头的标签都视为自定义元素
+          isCustomElement: tag => tag.startsWith('ion-')
+        }
+      }))
+  }
+}
+```
+
+6.2 使用Vue构建自定义元素
+
+Vue 提供了一个和定义一般 Vue 组件几乎完全一致的 defineCustomElement 方法来支持创建自定义元素。这个方法接收的参数和 defineComponent 完全相同。但它会返回一个继承自 HTMLElement 的自定义元素构造器：
+
+```vue
+<my-vue-element></my-vue-element>
+```
+
+```js
+
+```
+
+6.3 Web Components vs Vue Components
+
+1. 动画技巧
+
+Vue 除了 <Transition> 和 <TransitionGroup>，还有其他的方式制作动画。
+
+7.1 基于 Css class 的动画
+
+对于那些不是正在进入或离开 DOM 的元素，可以通过给它们动态添加 CSS class 来触发动画：
+
+```js
+const disabled = ref(false);
+
+function warnDisabled() {
+  disabled.value = true;
+  setTimeout(() => {
+    disabled.value = false;
+  }, 1500);
+}
+```
+
+```vue
+<div :class="{ shake: disabled }">
+  <button @click="warnDisabled">Click me</button>
+  <span v-if="disabled">This feature is disabled!</span>
+</div>
+```
+
+```css
+.shake {
+  animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  transform: translate3d(0, 0, 0);
+}
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+```
+
+7.2 状态驱动的动画
+
+有些过渡效果可以通过动态插值来实现，比如在交互时动态地给元素绑定样式。看下面这个例子：
+
+```js
+const x = ref(0);
+function onMousemove(e) {
+  x.value = e.clientX;
+}
+```
+
+```vue
+<div
+  @mousemove="onMousemove"
+  :style="{ backgroundColor: `hsl(${x}, 80%, 50%)` }"
+  class="movearea"
+>
+  <p>Move your mouse across this div...</p>
+  <p>x: {{ x }}</p>
+</div>
+```
+
+```css
+.movearea {
+  transition: 0.3s background-color ease;
+}
+```
+
+7.3 基于侦听器的动画
+
+通过发挥一些创意，我们可以基于一些数字状态，配合侦听器给任何东西加上动画。例如，我们可以将数字本身变成动画：
+
+```js
+import { ref, reactive, watch } from "vue";
+import gsap from "gsap";
+const number = ref(0);
+const tweened = reactive({
+  number: 0,
+});
+watch(number, (n) => {
+  gsap.to(tweened, { duration: 0.5, number: Number(n) || 0 });
+});
+```
+
+```vue
+Type a number:
+<input v-model.number="number" />
+<p>{{ tweened.number.toFixed(0) }}</p>
+```
