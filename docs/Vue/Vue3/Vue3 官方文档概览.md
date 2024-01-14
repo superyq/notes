@@ -1,4 +1,6 @@
-# Vue3 官方文档速通
+# Vue3 官方文档概览
+
+前言：参考[Vue 官方文档](https://cn.vuejs.org/guide/introduction.html)，之后文章主要学习组合式 API。
 
 一 开始
 
@@ -6,60 +8,47 @@
 
 1.1 什么是 Vue？
 
-一款 JavaScript 框架，并有两个核心功能：声明式渲染、响应性。
+一款 JS 框架，并有两个核心功能：声明式渲染、响应性。
 
 1.2 渐进式框架
 
-根据你的需求场景，你可以用不同的方式使用 Vue：
+根据不同的需求场景，使用不同方式的 Vue，比如：
 
-无需构建步骤，渐进式增强静态的 HTML
-在任何页面中作为 Web Components 嵌入
-单页应用 (SPA)
-全栈 / 服务端渲染 (SSR)
-Jamstack / 静态站点生成 (SSG)
-开发桌面端、移动端、WebGL，甚至是命令行终端中的界面
+| 无需构建步骤，直接引入 vuejs。
+| 在任何页面中作为 Web Components 嵌入
+| 使用构建步骤，单页应用 (SPA)
+| 全栈 / 服务端渲染 (SSR)
+| Jamstack / 静态站点生成 (SSG)
+| 开发桌面端、移动端、WebGL，甚至是命令行终端中的界面
 
-你可以根据实际场景来选择使用 Vue 的最佳方式，在各种场景下都可以保持同样的开发效率。
-这就是为什么我们将 Vue 称为“渐进式框架”：它是一个可以与你共同成长、适应你不同需求的框架。
+Vue 为什么可以称为“渐进式框架”：它是一个可以与你共同成长、适应你不同需求的框架。
 
 1.3 单文件组件
 
 单文件组件是 Vue 的标志性功能。
-\*.vue、SFC 就是单文件组件：会将一个组件的逻辑 (JavaScript)，模板 (HTML) 和样式 (CSS) 封装在同一个文件里。
+
+\*.vue、SFC 就是单文件组件：将一个组件的逻辑 (JS)，模板 (HTML) 和样式 (CSS) 封装在同一个文件里。
 
 1.4 API 风格
 
-选项式 API（Options API）
+选项式 API（Options API）：包含多个选项的对象来描述组件的逻辑，例如 data、methods 和 mounted。
 
-包含多个选项的对象来描述组件的逻辑，例如 data、methods 和 mounted。
-选项所定义的属性都会暴露在函数内部的 this 上，它会指向当前的组件实例。
-选项式 API 以“组件实例”的概念为中心 (即上述例子中的 this)
-它将响应性相关的细节抽象出来，并强制按照选项来组织代码，从而对初学者而言更为友好。
+组合式 API（Composition API）：使用导入的 API 函数来描述组件逻辑。通常会与 <script setup> 搭配使用。
 
-组合式 API（Composition API）
-
-使用导入的 API 函数来描述组件逻辑。
-组合式 API 通常会与 <script setup> 搭配使用。<script setup> 中的导入和顶层变量/函数都能够在模板中直接使用。
-组合式 API 的核心思想是直接在函数作用域内定义响应式状态变量，并将从多个函数中得到的状态组合起来处理复杂问题。
-这种形式更加自由，也需要你对 Vue 的响应式系统有更深的理解才能高效使用。相应的，它的灵活性也使得组织和重用逻辑的模式变得更加强大。
-
-综上：两种 API 是同一个底层系统所提供的两套不同的接口。选项式 API 是在组合式 API 的基础上实现的！
+综上：两种 API 是同一个底层系统构建的。选项式 API 是在组合式 API 的基础上实现的！
 
 2. 快速上手
 
 2.1 创建一个 Vue 应用
 
-这一指令将会安装并执行 create-vue，它是 Vue 官方的项目脚手架工具。
-
 ```js
+// 安装并执行 create-vue，它是 Vue 官方的项目脚手架工具。
 npm create vue@latest
 ```
 
 2.2 通过 CDN 使用 Vue
 
-通过 CDN 使用 Vue 时，不涉及“构建步骤”。这使得设置更加简单，并且可以用于增强静态的 HTML 或与后端框架集成。但是，你将无法使用单文件组件 (SFC) 语法。
-
-下面的链接使用了全局构建版本的 Vue，该版本的所有顶层 API 都以属性的形式暴露在了全局的 Vue 对象上。这里有一个使用全局构建版本的例子：
+可以用于增强静态的 HTML 或与后端框架集成。但将无法使用单文件组件 (SFC) 语法。
 
 ```html
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -80,7 +69,7 @@ npm create vue@latest
 </script>
 ```
 
-在本文档的其余部分我们使用的主要是 ES 模块语法。现代浏览器大多都已原生支持 ES 模块。因此我们可以像这样通过 CDN 以及原生 ES 模块使用 Vue：
+通过 CDN 以及原生 ES 模块使用 Vue：
 
 ```html
 <div id="app">{{ message }}</div>
@@ -102,7 +91,7 @@ npm create vue@latest
 </script>
 ```
 
-我们可以使用导入映射表 (Import Maps) 来告诉浏览器如何定位到导入的 vue：
+使用导入映射表 (Import Maps) 来告诉浏览器如何定位到导入的 vue：
 
 ```html
 <script type="importmap">
@@ -129,7 +118,7 @@ npm create vue@latest
 </script>
 ```
 
-随着对这份指南的逐步深入，我们可能需要将代码分割成单独的 JavaScript 文件，以便更容易管理。例如：
+分割代码成单独的 JS 文件，以便管理。
 
 ```html
 <!-- index.html -->
@@ -155,7 +144,7 @@ export default {
 };
 ```
 
-注意：直接点击 index.html，会抛出错误，因为 ES 模块不能通过 file:// 协议工作。由于安全原因，ES 模块只能通过 http:// 协议工作。要启动一个本地的 HTTP 服务器，请先安装 Node.js，然后通过命令行在 HTML 文件所在文件夹下运行 npx serve。
+注意：直接点击 index.html，会抛错误，因为 ES 模块不能通过 file:// 协议工作。只能通过 http:// 协议工作。需要启动一个本地的 HTTP 服务器，通过命令行在 HTML 文件所在文件夹下运行 npx serve。
 
 二 基础
 
@@ -163,7 +152,7 @@ export default {
 
 1.1 应用实例
 
-每个 Vue 应用都是通过 createApp 函数创建一个新的 应用实例：
+通过 createApp 函数创建 Vue 应用实例：
 
 ```js
 import { createApp } from "vue";
@@ -175,7 +164,7 @@ const app = createApp({
 
 1.2 根组件
 
-我们传入 createApp 的对象实际上是一个组件，每个应用都需要一个“根组件”，其他组件将作为其子组件。
+createApp 需要传入一个根组件，其他组件将作为其子组件。
 
 ```js
 import { createApp } from "vue";
@@ -187,69 +176,32 @@ const app = createApp(App);
 
 1.3 挂载应用
 
-应用实例必须在调用了 .mount() 方法后才会渲染出来。该方法接收一个“容器”参数，可以是一个实际的 DOM 元素或是一个 CSS 选择器字符串：
+调用 .mount() 方法，传入一个 DOM 元素或是 CSS 选择器。它的返回值是根组件实例而非应用实例。
 
 ```html
 <div id="app"></div>
 ```
 
-.mount() 方法应该始终在整个应用配置和资源注册完成后被调用。同时请注意，不同于其他资源注册方法，它的返回值是根组件实例而非应用实例。
-
 ```js
-app.mount("#app");
-```
-
-根组件的模板通常是组件本身的一部分，但也可以直接通过在挂载容器内编写模板来单独提供：
-
-当根组件没有设置 template 选项时，Vue 将自动使用容器的 innerHTML 作为模板。
-
-DOM 内模板通常用于无构建步骤的 Vue 应用程序。它们也可以与服务器端框架一起使用，其中根模板可能是由服务器动态生成的。
-
-```html
-<div id="app">
-  <button @click="count++">{{ count }}</button>
-</div>
-```
-
-```js
-import { createApp } from "vue";
-
-const app = createApp({
-  data() {
-    return {
-      count: 0,
-    };
-  },
-});
-
 app.mount("#app");
 ```
 
 1.4 应用配置
 
-应用实例会暴露一个 .config 对象允许我们配置一些应用级的选项，例如定义一个应用级的错误处理器，用来捕获所有子组件上的错误：
+注意：确保在挂载应用实例之前完成所有应用配置！
 
 ```js
+// 应用实例的 .config 对象可以进行一些配置，例如配置错误处理器：用来捕获所有子组件上的错误：
 app.config.errorHandler = (err) => {
   /* 处理错误 */
 };
-```
 
-应用实例还提供了一些方法来注册应用范围内可用的资源，例如注册一个组件：
-
-```js
+// 全局挂载组件
 app.component("TodoDeleteButton", TodoDeleteButton);
-```
 
-一个用于注册能够被应用内所有组件实例访问到的全局属性的对象。
-
-```js
+// 全局属性的对象。
 app.config.globalProperties.msg = "hello";
-```
-
-这使得 msg 在应用的任意组件模板上都可用，并且也可以通过任意组件实例的 this 访问到：
-
-```js
+// 通过 this 访问
 export default {
   mounted() {
     console.log(this.msg); // 'hello'
@@ -257,11 +209,9 @@ export default {
 };
 ```
 
-注意：确保在挂载应用实例之前完成所有应用配置！
-
 1.5 多个应用实例
 
-应用实例并不只限于一个。createApp API 允许你在同一个页面中创建多个共存的 Vue 应用，而且每个应用都拥有自己的用于配置和全局资源的作用域。
+每个应用都拥有自己的用于配置和全局资源的作用域。
 
 ```js
 const app1 = createApp({
@@ -277,14 +227,9 @@ app2.mount("#container-2");
 
 2. 模板语法
 
-我们能够声明式地将其组件实例的数据绑定到呈现的 DOM 上。
-在底层机制中，Vue 会将模板编译成高度优化的 JavaScript 代码。结合响应式系统，当应用状态变更时，Vue 能够智能地推导出需要重新渲染的组件的最少数量，并应用最少的 DOM 操作。
-
 2.1 文本插值
 
-最基本的数据绑定形式是文本插值，它使用的是“Mustache”语法 (即双大括号)：
-
-双大括号标签会被替换为相应组件实例中 msg 属性的值。
+最基本的数据绑定是文本插值，使用“Mustache”语法 (即双大括号)：
 
 ```html
 <span>Message: {{ msg }}</span>
@@ -292,40 +237,26 @@ app2.mount("#container-2");
 
 2.2 原始 HTML
 
-双大括号会将数据解释为纯文本，而不是 HTML。若想插入 HTML，你需要使用 v-html 指令：
+双大括号会将数据解释为纯文本，若想插入 HTML，需要使用 v-html 指令。
 
-这里看到的 v-html attribute 被称为一个指令。指令由 v- 作为前缀，表明它们是一些由 Vue 提供的特殊 attribute，它们将为渲染的 DOM 应用特殊的响应式行为。
+安全警告：动态渲染 HTML 是很危险的，容易造成 XSS 漏洞。仅在内容安全可信时再使用 v-html，并且永远不要使用用户提供的 HTML 内容。
 
 ```html
 <p>Using text interpolation: {{ rawHtml }}</p>
 <p>Using v-html directive: <span v-html="rawHtml"></span></p>
 ```
 
-安全警告：在网站上动态渲染任意 HTML 是非常危险的，因为这非常容易造成 XSS 漏洞。请仅在内容安全可信时再使用 v-html，并且永远不要使用用户提供的 HTML 内容。
-
 2.3 Attribute 绑定
 
-想要响应式地绑定一个 attribute，应该使用 v-bind 指令：
+绑定 attribute，使用 v-bind 指令。
 
 ```html
 <div v-bind:id="dynamicId"></div>
-```
-
-因为 v-bind 非常常用，所以提供了特定的简写语法：
-
-```html
+<!-- 简写 -->
 <div :id="dynamicId"></div>
 ```
 
-布尔型 attribute 依据 true / false 值来决定 attribute 是否应该存在于该元素上。disabled 就是最常见的例子之一。
-
-当 isButtonDisabled 为真值或一个空字符串 (即 <button disabled="">) 时，元素会包含这个 disabled attribute。而当其为其他假值时 attribute 将被忽略。
-
-```html
-<button :disabled="isButtonDisabled">Button</button>
-```
-
-动态绑定多个值
+绑定多个值，通过不带参数的 v-bind。
 
 ```js
 const objectOfAttrs = {
@@ -334,15 +265,13 @@ const objectOfAttrs = {
 };
 ```
 
-通过不带参数的 v-bind，你可以将它们绑定到单个元素上：
-
 ```html
 <div v-bind="objectOfAttrs"></div>
 ```
 
-2.4 使用 JavaScript 表达式
+2.4 使用 JS 表达式
 
-数据绑定都支持完整的 JavaScript 表达式，也就是一段能够被求值的 JavaScript 代码。一个简单的判断方法是是否可以合法地写在 return 后面。
+数据绑定都支持完整的 JS 表达式，也就是一段能够被求值的 JS 代码。一个简单的判断方法是是否可以合法地写在 return 后面。
 
 ```js
 {{ number + 1 }}
@@ -362,62 +291,34 @@ const objectOfAttrs = {
 </time>
 ```
 
-提示：绑定在表达式中的方法在组件每次更新时都会被重新调用，因此不应该产生任何副作用，比如改变数据或触发异步操作。
-
 2.5 指令 Directives
 
-指令是带有 v- 前缀的特殊 attribute。
-指令 attribute 的期望值为一个 JavaScript 表达式 (除了 v-for、v-on 和 v-slot 例外)。一个指令的任务是在其表达式的值变化时响应式地更新 DOM。
-以 v-if 为例：v-if 指令会基于表达式 seen 的值的真假来移除/插入该 <p> 元素
+指 v- 前缀的特殊 attribute。它的值为 JS 表达式（v-for、v-on、v-slot 除外），指令值变化时响应式的更新 DOM，比如 v-if。
 
 ```html
 <p v-if="seen">Now you see me</p>
 ```
 
-某些指令会需要一个“参数”，在指令名后通过一个冒号隔开做标识。
+带参数的指令，用':'隔开。
 
 ```html
 <a v-bind:href="url"> ... </a>
-
 <!-- 简写 -->
 <a :href="url"> ... </a>
 ```
 
-另一个例子是 v-on 指令，它将监听 DOM 事件：这里的参数是要监听的事件名称
+指令的参数，也可以动态绑定，用'[]'包裹。
 
 ```html
-<a v-on:click="doSomething"> ... </a>
-
-<!-- 简写 -->
-<a @click="doSomething"> ... </a>
-```
-
-同样在指令参数上也可以使用一个 JavaScript 表达式，需要包含在一对方括号内：
-
-```html
-<!--
-注意，参数表达式有一些约束，
-参见下面“动态参数值的限制”与“动态参数语法的限制”章节的解释
--->
 <a v-bind:[attributeName]="url"> ... </a>
-
 <!-- 简写 -->
 <a :[attributeName]="url"> ... </a>
 ```
 
-将一个函数绑定到动态的事件名称上：
+带修饰符的指令，用'.'隔开。
 
 ```html
-<a v-on:[eventName]="doSomething"> ... </a>
-
-<!-- 简写 -->
-<a @[eventName]="doSomething"></a>
-```
-
-修饰符是以点开头的特殊后缀，表明指令需要以一些特殊的方式被绑定。
-如 .prevent 修饰符会告知 v-on 指令对触发的事件调用 event.preventDefault()：
-
-```html
+<!-- 触发的事件调用 event.preventDefault() -->
 <form @submit.prevent="onSubmit">...</form>
 ```
 
@@ -425,7 +326,7 @@ const objectOfAttrs = {
 
 3.1 声明响应式状态
 
-在组合式 API 中，推荐使用 ref() 函数来声明响应式状态：
+官方推荐使用 ref() 函数来声明响应式状态。
 
 ```js
 import { ref } from "vue";
@@ -433,7 +334,7 @@ import { ref } from "vue";
 const count = ref(0);
 ```
 
-ref() 接收参数，并将其包裹在一个带有 .value 属性的 ref 对象中返回：
+ref() 接收参数，并返回一个带有 .value 属性的 ref 对象。
 
 ```js
 const count = ref(0);
@@ -445,38 +346,13 @@ count.value++;
 console.log(count.value); // 1
 ```
 
-要在组件模板中访问 ref，请从组件的 setup() 函数中声明并返回它们：
-
-```js
-import { ref } from "vue";
-
-export default {
-  setup() {
-    const count = ref(0);
-
-    function increment() {
-      // 在 JavaScript 中需要 .value
-      count.value++;
-    }
-
-    // 不要忘记同时暴露 increment 函数
-    return {
-      count,
-      increment,
-    };
-  },
-};
-```
-
-在模板中使用 ref 时，我们不需要附加 .value。ref 会自动解包 (有一些注意事项)。
-
-你也可以直接在事件监听器中改变一个 ref：
+在模板中使用 ref 变量，不需要添加 .value。ref 会自动解包。也可以直接在事件监听器中改变一个 ref。
 
 ```html
 <button @click="count++">{{ count }}</button>
 ```
 
-在 setup() 函数中手动暴露大量的状态和方法非常繁琐。幸运的是，我们可以通过使用单文件组件 (SFC) 来避免这种情况。我们可以使用 <script setup> 来大幅度地简化代码：
+通过单文件组件（SFC），使用 <script setup> 来大幅度地简化代码。
 
 ```vue
 <script setup>
@@ -496,11 +372,7 @@ function increment() {
 </template>
 ```
 
-为什么我们需要使用带有 .value 的 ref，而不是普通的变量？需要了解 Vue 的响应式系统是如何工作的。
-
-.value 属性给予了 Vue 一个机会来检测 ref 何时被访问或修改。在其内部，Vue 在它的 getter 中执行追踪，在它的 setter 中执行触发。从概念上讲，你可以将 ref 看作是一个像这样的对象：
-
-另一个 ref 的好处是，与普通变量不同，你可以将 ref 传递给函数，同时保留对最新值和响应式连接的访问。
+为什么使用 ref，而不是普通的变量。这是因为 Vue 需要通过.value 属性来实现状态响应性。基础原理是在 getter 中追踪，在 setter 中触发。
 
 ```js
 // 伪代码，不是真正的实现
@@ -517,29 +389,6 @@ const myRef = {
 };
 ```
 
-Ref 会使它的值具有深层响应性。这意味着即使改变嵌套对象或数组时，变化也会被检测到：
-
-提示：也可以通过 shallow ref 来放弃深层响应性。对于浅层 ref，只有 .value 的访问会被追踪。浅层 ref 可以用于避免对大型数据的响应性开销来优化性能、或者有外部库管理其内部状态的情况。
-
-```js
-import { ref } from "vue";
-
-const obj = ref({
-  nested: { count: 0 },
-  arr: ["foo", "bar"],
-});
-
-function mutateDeeply() {
-  // 以下都会按照期望工作
-  obj.value.nested.count++;
-  obj.value.arr.push("baz");
-}
-```
-
-DOM 更新时机
-
-当你修改响应式状态时，DOM 会被自动更新。但 DOM 更新不是同步的。Vue 会在“next tick”更新周期中缓冲所有状态的修改，以确保不管进行了多少次状态修改，每个组件都只会被更新一次。
-
 要等待 DOM 更新完成后再执行额外的代码，可以使用 nextTick() 全局 API：
 
 ```js
@@ -554,11 +403,7 @@ async function increment() {
 
 3.2 reactive()
 
-响应式对象是 JavaScript 代理，其行为就和普通对象一样。不同的是，Vue 能够拦截对响应式对象所有属性的访问和修改，以便进行依赖追踪和触发更新。
-
-reactive() 将深层地转换对象：当访问嵌套对象时，它们也会被 reactive() 包装。当 ref 的值是一个对象时，ref() 也会在内部调用它。与浅层 ref 类似，这里也有一个 shallowReactive() API 可以选择退出深层响应性。
-
-值得注意的是，reactive() 返回的是一个原始对象的 Proxy，它和原始对象是不相等的：
+reactive()，参数只能是对象类型，返回的是一个原始对象的 Proxy，它和原始对象是不相等的。
 
 ```js
 const raw = {};
@@ -568,51 +413,23 @@ const proxy = reactive(raw);
 console.log(proxy === raw); // false
 ```
 
-为保证访问代理的一致性，对同一个原始对象调用 reactive() 会总是返回同样的代理对象，而对一个已存在的代理对象调用 reactive() 会返回其本身：
+reactive() API 有一些局限性,官方建议使用 ref() 作为声明响应式状态的主要 API。博主个人还是喜欢 ref，reactive 混着用，注意哪些局限性就可以了。
+
+局限性包括：只能用于对象类型（对象，数组，Map，Set）、不能替换整个对象、对结构操作不友好。
 
 ```js
-// 在同一个对象上调用 reactive() 会返回相同的代理
-console.log(reactive(raw) === proxy); // true
-
-// 在一个代理上调用 reactive() 会返回它自己
-console.log(reactive(proxy) === proxy); // true
-```
-
-这个规则对嵌套对象也适用。依靠深层响应性，响应式对象内的嵌套对象依然是代理：
-
-```js
-const proxy = reactive({});
-
-const raw = {};
-proxy.nested = raw;
-
-console.log(proxy.nested === raw); // false
-```
-
-reactive() API 有一些局限性,由于这些限制，我们建议使用 ref() 作为声明响应式状态的主要 API。
-
-有限的值类型：它只能用于对象类型 (对象、数组和如 Map、Set 这样的集合类型)。它不能持有如 string、number 或 boolean 这样的原始类型。
-
-不能替换整个对象：由于 Vue 的响应式跟踪是通过属性访问实现的，因此我们必须始终保持对响应式对象的相同引用。这意味着我们不能轻易地“替换”响应式对象，因为这样的话与第一个引用的响应性连接将丢失：
-
-```js
+// 不能替换整个对象
 let state = reactive({ count: 0 });
-
 // 上面的 ({ count: 0 }) 引用将不再被追踪
 // (响应性连接已丢失！)
 state = reactive({ count: 1 });
-```
 
-对解构操作不友好：当我们将响应式对象的原始类型属性解构为本地变量时，或者将该属性传递给函数时，我们将丢失响应性连接：
-
-```js
+// 对解构不友好
 const state = reactive({ count: 0 });
-
 // 当解构时，count 已经与 state.count 断开连接
 let { count } = state;
 // 不会影响原始的 state
 count++;
-
 // 该函数接收到的是一个普通的数字
 // 并且无法追踪 state.count 的变化
 // 我们必须传入整个对象以保持响应性
@@ -621,7 +438,7 @@ callSomeFunction(state.count);
 
 3.3 额外的 ref 解包细节
 
-一个 ref 会在作为响应式对象的属性被访问或修改时自动解包。换句话说，它的行为就像一个普通的属性：
+一个 ref 会在作为响应式对象的属性被访问或修改时自动解包。
 
 ```js
 const count = ref(0);
@@ -635,65 +452,11 @@ state.count = 1;
 console.log(count.value); // 1
 ```
 
-如果将一个新的 ref 赋值给一个关联了已有 ref 的属性，那么它会替换掉旧的 ref：
-
-```js
-const otherCount = ref(2);
-
-state.count = otherCount;
-console.log(state.count); // 2
-// 原始 ref 现在已经和 state.count 失去联系
-console.log(count.value); // 1
-```
-
-与 reactive 对象不同的是，当 ref 作为响应式数组或原生集合类型(如 Map) 中的元素被访问时，它不会被解包：
-
-```js
-const books = reactive([ref("Vue 3 Guide")]);
-// 这里需要 .value
-console.log(books[0].value);
-
-const map = reactive(new Map([["count", ref(0)]]));
-// 这里需要 .value
-console.log(map.get("count").value);
-```
-
-在模板渲染上下文中，只有顶级的 ref 属性才会被解包。
-
-在下面的例子中，count 和 object 是顶级属性，但 object.id 不是：
-
-```js
-const count = ref(0);
-const object = { id: ref(1) };
-```
-
-这个表达式按预期工作：
-
-```html
-{{ count + 1 }}
-```
-
-但这个不会
-
-```html
-{{ object.id + 1 }}
-<!-- [object Object]1 -->
-```
-
-另一个需要注意的点是，如果 ref 是文本插值的最终计算值 (即 {{ }} 标签)，那么它将被解包，因此以下内容将渲染为 1：
-
-```html
-{{ object.id }}
-<!-- 等价于 {{ object.id.value }}。 -->
-```
-
 4. 计算属性
 
 4.1 基础示例
 
-使用计算属性来描述依赖响应式状态的复杂逻辑。
-
-computed() 方法期望接收一个 getter 函数，返回值为一个计算属性 ref。示例：
+computed() 方法期望接收一个 getter 函数，返回值为一个计算属性 ref。
 
 ```vue
 <script setup>
@@ -722,17 +485,11 @@ const publishedBooksMessage = computed(() => {
 
 4.2 计算属性缓存 vs 方法
 
-计算属性值会基于其响应式依赖被缓存。相比之下，方法调用总是会在重渲染发生时再次执行函数。
-
-这也解释了为什么下面的计算属性永远不会更新，因为 Date.now() 并不是一个响应式依赖：
-
-```js
-const now = computed(() => Date.now());
-```
+计算属性值会基于其响应式依赖被缓存。方法调用则总会在重新渲染时再次执行。
 
 4.3 可写计算属性
 
-计算属性默认是只读的。可以通过同时提供 getter 和 setter 来创建：
+计算属性默认是只读的。但可以通过设置 get 和 set 函数变成可读可写。
 
 ```vue
 <script setup>
@@ -757,21 +514,19 @@ const fullName = computed({
 
 4.4 最佳实践
 
-计算属性的 getter 应只做计算而没有任何其他的副作用，这一点非常重要，请务必牢记。举例来说，不要在 getter 中做异步请求或者更改 DOM！
-
-计算属性返回的值是派生状态。可以把它看作是一个“临时快照”，每当源状态发生变化时，就会创建一个新的快照。更改快照是没有意义的，因此计算属性的返回值应该被视为只读的，并且永远不应该被更改——应该更新它所依赖的源状态以触发新的计算。
+使用计算属性，不要在里面做异步请求和修改 DOM。并且尽量保持只读。
 
 5. 类与样式绑定
 
 5.1 绑定 HTML class
 
-我们可以给 :class (v-bind:class 的缩写) 传递一个对象来动态切换 class：
+通过对象来动态切换 class。
 
 ```html
 <div :class="{ active: isActive }"></div>
 ```
 
-绑定的对象并不一定需要写成内联字面量的形式，也可以直接绑定一个对象：
+可以直接绑定一个对象。
 
 ```js
 const classObject = reactive({
@@ -784,7 +539,7 @@ const classObject = reactive({
 <div :class="classObject"></div>
 ```
 
-我们可以给 :class 绑定一个数组来渲染多个 CSS class：
+通过数组渲染多个 class。
 
 ```js
 const activeClass = ref("active");
@@ -795,24 +550,24 @@ const errorClass = ref("text-danger");
 <div :class="[activeClass, errorClass]"></div>
 ```
 
-如果你也想在数组中有条件地渲染某个 class，你可以使用三元表达式：
+数组中也可以使用 JS 表达式。
 
 ```vue
 <div :class="[isActive ? activeClass : '', errorClass]"></div>
 <!-- 等于 -->
-<div :class="[{ active: isActive }, errorClass]"></div>
+<div :class="[{ activeClass: isActive }, errorClass]"></div>
 ```
 
-如果你的组件有多个根元素，你将需要指定哪个根元素来接收这个 class。你可以通过组件的 $attrs 属性来实现指定：
+如果组件有多个根元素，透传的 class 需要通过组件的 $attrs 属性来实现指定。
+
+```vue
+<MyComponent class="baz" />
+```
 
 ```vue
 <!-- MyComponent 模板使用 $attrs 时 -->
 <p :class="$attrs.class">Hi!</p>
 <span>This is a child component</span>
-```
-
-```vue
-<MyComponent class="baz" />
 ```
 
 ```vue
@@ -822,7 +577,7 @@ const errorClass = ref("text-danger");
 
 5.2 绑定内联样式
 
-:style 支持绑定 JavaScript 对象值，对应的是 HTML 元素的 style 属性：
+值为对象，对应的是 style 属性。
 
 ```js
 const activeColor = ref("red");
@@ -833,7 +588,7 @@ const fontSize = ref(30);
 <div :style="{ color: activeColor, fontSize: fontSize + 'px' }"></div>
 ```
 
-直接绑定一个样式对象通常是一个好主意，这样可以使模板更加简洁：
+直接绑定一个样式对象使模板更加简洁.
 
 ```js
 const styleObject = reactive({
@@ -846,7 +601,7 @@ const styleObject = reactive({
 <div :style="styleObject"></div>
 ```
 
-我们还可以给 :style 绑定一个包含多个样式对象的数组。这些对象会被合并后渲染到同一元素上：
+还可以绑定一个包含多个样式对象的数组。
 
 ```vue
 <div :style="[baseStyles, overridingStyles]"></div>
@@ -856,15 +611,13 @@ const styleObject = reactive({
 
 6.1 v-if、v-else、v-else-if
 
-v-if 指令用于条件性地渲染一块内容。这块内容只会在指令的表达式返回真值时才被渲染。
+v-if 指令用于条件性地渲染内容。当值为真时才被渲染。
 
 ```vue
 <h1 v-if="awesome">Vue is awesome!</h1>
 ```
 
-你也可以使用 v-else 为 v-if 添加一个“else 区块”。
-
-一个 v-else 元素必须跟在一个 v-if 或者 v-else-if 元素后面，否则它将不会被识别。
+v-else 为 v-if 添加一个“else 区块”。并且必须跟在一个 v-if 或者 v-else-if 元素后面。
 
 ```vue
 <button @click="awesome = !awesome">Toggle</button>
@@ -873,9 +626,7 @@ v-if 指令用于条件性地渲染一块内容。这块内容只会在指令的
 <h1 v-else>Oh no 😢</h1>
 ```
 
-v-else-if 提供的是相应于 v-if 的“else if 区块”。它可以连续多次重复使用：
-
-和 v-else 类似，一个使用 v-else-if 的元素必须紧跟在一个 v-if 或一个 v-else-if 元素后面。
+v-else-if 提供的是相应于 v-if 的“else if 区块”。可以连续多次使用。并且必须跟在一个 v-if 或者 v-else-if 元素后面。
 
 ```vue
 <div v-if="type === 'A'">
@@ -892,9 +643,7 @@ v-else-if 提供的是相应于 v-if 的“else if 区块”。它可以连续�
 </div>
 ```
 
-如果我们想要切换不止一个元素呢？在这种情况下我们可以在一个 <template> 元素上使用 v-if，这只是一个不可见的包装器元素，最后渲染的结果并不会包含这个 <template> 元素。
-
-v-else 和 v-else-if 也可以在 <template> 上使用。
+可以使用 <template> 包裹想要一起切换的元素块，渲染的结果并不会包含这个 <template> 元素。v-else、v-else-if 同理。
 
 ```vue
 <template v-if="ok">
@@ -906,33 +655,25 @@ v-else 和 v-else-if 也可以在 <template> 上使用。
 
 6.2 v-show
 
-另一个可以用来按条件显示一个元素的指令是 v-show。其用法基本一样。
-
-不同之处在于 v-show 会在 DOM 渲染中保留该元素；v-show 仅切换了该元素上名为 display 的 CSS 属性。
-
-v-show 不支持在 <template> 元素上使用，也不能和 v-else 搭配使用。
+v-show 仅切换了元素上 display 的 CSS 属性。且不支持在 <template> 元素上使用，也不能和 v-else 搭配使用。
 
 6.3 v-if vs v-show
 
-v-if 是“真实的”按条件渲染，因为它确保了在切换时，条件区块内的事件监听器和子组件都会被销毁与重建。
+v-if 切换的组件都会被销毁与重建。但是如果初始条件为 false，则不会做任何事，有更高的切换开销。
 
-v-if 也是惰性的：如果在初次渲染时条件值为 false，则不会做任何事。条件区块只有当条件首次变为 true 时才被渲染。
+v-show 切换的组件只有 display 属性被修改，但初始化都会渲染。有更高的渲染开销。
 
-相比之下，v-show 简单许多，元素无论初始条件如何，始终会被渲染，只有 CSS display 属性会被切换。
+综上：如果切换频繁用 v-show，反之用 v-if。
 
-总的来说，v-if 有更高的切换开销，而 v-show 有更高的初始渲染开销。因此，如果需要频繁切换，则使用 v-show 较好；如果在运行时绑定条件很少改变，则 v-if 会更合适。
+6.4 v-if 和 v-for
 
-6.3 v-if 和 v-for
-
-同时使用 v-if 和 v-for 是不推荐的，因为这样二者的优先级不明显。
-
-当 v-if 和 v-for 同时存在于一个元素上的时候，v-if 会首先被执行。
+v-if 和 v-for 不推荐同时使用，因为这样二者的优先级不明显。如果二者同时存在一个元素上，v-if 优先执行。
 
 7. 列表渲染
 
 7.1 v-for
 
-使用 v-for 指令基于一个数组来渲染一个列表。
+v-for 指令基于一个数组来渲染一个列表。
 
 ```js
 const parentMessage = ref("Parent");
@@ -945,7 +686,7 @@ const items = ref([{ message: "Foo" }, { message: "Bar" }]);
 </li>
 ```
 
-你也可以使用 of 作为分隔符来替代 in，这更接近 JavaScript 的迭代器语法：
+可以使用 of 替代 in。
 
 ```vue
 <div v-for="item of items"></div>
@@ -953,7 +694,7 @@ const items = ref([{ message: "Foo" }, { message: "Bar" }]);
 
 7.2 v-for 与对象
 
-你也可以使用 v-for 来遍历一个对象的所有属性。遍历的顺序会基于对该对象调用 Object.keys() 的返回值来决定。
+v-for 可以遍历对象属性
 
 ```js
 const myObject = reactive({
@@ -972,9 +713,7 @@ const myObject = reactive({
 
 7.3 在 v-for 里使用范围值
 
-v-for 可以直接接受一个整数值。在这种用例中，会将该模板基于 1...n 的取值范围重复多次。
-
-注意此处 n 的初值是从 1 开始而非 0。
+v-for 可以接受一个整数。从 1~n 开始遍历
 
 ```vue
 <span v-for="n in 10">{{ n }}</span>
@@ -993,19 +732,13 @@ v-for 可以直接接受一个整数值。在这种用例中，会将该模板�
 
 7.5 v-for 与 v-if
 
-当它们同时存在于一个节点上时，v-if 比 v-for 的优先级更高。这意味着 v-if 的条件将无法访问到 v-for 作用域内定义的变量别名：
+在同一节点上，v-if 比 v-for 优先级更高。意味着 v-if 的条件无法访问到 v-for 中的变量。
 
 ```html
-<!--
- 这会抛出一个错误，因为属性 todo 此时
- 没有在该实例上定义
--->
+<!-- 会抛出一个错误，因为v-if访问不到属性 todo -->
 <li v-for="todo in todos" v-if="!todo.isComplete">{{ todo.name }}</li>
-```
 
-在外新包装一层 <template> 再在其上使用 v-for 可以解决这个问题 (这也更加明显易读)：
-
-```html
+<!-- 解决方法:包裹一层template -->
 <template v-for="todo in todos">
   <li v-if="!todo.isComplete">{{ todo.name }}</li>
 </template>
@@ -1013,15 +746,7 @@ v-for 可以直接接受一个整数值。在这种用例中，会将该模板�
 
 7.6 通过 key 管理状态
 
-Vue 默认按照“就地更新”的策略来更新通过 v-for 渲染的元素列表。当数据项的顺序改变时，Vue 不会随之移动 DOM 元素的顺序，而是就地更新每个元素，确保它们在原本指定的索引位置上渲染。
-
-默认模式是高效的，但只适用于列表渲染输出的结果不依赖子组件状态或者临时 DOM 状态 (例如表单输入值) 的情况。
-
-为了给 Vue 一个提示，以便它可以跟踪每个节点的标识，从而重用和重新排序现有的元素，你需要为每个元素对应的块提供一个唯一的 key attribute。
-
-推荐在任何可行的时候为 v-for 提供一个 key attribute。
-
-key 绑定的值期望是一个基础类型的值，例如字符串或 number 类型。不要用对象作为 v-for 的 key。
+Vue 默认的 “就地更新” 策略是高效的，但当数据源的顺序改变时，Vue 不会随之移动 DOM 顺序，而是就地更新每个元素。解决这一问题需要给每个元素添加一个 Key 值，官方推荐使用 v-for 都添加 key 值。
 
 ```html
 <div v-for="item in items" :key="item.id">
@@ -1031,13 +756,11 @@ key 绑定的值期望是一个基础类型的值，例如字符串或 number �
 
 7.7 数组变化侦测
 
-Vue 能够侦听响应式数组的变更方法，并在它们被调用时触发相关的更新。这些变更方法包括：push()，pop()，shift()，unshift()，splice()，sort()，reverse()。
-
-不可变 (immutable) 方法，例如 filter()，concat() 和 slice()，这些都不会更改原数组，而总是返回一个新数组。
+Vue 能侦听响应式数组的变化。改变原数组的方法：push()，pop()，shift()，unshift()，splice()，sort()，reverse()。不改变元素组：filter()，concat()，slice()。
 
 7.8 展示过滤或排序后的结果
 
-有时，我们希望显示数组经过过滤或排序后的内容，而不实际变更或重置原始数据。在这种情况下，你可以创建返回已过滤或已排序数组的计算属性。
+使用 computed，在不修改数据源的前提下，展示过滤或排序后的数据。
 
 ```js
 const numbers = ref([1, 2, 3, 4, 5]);
@@ -1055,11 +778,7 @@ const evenNumbers = computed(() => {
 
 8.1 监听事件
 
-使用 v-on 指令 (简写为 @) 来监听 DOM 事件
-
-内联事件处理器：事件被触发时执行的内联 JavaScript 语句 (与 onclick 类似)。
-
-方法事件处理器：一个指向组件上定义的方法的属性名或是路径。
+使用 v-on 指令 (简写 @) 来监听 DOM 事件
 
 8.2 内联事件处理器
 
@@ -1090,11 +809,7 @@ function greet(event) {
 <button @click="greet">Greet</button>
 ```
 
-模板编译器会通过检查 v-on 的值是否是合法的 JavaScript 标识符或属性访问路径来断定是何种形式的事件处理器。举例来说，foo、foo.bar 和 foo['bar'] 会被视为方法事件处理器，而 foo() 和 count++ 会被视为内联事件处理器。
-
-8.4 在内联处理器中调用方法
-
-允许我们向方法传入自定义参数以代替原生事件：
+8.4 事件传参
 
 ```js
 function say(message) {
@@ -1107,9 +822,9 @@ function say(message) {
 <button @click="say('bye')">Say bye</button>
 ```
 
-8.5 在内联事件处理器中访问事件参数
+8.5 在方法中访问原生 DOM
 
-在内联事件处理器中访问原生 DOM 事件。向该处理器方法传入一个特殊的 $event 变量，或者使用内联箭头函数：
+通过 $event 变量访问原生 DOM，或使用内联箭头函数中的 event 形参
 
 ```html
 <!-- 使用特殊的 $event 变量 -->
@@ -1133,9 +848,7 @@ function warn(message, event) {
 
 8.6 事件修饰符
 
-在处理事件时调用 event.preventDefault() 或 event.stopPropagation() 是很常见的。尽管我们可以直接在方法内调用，但如果方法能更专注于数据逻辑而不用去处理 DOM 事件的细节会更好。
-
-为解决这一问题，Vue 为 v-on 提供了事件修饰符。修饰符是用 . 表示的指令后缀，包含以下这些：.stop，.prevent，.self，.capture，.once，.passive
+修饰符是用 . 表示的指令后缀，包含：.stop，.prevent，.self，.capture，.once，.passive
 
 ```html
 <!-- 单击事件将停止传递 -->
@@ -1182,24 +895,12 @@ function warn(message, event) {
 
 9.  表单输入绑定
 
-前端处理表单时，手动连接值绑定和更改事件监听器可能会很麻烦：
-
-```html
-<input :value="text" @input="event => text = event.target.value" />
-```
-
-v-model 指令帮我们简化了这一步骤：
+v-model 数据双向绑定
 
 ```html
 <input v-model="text" />
-```
-
-v-model 可根据所使用的元素自动使用对应的 DOM 属性和事件组合：
-
-```docs
-文本类型的 <input> 和 <textarea> 元素会绑定 value property 并侦听 input 事件；
-<input type="checkbox"> 和 <input type="radio"> 会绑定 checked property 并侦听 change 事件；
-<select> 会绑定 value property 并侦听 change 事件。
+<!-- 等价于 -->
+<input :value="text" @input="event => text = event.target.value" />
 ```
 
 9.1 基本用法
@@ -1264,29 +965,24 @@ v-model 可根据所使用的元素自动使用对应的 DOM 属性和事件组�
 
 10. 生命周期
 
-Vue 组件实例在创建时的初始化步骤，比如数据侦听，编译模板，挂载实例到 DOM，以及在数据改变时更新 DOM。
-在此过程中，它也会运行被称为生命周期钩子的函数，让开发者有机会在特定阶段运行自己的代码。
-
-10.1 注册周期钩子
-
-最常用的是 onMounted、onUpdated 和 onUnmounted
+Vue 组件实例的创建到销毁，一些列的生命周期钩子函数，可以让我们特定阶段运行自己的代码。最常用的是 onMounted、onUpdated 和 onUnmounted
 
 ```html
 <script setup>
   import { onMounted, onUpdated, onUnmounted } from "vue";
 
-  // onMounted 钩子可以用来在组件完成初始渲染并创建 DOM 节点后运行代码：
+  // 初始渲染、创建 DOM 节点后
   onMounted(() => {
     console.log(`the component is now mounted.`);
   });
 
-  // 在组件因为响应式状态变更而更新其 DOM 树之后调用。
+  // 组件更新 DOM 树之后。
   onUpdated(() => {
     // 文本内容应该与当前的 `count.value` 一致
     console.log(document.getElementById("count").textContent);
   });
 
-  // 在组件实例被卸载之后调用。
+  // 组件实例被卸载之后。
   let intervalId;
   onMounted(() => {
     intervalId = setInterval(() => {
@@ -1335,7 +1031,7 @@ Vue 组件实例在创建时的初始化步骤，比如数据侦听，编译模�
 </template>
 ```
 
-watch 的第一个参数可以是不同形式的“数据源”：它可以是一个 ref (包括计算属性)、一个响应式对象、一个 getter 函数、或多个数据源组成的数组：
+watch 的第一个参数可以是不同形式的“数据源”：它可以是一个 ref (包括计算属性)、一个响应式对象、一个 getter 函数、或多个数据源组成的数组。
 
 ```js
 const x = ref(0);
@@ -1360,21 +1056,16 @@ watch([x, () => y.value], ([newX, newY]) => {
 });
 ```
 
-注意，你不能直接侦听响应式对象的属性值，例如:
+重点：不能直接监听对象的属性。
 
 ```js
 const obj = reactive({ count: 0 });
-
 // 错误，因为 watch() 得到的参数是一个 number
 watch(obj.count, (count) => {
   console.log(`count is: ${count}`);
 });
-```
 
-这里需要用一个返回该属性的 getter 函数：
-
-```js
-// 提供一个 getter 函数
+// 解决：提供一个 getter 函数
 watch(
   () => obj.count,
   (count) => {
@@ -1385,7 +1076,7 @@ watch(
 
 11.2 深层侦听器
 
-直接给 watch() 传入一个响应式对象，会隐式地创建一个深层侦听器——该回调函数在所有嵌套的变更时都会被触发：
+给 watch() 传入一个响应式对象，会监听对象的所有属性。
 
 ```js
 const obj = reactive({ count: 0 });
@@ -1401,7 +1092,7 @@ obj.count++;
 
 11.3 即时回调的侦听器
 
-watch 默认是懒执行的：仅当数据源变化时，才会执行回调。但在某些场景中，我们希望在创建侦听器时，立即执行一遍回调。举例来说，我们想请求一些初始数据，然后在相关状态更改时重新请求数据。
+watch 默认是懒执行的：仅当数据源变化时，才会执行回调。可以通过设置immediate：true，立即执行一遍回调。
 
 ```js
 watch(
@@ -1619,7 +1310,7 @@ watchEffect(() => {
 </template>
 ```
 
-当不使用构建步骤时，一个 Vue 组件以一个包含 Vue 特定选项的 JavaScript 对象来定义：
+当不使用构建步骤时，一个 Vue 组件以一个包含 Vue 特定选项的 JS 对象来定义：
 
 ```js
 import { ref } from "vue";
@@ -1918,7 +1609,7 @@ defineProps({
 
 ```vue
 <!-- 虽然 `42` 是个常量，我们还是需要使用 v-bind -->
-<!-- 因为这是一个 JavaScript 表达式而不是一个字符串 -->
+<!-- 因为这是一个 JS 表达式而不是一个字符串 -->
 <BlogPost :likes="42" />
 
 <!-- 根据一个变量的值动态传入 -->
@@ -1928,21 +1619,21 @@ defineProps({
 <BlogPost is-published />
 
 <!-- 虽然 `false` 是静态的值，我们还是需要使用 v-bind -->
-<!-- 因为这是一个 JavaScript 表达式而不是一个字符串 -->
+<!-- 因为这是一个 JS 表达式而不是一个字符串 -->
 <BlogPost :is-published="false" />
 
 <!-- 根据一个变量的值动态传入 -->
 <BlogPost :is-published="post.isPublished" />
 
 <!-- 虽然这个数组是个常量，我们还是需要使用 v-bind -->
-<!-- 因为这是一个 JavaScript 表达式而不是一个字符串 -->
+<!-- 因为这是一个 JS 表达式而不是一个字符串 -->
 <BlogPost :comment-ids="[234, 266, 273]" />
 
 <!-- 根据一个变量的值动态传入 -->
 <BlogPost :comment-ids="post.commentIds" />
 
 <!-- 虽然这个对象字面量是个常量，我们还是需要使用 v-bind -->
-<!-- 因为这是一个 JavaScript 表达式而不是一个字符串 -->
+<!-- 因为这是一个 JS 表达式而不是一个字符串 -->
 <!-- <BlogPost
   :author="{
     name: 'Veronica',
@@ -3277,7 +2968,7 @@ function onLeaveCancelled(el) {}
 ```vue
 <!-- MyTransition.vue -->
 <script>
-// JavaScript 钩子逻辑...
+// JS 钩子逻辑...
 </script>
 
 <template>
@@ -3861,7 +3552,7 @@ Prettier 提供了格式化支持
 
 自定义块被编译成导入到同一 Vue 文件的不同请求查询。取决于底层构建工具如何处理这类导入请求。
 
-| 使用 Vite，需要一个自定义 Vite 插件将自定义块转换为可执行的 JavaScript 代码。[示例](https://github.com/vitejs/vite-plugin-vue/tree/main/packages/plugin-vue#example-for-transforming-custom-blocks)。
+| 使用 Vite，需要一个自定义 Vite 插件将自定义块转换为可执行的 JS 代码。[示例](https://github.com/vitejs/vite-plugin-vue/tree/main/packages/plugin-vue#example-for-transforming-custom-blocks)。
 | 如果使用 Vue CLI 或只是 webpack，需要使用一个 loader 来配置如何转换匹配到的自定义块。[示例](https://vue-loader.vuejs.org/zh/guide/custom-blocks.html#example)。
 
 2.10 底层库
@@ -4162,7 +3853,7 @@ Vue 也支持将组件在服务端直接渲染成 HTML 字符串，作为服务�
 
 6.1.2 为什么要用 SSR？
 
-更快的首屏加载：服务端渲染的 HTML 无需等到所有的 JavaScript 都下载并执行完成之后才显示，所以你的用户将会更快地看到完整渲染的页面。更快的数据库连接。
+更快的首屏加载：服务端渲染的 HTML 无需等到所有的 JS 都下载并执行完成之后才显示，所以你的用户将会更快地看到完整渲染的页面。更快的数据库连接。
 
 统一的心智模型：你可以使用相同的语言以及相同的声明式、面向组件的心智模型来开发整个应用，而不需要在后端模板系统和前端框架之间来回切换。
 
@@ -4437,7 +4128,7 @@ v-memo 是一个内置指令，可以用来有条件地跳过某些大型子树�
 
 使用 Vue 时最基本的安全规则就是不要将无法信赖的内容作为你的组件模板。
 
-使用无法信赖的模板相当于允许任意的 JavaScript 在你的应用中执行。
+使用无法信赖的模板相当于允许任意的 JS 在你的应用中执行。
 
 更糟糕的是，如果在服务端渲染时执行了这些代码，可能会导致服务器被攻击。举例来说：
 
@@ -4469,11 +4160,11 @@ Vue.createApp({
 
 4.4 潜在的危险
 
-在任何 Web 应用中，允许以 HTML、CSS 或 JavaScript 形式执行未经无害化处理的、用户提供的内容都有潜在的安全隐患，因此这应尽可能避免。
+在任何 Web 应用中，允许以 HTML、CSS 或 JS 形式执行未经无害化处理的、用户提供的内容都有潜在的安全隐患，因此这应尽可能避免。
 
 4.5 最佳实践
 
-最基本的规则就是只要你允许执行未经无害化处理的、用户提供的内容 (无论是 HTML、JavaScript 还是 CSS)，你就可能面临攻击。无论是使用 Vue、其他框架，或是不使用框架，道理都是一样的。
+最基本的规则就是只要你允许执行未经无害化处理的、用户提供的内容 (无论是 HTML、JS 还是 CSS)，你就可能面临攻击。无论是使用 Vue、其他框架，或是不使用框架，道理都是一样的。
 
 建议你熟读这些资源：[HTML5 安全手册](https://html5sec.org/),[OWASP 的跨站脚本攻击 (XSS) 防护手册](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)
 
@@ -4530,7 +4221,7 @@ Vue 可以构建桌面应用、移动端应用、3DWebGL
 
 2.3 与选项式 API 的关系
 
-在写组合式 API 的代码时也运用上所有普通 JavaScript 代码组织的最佳实践。
+在写组合式 API 的代码时也运用上所有普通 JS 代码组织的最佳实践。
 
 组合式 API 能够覆盖所有状态逻辑方面的需求。
 
@@ -4571,13 +4262,293 @@ whenDepsChange(update);
 ```
 
 3.2 Vue 中响应性是怎么工作的
-3.3 运行时 vs 编译时响应性
-3.4 响应性调试
-3.5 与外部系统状态集成
-3.6 与信号（signal）的联系
+
+在 JS 中有两种劫持 property 访问的方式：getter / setters 和 Proxies。Vue 2 使用 getter / setters，Vue 3 中则使用了 Proxy 来创建响应式对象。
+
+```js
+function reactive(obj) {
+  return new Proxy(obj, {
+    get(target, key) {
+      track(target, key);
+      return target[key];
+    },
+    set(target, key, value) {
+      target[key] = value;
+      trigger(target, key);
+    },
+  });
+}
+
+function ref(value) {
+  const refObject = {
+    get value() {
+      track(refObject, "value");
+      return value;
+    },
+    set value(newValue) {
+      value = newValue;
+      trigger(refObject, "value");
+    },
+  };
+  return refObject;
+}
+```
 
 4. 渲染机制
+
+4.1 虚拟 DOM
+
+虚拟 DOM (Virtual DOM，简称 VDOM) 是一种编程概念，意为将目标所需的 UI 通过数据结构“虚拟”地表示出来，保存在内存中，然后将真实的 DOM 与之保持同步。
+
+这里所说的 vnode 即一个纯 JS 的对象 (一个“虚拟节点”)，它代表着一个 <div> 元素。它包含我们创建实际元素所需的所有信息。它还包含更多的子节点，这使它成为虚拟 DOM 树的根节点。
+
+一个运行时渲染器将会遍历整个虚拟 DOM 树，并据此构建真实的 DOM 树。这个过程被称为挂载 (mount)。
+
+如果我们有两份虚拟 DOM 树，渲染器将会有比较地遍历它们，找出它们之间的区别，并应用这其中的变化到真实的 DOM 上。这个过程被称为更新 (patch)，又被称为“比对”(diffing) 或“协调”(reconciliation)。
+
+```js
+const vnode = {
+  type: "div",
+  props: {
+    id: "hello",
+  },
+  children: [
+    /* 更多 vnode */
+  ],
+};
+```
+
+4.2 渲染管线
+
+Vue 组件挂载时会发生如下几件事：编译：Vue 模板被编译为渲染函数、挂载：运行时渲染器调用渲染函数，遍历返回的虚拟 DOM 树、更新：当一个依赖发生变化后，副作用会重新运行，这时候会创建一个更新后的虚拟 DOM 树。
+
+4.3 模板 vs 渲染函数
+
+Vue 模板会被预编译成虚拟 DOM 渲染函数。
+
 5. 渲染函数 & JSX
+
+5.1 基础用法
+
+Vue 提供了一个 h() 函数用于创建 vnodes：
+
+```js
+import { h } from "vue";
+
+const vnode = h(
+  "div", // type
+  { id: "foo", class: "bar" }, // props
+  [
+    /* children */
+  ]
+);
+```
+
+h() 函数的使用方式非常的灵活：
+
+```js
+// 除了类型必填以外，其他的参数都是可选的
+h("div");
+h("div", { id: "foo" });
+
+// attribute 和 property 都能在 prop 中书写
+// Vue 会自动将它们分配到正确的位置
+h("div", { class: "bar", innerHTML: "hello" });
+
+// 像 `.prop` 和 `.attr` 这样的的属性修饰符
+// 可以分别通过 `.` 和 `^` 前缀来添加
+h("div", { ".name": "some-name", "^width": "100" });
+
+// 类与样式可以像在模板中一样
+// 用数组或对象的形式书写
+h("div", { class: [foo, { bar }], style: { color: "red" } });
+
+// 事件监听器应以 onXxx 的形式书写
+h("div", { onClick: () => {} });
+
+// children 可以是一个字符串
+h("div", { id: "foo" }, "hello");
+
+// 没有 props 时可以省略不写
+h("div", "hello");
+h("div", [h("span", "hello")]);
+
+// children 数组可以同时包含 vnodes 与字符串
+h("div", ["hello", h("span", "hello")]);
+```
+
+得到的 vnode 为如下形式：
+
+```js
+const vnode = h("div", { id: "foo" }, []);
+
+vnode.type; // 'div'
+vnode.props; // { id: 'foo' }
+vnode.children; // []
+vnode.key; // null
+```
+
+5.2 JSX/TSX
+
+JSX 是 JS 的一个类似 XML 的扩展，有了它，我们可以用以下的方式来书写代码：
+
+```js
+const vnode = <div>hello</div>;
+```
+
+在 JSX 表达式中，使用大括号来嵌入动态值：
+
+```js
+const vnode = <div id={dynamicId}>hello, {userName}</div>;
+```
+
+5.3 渲染函数案例
+
+```js
+// v-if
+h('div', [ok.value ? h('div', 'yes') : h('span', 'no')])
+// 等价于
+<div>
+  <div v-if="ok">yes</div>
+  <span v-else>no</span>
+</div>
+
+// v-for
+h(
+  'ul',
+  // assuming `items` is a ref with array value
+  items.value.map(({ id, text }) => {
+    return h('li', { key: id }, text)
+  })
+)
+// 等价于
+<ul>
+  <li v-for="{ id, text } in items" :key="id">
+    {{ text }}
+  </li>
+</ul>
+
+// v-on
+h(
+  'button',
+  {
+    onClick(event) {
+      /* ... */
+    }
+  },
+  'click me'
+)
+// 等价于
+<button @click="">
+  click me
+</button>
+
+// 事件修饰符
+h('input', {
+  onClickCapture() {
+    /* 捕捉模式中的监听器 */
+  },
+  onKeyupOnce() {
+    /* 只触发一次 */
+  },
+  onMouseoverOnceCapture() {
+    /* 单次 + 捕捉 */
+  }
+})
+// 等价于
+<input @click.capture="" @keyup.once='' @mouseover.once.capture=""/>
+
+// 组件
+import Foo from './Foo.vue'
+import Bar from './Bar.jsx'
+
+function render() {
+  return h('div', [h(Foo), h(Bar)])
+}
+// 等价于
+<div>
+  <Foo />
+  <Bar />
+</div>
+
+// 传递插槽
+// 单个默认插槽
+h(MyComponent, () => 'hello')
+// 等价于
+<MyComponent>hello</MyComponent>
+
+// 具名插槽
+// 注意 `null` 是必需的
+// 以避免 slot 对象被当成 prop 处理
+h(MyComponent, null, {
+    default: () => 'default slot',
+    foo: () => h('div', 'foo'),
+    bar: () => [h('span', 'one'), h('span', 'two')]
+})
+// 等价于
+<MyComponent>
+  <template #default>default slot</template>
+  <template #foo>
+    <div>foo</div>
+  </template>
+  <template #bar>
+    <span>one</span>
+    <span>two</span>
+  </template>
+</MyComponent>
+
+// 内置组件
+import { h, KeepAlive, Teleport, Transition, TransitionGroup } from 'vue'
+export default {
+  setup () {
+    return () => h(Transition, { mode: 'out-in' }, /* ... */)
+  }
+}
+// 等价于
+<Transition mode='out-in'></Transition>
+
+// v-model
+export default {
+  props: ['modelValue'],
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    return () =>
+      h(SomeComponent, {
+        modelValue: props.modelValue,
+        'onUpdate:modelValue': (value) => emit('update:modelValue', value)
+      })
+  }
+}
+// 等价于
+<SomeComponent v-model=""></SomeComponent>
+
+// 自定义指令
+import { h, withDirectives } from 'vue'
+
+// 自定义指令
+const pin = {
+  mounted() { /* ... */ },
+  updated() { /* ... */ }
+}
+
+// <div v-pin:top.animate="200"></div>
+const vnode = withDirectives(h('div'), [
+  [pin, 200, 'top', { animate: true }]
+])
+
+// 模板引用
+import { h, ref } from 'vue'
+
+export default {
+  setup() {
+    const divEl = ref()
+
+    // <div ref="divEl">
+    return () => h('div', { ref: divEl })
+  }
+}
+```
+
 6. Vue 与 Web Components
 
 Web Components 是一组 web 原生 API 的统称，允许开发者创建可复用的自定义元素 (custom elements)。
@@ -4591,12 +4562,12 @@ Web Components 是一组 web 原生 API 的统称，允许开发者创建可复�
 ```js
 // 仅在浏览器内编译时才会工作
 // 如果使用了构建工具，请看下面的配置示例
-app.config.compilerOptions.isCustomElement = (tag) => tag.includes('-')
+app.config.compilerOptions.isCustomElement = (tag) => tag.includes("-");
 ```
 
 ```js
 // vite.config.js
-import vue from '@vitejs/plugin-vue'
+import vue from "@vitejs/plugin-vue";
 
 export default {
   plugins: [
@@ -4604,33 +4575,33 @@ export default {
       template: {
         compilerOptions: {
           // 将所有带短横线的标签名都视为自定义元素
-          isCustomElement: (tag) => tag.includes('-')
-        }
-      }
-    })
-  ]
-}
+          isCustomElement: (tag) => tag.includes("-"),
+        },
+      },
+    }),
+  ],
+};
 ```
 
 ```js
 // vue.config.js
 module.exports = {
-  chainWebpack: config => {
+  chainWebpack: (config) => {
     config.module
-      .rule('vue')
-      .use('vue-loader')
-      .tap(options => ({
+      .rule("vue")
+      .use("vue-loader")
+      .tap((options) => ({
         ...options,
         compilerOptions: {
           // 将所有以 ion- 开头的标签都视为自定义元素
-          isCustomElement: tag => tag.startsWith('ion-')
-        }
-      }))
-  }
-}
+          isCustomElement: (tag) => tag.startsWith("ion-"),
+        },
+      }));
+  },
+};
 ```
 
-6.2 使用Vue构建自定义元素
+6.2 使用 Vue 构建自定义元素
 
 Vue 提供了一个和定义一般 Vue 组件几乎完全一致的 defineCustomElement 方法来支持创建自定义元素。这个方法接收的参数和 defineComponent 完全相同。但它会返回一个继承自 HTMLElement 的自定义元素构造器：
 
@@ -4639,12 +4610,37 @@ Vue 提供了一个和定义一般 Vue 组件几乎完全一致的 defineCustomE
 ```
 
 ```js
+import { defineCustomElement } from "vue";
 
+const MyVueElement = defineCustomElement({
+  // 这里是同平常一样的 Vue 组件选项
+  props: {},
+  emits: {},
+  template: `...`,
+
+  // defineCustomElement 特有的：注入进 shadow root 的 CSS
+  styles: [`/* inlined css */`],
+});
+
+// 注册自定义元素
+// 注册之后，所有此页面中的 `<my-vue-element>` 标签
+// 都会被升级
+customElements.define("my-vue-element", MyVueElement);
+
+// 你也可以编程式地实例化元素：
+// （必须在注册之后）
+document.body.appendChild(
+  new MyVueElement({
+    // 初始化 props（可选）
+  })
+);
 ```
 
 6.3 Web Components vs Vue Components
 
-1. 动画技巧
+自定义元素和 Vue 组件之间确实存在一定程度的功能重叠：它们都允许我们定义具有数据传递、事件发射和生命周期管理的可重用组件。然而，Web Components 的 API 相对来说是更底层的和更基础的。
+
+7. 动画技巧
 
 Vue 除了 <Transition> 和 <TransitionGroup>，还有其他的方式制作动画。
 
