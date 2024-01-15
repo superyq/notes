@@ -1151,35 +1151,9 @@ watchPostEffect(() => {
 });
 ```
 
-11.6 停止侦听器
+12. 模板引用
 
-要手动停止一个侦听器，请调用 watch 或 watchEffect 返回的函数：
-
-```js
-const unwatch = watchEffect(() => {});
-
-// ...当该侦听器不再需要时
-unwatch();
-```
-
-注意，需要异步创建侦听器的情况很少，请尽可能选择同步创建。如果需要等待一些异步数据，你可以使用条件式的侦听逻辑：
-
-```js
-// 需要异步请求得到的数据
-const data = ref(null);
-
-watchEffect(() => {
-  if (data.value) {
-    // 数据加载后执行某些操作...
-  }
-});
-```
-
-1.  模板引用
-
-当我们需要直接访问底层 DOM 元素。我们可以使用特殊的 ref attribute：
-
-ref 是一个特殊的 attribute，它允许我们在一个特定的 DOM 元素或子组件实例被挂载后，获得对它的直接引用。这可能很有用，比如说在组件挂载时将焦点设置到一个 input 元素上，或在一个元素上初始化一个第三方库。
+使用 ref attribute 访问 DOM 元素。
 
 ```html
 <input ref="input" />
@@ -1187,7 +1161,7 @@ ref 是一个特殊的 attribute，它允许我们在一个特定的 DOM 元素�
 
 12.1 访问模板引用
 
-为了通过组合式 API 获得该模板引用，我们需要声明一个同名的 ref：
+声明一个同名的 ref。
 
 ```html
 <script setup>
@@ -1207,9 +1181,7 @@ ref 是一个特殊的 attribute，它允许我们在一个特定的 DOM 元素�
 </template>
 ```
 
-注意，你只可以在组件挂载后才能访问模板引用。如果你想在模板中的表达式上访问 input，在初次渲染时会是 null。这是因为在初次渲染前这个元素还不存在呢！
-
-如果你需要侦听一个模板引用 ref 的变化，确保考虑到其值为 null 的情况：
+侦听模板引用 ref 的变化，需要考虑值为 null 的情况。
 
 ```js
 watchEffect(() => {
@@ -1223,7 +1195,7 @@ watchEffect(() => {
 
 12.2 v-for 中的模板引用
 
-当在 v-for 中使用模板引用时，对应的 ref 中包含的值是一个数组，它将在元素被挂载后包含对应整个列表的所有元素：
+v-for 使用模板引用时，对应的 ref 包含的是一个数组。
 
 ```html
 <script setup>
@@ -1247,44 +1219,19 @@ watchEffect(() => {
 
 12.3 函数模板引用
 
-除了使用字符串值作名字，ref attribute 还可以绑定为一个函数，会在每次组件更新时都被调用。该函数会收到元素引用作为其第一个参数：
-
-注意我们这里需要使用动态的 :ref 绑定才能够传入一个函数。当绑定的元素被卸载时，函数也会被调用一次，此时的 el 参数会是 null。你当然也可以绑定一个组件方法而不是内联函数。
+ref attribute 还可以绑定为一个函数，每次组件更新时都被调用。收到的第一个参数是元素引用。
 
 ```html
 <input :ref="(el) => { /* 将 el 赋值给一个数据属性或 ref 变量 */ }" />
 ```
 
-12.4 组件上的 ref
-
-如果一个子组件使用的是选项式 API 或没有使用 <script setup>，被引用的组件实例和该子组件的 this 完全一致，这意味着父组件对子组件的每一个属性和方法都有完全的访问权。
-
-使用了 <script setup> 的组件是默认私有的：一个父组件无法访问到一个使用了 <script setup> 的子组件中的任何东西，除非子组件在其中通过 defineExpose 宏显式暴露：
-
-当父组件通过模板引用获取到了该组件的实例时，得到的实例类型为 { a: number, b: number }
-
-```html
-<script setup>
-  import { ref } from "vue";
-
-  const a = 1;
-  const b = ref(2);
-
-  // 像 defineExpose 这样的编译器宏不需要导入
-  defineExpose({
-    a,
-    b,
-  });
-</script>
-```
-
 13. 组件基础
 
-组件允许我们将 UI 划分为独立的、可重用的部分，并且可以对每个部分进行单独的思考。
+组件允许我们将 UI 划分为独立的、可重用的部分，并且对每个部分进行单独的思考。
 
 13.1 定义一个组件
 
-当使用构建步骤时，一个单独的 .vue 文件被叫做单文件组件 (简称 SFC)：
+.vue 文件 (简称 SFC)。
 
 ```html
 <script setup>
@@ -1298,30 +1245,9 @@ watchEffect(() => {
 </template>
 ```
 
-当不使用构建步骤时，一个 Vue 组件以一个包含 Vue 特定选项的 JS 对象来定义：
-
-```js
-import { ref } from "vue";
-
-export default {
-  setup() {
-    const count = ref(0);
-    return { count };
-  },
-  template: `
-    <button @click="count++">
-      You clicked me {{ count }} times.
-    </button>`,
-  // 也可以针对一个 DOM 内联模板：
-  // template: '#my-template-element'
-};
-```
-
 13.2 使用组件
 
-每一个组件都维护着自己的状态，这是因为每当你使用一个组件，就创建了一个新的实例。
-
-通过 <script setup>，导入的组件都在模板中直接可用。
+官方推荐使用 PascalCase 标签名用于和原生 HTML 标签区分。
 
 ```vue
 <script setup>
@@ -1334,23 +1260,9 @@ import ButtonCounter from "./ButtonCounter.vue";
 </template>
 ```
 
-在单文件组件中，推荐为子组件使用 PascalCase 的标签名，以此来和原生的 HTML 元素作区分。
-
-```vue
-<ButtonCounter />
-```
-
-在 DOM 中书写模板 (例如原生 <template> 元素的内容)，模板的编译需要遵从浏览器中 HTML 的解析行为。需要使用 kebab-case 形式并显式地关闭这些组件的标签。
-
-```html
-<button-counter></button-counter>
-```
-
 13.3 传递 props
 
-相同的组件，展示不同的数据，就会使用到 props。
-
-Props 是一种特别的 attributes，在组件上声明注册，要用到 defineProps 宏：
+通过 defineProps 宏，声明可以向组件传递的状态。
 
 ```vue
 <!-- BlogPost.vue -->
@@ -1363,80 +1275,37 @@ defineProps(["title"]);
 </template>
 ```
 
-defineProps 是一个仅 <script setup> 中可用的编译宏命令，并不需要显式地导入。defineProps 会返回一个对象，其中包含了可以传递给组件的所有 props：
-
-```js
-const props = defineProps(["title"]);
-console.log(props.title);
-```
-
-如果你没有使用 <script setup>，props 必须以 props 选项的方式声明，props 对象会作为 setup() 函数的第一个参数被传入：
-
-```js
-export default {
-  props: ["title"],
-  setup(props) {
-    console.log(props.title);
-  },
-};
-```
-
 13.4 监听事件
 
+通过 defineEmits 宏，声明需要抛出的事件。
+
 子组件可以通过调用内置的 $emit 方法，通过传入事件名称来抛出一个事件：
-
-```vue
-<!-- BlogPost.vue, 省略了 <script> -->
-<template>
-  <div class="blog-post">
-    <h4>{{ title }}</h4>
-    <button @click="$emit('enlarge-text')">Enlarge text</button>
-  </div>
-</template>
-```
-
-我们可以通过 defineEmits 宏来声明需要抛出的事件：
 
 ```vue
 <!-- BlogPost.vue -->
 <script setup>
 defineProps(["title"]);
-defineEmits(["enlarge-text"]);
-</script>
-```
-
-和 defineProps 类似，defineEmits 仅可用于 <script setup> 之中，并且不需要导入，它返回一个等同于 $emit 方法的 emit 函数。它可以被用于在组件的 <script setup> 中抛出事件，因为此处无法直接访问 $emit：
-
-```vue
-<script setup>
 const emit = defineEmits(["enlarge-text"]);
 
-emit("enlarge-text");
-</script>
-```
-
-如果你没有在使用 <script setup>，你可以通过 emits 选项定义组件会抛出的事件。你可以从 setup() 函数的第二个参数，即 setup 上下文对象上访问到 emit 函数：
-
-```js
-export default {
-  emits: ["enlarge-text"],
-  setup(props, ctx) {
-    ctx.emit("enlarge-text");
-  },
+const handleClick = () => {
+  emit("enlarge-text");
 };
+</script>
+
+<template>
+  <div class="blog-post">
+    <h4>{{ title }}</h4>
+    <button @click="handleClick">Enlarge text</button>
+  </div>
+</template>
 ```
 
 13.5 通过插槽来分配内容
 
-一些情况下我们会希望能和 HTML 元素一样向组件中传递内容：
+通过 <slot> 元素来实现。
 
 ```vue
-<AlertBox> Something bad happened. </AlertBox>
-```
-
-可以通过 Vue 的自定义 <slot> 元素来实现：
-
-```vue
+<!-- AlertBox.vue -->
 <template>
   <div class="alert-box">
     <strong>This is an Error for Demo Purposes</strong>
@@ -1451,11 +1320,13 @@ export default {
 </style>
 ```
 
+```vue
+<AlertBox> Something bad happened. </AlertBox>
+```
+
 13.6 动态组件
 
-有些场景会需要在两个组件间来回切换，比如 Tab 界面：
-
-当使用 <component :is="..."> 来在多个组件间作切换时，被切换掉的组件会被卸载。我们可以通过 <KeepAlive> 组件强制被切换掉的组件仍然保持“存活”的状态。
+通过 <component :is="..."> 来在多个组件间作切换，可以使用 <KeepAlive> 保持被切换的组件“存活”的状态。
 
 ```vue
 <!-- currentTab 改变时组件也改变 -->
@@ -1485,7 +1356,7 @@ app.component(
 );
 ```
 
-.component() 方法可以被链式调用：
+.component() 可以链式调用。
 
 ```js
 app
@@ -1494,11 +1365,11 @@ app
   .component("ComponentC", ComponentC);
 ```
 
-注意：全局注册虽然很方便，但有以下几个问题：1. 如果你全局注册了一个组件，即使它并没有被实际使用，它仍然会出现在打包后的 JS 文件中。2. 全局注册使依赖关系变得不那么明确。不太容易定位子组件的实现。
+注意：全局注册存在以下几个问题：1. 全局注册组件后，即使没有被实际使用，仍会被打包在 JS 文件中。2. 全局注册使依赖关系变得不那么明确。不容易定位子组件的实现。
 
 1.2 局部注册
 
-在使用 <script setup> 的单文件组件中，导入的组件可以直接在模板中使用，无需注册：
+导入后可以直接使用。
 
 ```vue
 <script setup>
@@ -1510,76 +1381,33 @@ import ComponentA from "./ComponentA.vue";
 </template>
 ```
 
-如果没有使用 <script setup>，则需要使用 components 选项来显式注册：
-
-```js
-import ComponentA from "./ComponentA.js";
-
-export default {
-  components: {
-    ComponentA,
-  },
-  setup() {
-    // ...
-  },
-};
-```
-
 1.3 组件名格式
 
-使用 PascalCase 作为组件名的注册格式。
+官方推荐使用 PascalCase 作为组件名的注册格式。
 
 2. Props
 
 2.1 Props 声明
 
-显示声明 props，用以区分 props 和透传 attribute
-
-在 <script setup> 中，使用 defineProps() 宏来声明：
+使用 defineProps() 宏来声明。
 
 ```vue
 <script setup>
+// defineProps传入字符串数组
 const props = defineProps(["foo"]);
+// 或 传入对象：可进行类型检测。
+const props = defineProps({
+  title: String,
+  likes: Number,
+});
 
 console.log(props.foo);
 </script>
 ```
 
-在没有 <script setup> 中，使用 props 选项来声明：
-
-```js
-export default {
-  props: ["foo"],
-  setup(props) {
-    // setup() 接收 props 作为第一个参数
-    console.log(props.foo);
-  },
-};
-```
-
-可以使用对象的形式声明 prop：
-
-```js
-// 使用 <script setup>
-defineProps({
-  title: String,
-  likes: Number,
-});
-```
-
-```js
-// 非 <script setup>
-export default {
-  props: {
-    title: String,
-    likes: Number,
-  },
-};
-```
-
 2.2 传递 prop 的细节
 
-如果一个 prop 的名字很长，应使用 camelCase 形式
+如果 prop 的名字很长，官方建议使用 camelCase 形式
 
 ```js
 defineProps({
@@ -1587,7 +1415,7 @@ defineProps({
 });
 ```
 
-向子组件传递 props 时，通常会将其写为 kebab-case 形式
+传递 props 时，官方推荐以 kebab-case 形式
 
 ```vue
 <MyComponent greeting-message="hello" />
@@ -1647,9 +1475,7 @@ const post = {
 
 2.3 单向数据流
 
-所有的 props 都遵循着单向绑定原则，若你在子组件中去更改一个 prop，Vue 会在控制台上向你抛出警告
-
-两个场景可能导致你想要修改 prop：1.prop 被用于传入初始值；而子组件想在之后将其作为一个局部数据属性。2. 需要对传入的 prop 值做进一步的转换。
+props 都遵循单向绑定原则，不允许在子组件中去更改一个 prop。但有两个场景可能想要修改 prop：1.prop 被用于传入初始值，之后想将其作为一个响应式属性。2. 需要对传入的 prop 值做进一步的转换。
 
 2.4 Prop 校验
 
@@ -1699,7 +1525,7 @@ defineProps({
 });
 ```
 
-也可以用自定义的类或者构造函数去验证，校验 author prop 的值是否是 Person 类的一个实例。
+也可用自定义的类或构造函数去验证，校验是否是 Person 类的实例。
 
 ```js
 class Person {
