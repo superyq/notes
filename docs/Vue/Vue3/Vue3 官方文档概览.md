@@ -413,7 +413,7 @@ const proxy = reactive(raw);
 console.log(proxy === raw); // false
 ```
 
-reactive() API 有一些局限性,官方建议使用 ref() 作为声明响应式状态的主要 API。博主个人还是喜欢 ref，reactive 混着用，注意哪些局限性就可以了。
+reactive() API 有一些局限性,官方建议使用 ref() 作为声明响应式状态的主要 API。博主个人还是喜欢 ref，reactive 混着用，注意那些局限性就可以了。
 
 局限性包括：只能用于对象类型（对象，数组，Map，Set）、不能替换整个对象、对结构操作不友好。
 
@@ -1092,7 +1092,7 @@ obj.count++;
 
 11.3 即时回调的侦听器
 
-watch 默认是懒执行的：仅当数据源变化时，才会执行回调。可以通过设置immediate：true，立即执行一遍回调。
+watch 默认是懒执行的：仅当数据源变化时，才会执行回调。可以通过设置 immediate：true，立即执行一遍回调。
 
 ```js
 watch(
@@ -1106,7 +1106,7 @@ watch(
 
 11.4 watchEffect()
 
-侦听器的回调使用与源完全相同的响应式状态是很常见的。如下：
+侦听器的回调与源完全相同的响应式状态是很常见的。可以用 watchEffect 函数 来简化。
 
 ```js
 const todoId = ref(1);
@@ -1122,11 +1122,8 @@ watch(
   },
   { immediate: true }
 );
-```
 
-可以用 watchEffect 函数 来简化上面的代码。
-
-```js
+// 简化
 watchEffect(async () => {
   const response = await fetch(
     `https://jsonplaceholder.typicode.com/todos/${todoId.value}`
@@ -1137,27 +1134,18 @@ watchEffect(async () => {
 
 11.5 回调的触发时机
 
-当你更改了响应式状态，它可能会同时触发 Vue 组件更新和侦听器回调。
-
-默认情况下，用户创建的侦听器回调，都会在 Vue 组件更新之前被调用。这意味着你在侦听器回调中访问的 DOM 将是被 Vue 更新之前的状态。
-
-如果想在侦听器回调中能访问被 Vue 更新之后的 DOM，你需要指明 flush: 'post' 选项：
+修改了监听的响应状态后，默认先触发监听函数，后更新组件。意味着在监听函数中访问的 DOM 是更新前的状态，如果要访问更新后的 DOM，可以通过 fulsh：'post'配置。
 
 ```js
 watch(source, callback, {
   flush: "post",
 });
-
 watchEffect(callback, {
   flush: "post",
 });
-```
 
-后置刷新的 watchEffect() 有个更方便的别名 watchPostEffect()：
-
-```js
+// 或者
 import { watchPostEffect } from "vue";
-
 watchPostEffect(() => {
   /* 在 Vue 更新后执行 */
 });
@@ -1187,7 +1175,7 @@ watchEffect(() => {
 });
 ```
 
-12. 模板引用
+1.  模板引用
 
 当我们需要直接访问底层 DOM 元素。我们可以使用特殊的 ref attribute：
 
