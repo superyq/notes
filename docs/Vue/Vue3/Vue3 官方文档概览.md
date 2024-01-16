@@ -1525,7 +1525,7 @@ defineProps({
 });
 ```
 
-也可用自定义的类或构造函数去验证，校验是否是 Person 类的实例。
+自定义类或构造函数去验证，校验是否 Person 类的实例。
 
 ```js
 class Person {
@@ -1554,14 +1554,14 @@ defineProps({
 
 3.1 触发与监听事件
 
-在组件的模板表达式中，可以直接使用 $emit 方法触发自定义事件
+模板表达式可以直接使用 $emit 触发自定义事件
 
 ```vue
 <!-- MyComponent -->
 <button @click="$emit('someEvent')">click me</button>
 ```
 
-父组件通过@来监听事件：
+父组件通过@来监听事件
 
 ```vue
 <MyComponent @some-event="callback" />
@@ -1581,17 +1581,7 @@ defineProps({
 
 3.3 声明触发的事件
 
-通过 defineEmits() 宏来声明要触发的事件：
-
-```vue
-<script setup>
-defineEmits(["inFocus", "submit"]);
-</script>
-```
-
-在 <template> 中使用的 $emit 方法不能在组件的 <script setup> 部分中使用，但 defineEmits() 会返回一个相同作用的函数供我们使用：
-
-defineEmits() 宏不能在子函数中使用。它必须直接放置在 <script setup> 的顶级作用域下。
+通过 defineEmits() 宏来声明要触发的事件
 
 ```vue
 <script setup>
@@ -1603,20 +1593,9 @@ function buttonClick() {
 </script>
 ```
 
-如果你显式地使用了 setup 函数而不是 <script setup>，则事件需要通过 emits 选项来定义
-
-```js
-export default {
-  emits: ["inFocus", "submit"],
-  setup(props, ctx) {
-    ctx.emit("submit");
-  },
-};
-```
-
 3.4 事件校验
 
-要为事件添加校验，那么事件可以被赋值为一个函数，接受的参数就是抛出事件时传入 emit 的内容，返回一个布尔值来表明事件是否合法。
+校验事件参数是否符合要求，返回布尔值表明事件是否符合。
 
 ```vue
 <script setup>
@@ -1643,7 +1622,7 @@ function submitForm(email, password) {
 
 4. 组件 v-model
 
-v-model 在原生元素上的用法
+v-model 在 input 上的用法
 
 ```vue
 <input v-model="searchText" />
@@ -1651,14 +1630,7 @@ v-model 在原生元素上的用法
 <input :value="searchText" @input="searchText = $event.target.value" />
 ```
 
-v-model 在组件上的用法
-
-```vue
-<!-- <CustomInput
-  :model-value="searchText"
-  @update:model-value="newValue => searchText = newValue"
-/> -->
-```
+v-model 在组件上的用法，通过 modelValue，update:modelValue 设置。
 
 ```vue
 <!-- CustomInput.vue -->
@@ -1677,6 +1649,11 @@ defineEmits(["update:modelValue"]);
 
 ```vue
 <CustomInput v-model="searchText" />
+<!-- 展开 -->
+<!-- <CustomInput
+  :model-value="searchText"
+  @update:model-value="newValue => searchText = newValue"
+/> -->
 ```
 
 ```vue
@@ -1783,7 +1760,7 @@ function emitValue(e) {
 </template>
 ```
 
-对于又有参数又有修饰符的 v-model 绑定，生成的 prop 名将是 arg + "Modifiers"。举例来说：
+v-model 参数和修饰符一起绑定。
 
 ```html
 <MyComponent v-model:title.capitalize="myText"></MyComponent>
@@ -1798,13 +1775,11 @@ defineEmits(['update:title']) console.log(props.titleModifiers) // { capitalize:
 
 5.1 Attributes 继承
 
-“透传 attribute”指的是传递给一个组件，却没有被该组件声明为 props 或 emits 的 attribute 或者 v-on 事件监听器。最常见的例子就是 class、style 和 id。
+class、style、id 传递给组件，透传给组件的元素。如果只有一个根节点，默认透传给根节点上，如果有多个根节点，通过 v-bind='$attrs'来确定透传给哪个根节点。
 
 5.2 禁用 Attributes 继承
 
-最常见的需要禁用 attribute 继承的场景就是 attribute 需要应用在根节点以外的其他元素上。
-
-通过设置 inheritAttrs 选项为 false，你可以完全控制透传进来的 attribute 被如何使用。
+应用场景：组件只有一个根节点，但透传的 attribute 需要传到其他元素上。通过设置 inheritAttrs 选项为 false，v-bind='$attrs'，来完全控制透传。
 
 ```vue
 <script setup>
@@ -1821,21 +1796,9 @@ defineOptions({
 </template>
 ```
 
-5.3 多根节点的 Attributes 继承
+5.3 在 JS 中访问透传 Attributes
 
-多个根节点的组件没有自动 attribute 透传行为。如果 $attrs 没有被显式绑定，将会抛出一个运行时警告。
-
-如果 $attrs 被显式绑定，则不会有警告：
-
-```html
-<header>...</header>
-<main v-bind="$attrs">...</main>
-<footer>...</footer>
-```
-
-5.4 在 JS 中访问透传 Attributes
-
-使用 useAttrs() API 来访问一个组件的所有透传 attribute：
+使用 useAttrs() API 来访问一个组件的所有透传 attribute
 
 ```vue
 <script setup>
@@ -1849,27 +1812,26 @@ const attrs = useAttrs();
 
 6.1 插槽内容与出口
 
-<slot> 元素是一个插槽出口 (slot outlet)，标示了父元素提供的插槽内容 (slot content) 将在哪里被渲染。
+通过 <slot> 确定插槽插入的位置。
 
 ```html
+<!-- FancyButton.vue -->
 <button class="fancy-btn">
-  <slot></slot>
   <!-- 插槽出口 -->
+  <slot></slot>
 </button>
 ```
 
 ```html
 <FancyButton>
-  Click me!
   <!-- 插槽内容 -->
+  Click me!
 </FancyButton>
 ```
 
 6.2 渲染作用域
 
-插槽内容可以访问到父组件的数据作用域，因为插槽内容本身是在父组件模板中定义的。举例来说：
-
-插槽内容无法访问子组件的数据。
+插槽内容可以访问父组件的状态，无法访问子组件的状态。
 
 ```vue
 <span>{{ message }}</span>
@@ -1878,20 +1840,20 @@ const attrs = useAttrs();
 
 6.3 默认内容
 
-在外部没有提供任何内容的情况下，可以为插槽指定默认内容。
+外部没有传递内容，展示默认内容。
 
 ```html
 <button type="submit">
   <slot>
-    Submit
     <!-- 默认内容 -->
+    Submit
   </slot>
 </button>
 ```
 
 6.4 具名插槽
 
-一个组件中包含多个插槽出口，可以使用<slot> 元素的 attribute name，没有提供 name 的 <slot> 出口会隐式地命名为“default”。
+通过 <slot name=''>来设定，name 默认值为 default。
 
 ```html
 <div class="container">
@@ -1899,7 +1861,7 @@ const attrs = useAttrs();
     <slot name="header"></slot>
   </header>
   <main>
-    <slot></slot>
+    <slot name="default"></slot>
   </main>
   <footer>
     <slot name="footer"></slot>
@@ -1907,9 +1869,7 @@ const attrs = useAttrs();
 </div>
 ```
 
-要为具名插槽传入内容，我们需要使用一个含 v-slot 指令的 <template> 元素，并将目标插槽的名字传给该指令：
-
-v-slot 有对应的简写 #，因此 <template v-slot:header> 可以简写为 <template #header>。
+通过 v-slot 有对应的简写 # 来使用，因此 <template v-slot:header> 可以简写为 <template #header>。
 
 ```html
 <BaseLayout>
@@ -1932,9 +1892,7 @@ v-slot 有对应的简写 #，因此 <template v-slot:header> 可以简写为 <t
 
 6.6 作用域插槽
 
-在某些场景下插槽的内容可能想要同时使用父组件域内和子组件域内的数据。
-
-默认作用域插槽
+插槽内容同时访问父组件和子组件的状态。
 
 ```html
 <!-- <MyComponent> 的模板 -->
@@ -1949,7 +1907,14 @@ v-slot 有对应的简写 #，因此 <template v-slot:header> 可以简写为 <t
 </MyComponent>
 ```
 
-具名作用域插槽，插槽 props 可以作为 v-slot 指令的值被访问到：v-slot:name="slotProps"。当使用缩写时是这样：
+向具名插槽中传入 props
+
+```html
+<!-- MyComponent.vue -->
+<slot name="header" message="hello"></slot>
+```
+
+具名插槽访问子组件的状态。
 
 ```html
 <MyComponent>
@@ -1961,21 +1926,13 @@ v-slot 有对应的简写 #，因此 <template v-slot:header> 可以简写为 <t
 </MyComponent>
 ```
 
-向具名插槽中传入 props：
-
-```html
-<slot name="header" message="hello"></slot>
-```
-
 7. 依赖注入
 
 7.1 Prop 逐级透传问题
 
-多层级嵌套的组件，某个深层的子组件需要一个较远的祖先组件中的部分数据。如果仅使用 props 则必须将其沿着组件链逐级传递下去，这一问题被称为“prop 逐级透传”。
+解决多层级嵌套的组件，共享祖先状态。使用 provide 和 inject 可以帮助我们解决。
 
-provide 和 inject 可以帮助我们解决这一问题。
-
-7.2 Provide（提供）
+7.2 局部 Provide（提供）
 
 ```vue
 <script setup>
@@ -1985,19 +1942,7 @@ provide(/* 注入名 */ "message", /* 值 */ "hello!");
 </script>
 ```
 
-```js
-import { provide } from "vue";
-
-export default {
-  setup() {
-    provide(/* 注入名 */ "message", /* 值 */ "hello!");
-  },
-};
-```
-
-7.3 应用层 Provide
-
-除了在一个组件中提供依赖，我们还可以在整个应用层面提供依赖：
+7.3 全局 Provide
 
 ```js
 import { createApp } from "vue";
@@ -2013,32 +1958,13 @@ app.provide(/* 注入名 */ "message", /* 值 */ "hello!");
 <script setup>
 import { inject } from "vue";
 
-const message = inject("message");
+const message = inject("message", "这是默认值");
 </script>
-```
-
-```js
-import { inject } from "vue";
-
-export default {
-  setup() {
-    const message = inject("message");
-    return { message };
-  },
-};
-```
-
-在注入一个值时不要求必须有提供者，那么我们应该声明一个默认值
-
-```js
-// 如果没有祖先组件提供 "message"
-// `value` 会是 "这是默认值"
-const value = inject("message", "这是默认值");
 ```
 
 7.5 和响应数据配合使用
 
-建议尽可能将任何对响应式状态的变更都保持在供给方组件中。
+官方建议将共享状态和修改共享状态的方法都 Provide 出去。
 
 ```vue
 <!-- 在供给方组件内 -->
@@ -2071,7 +1997,7 @@ const { location, updateLocation } = inject("location");
 </template>
 ```
 
-如果你想确保提供的数据不能被注入方的组件更改，你可以使用 readonly()
+使用 readonly()，注入方就只读不可修改。
 
 ```vue
 <script setup>
@@ -2086,9 +2012,7 @@ provide("read-only-count", readonly(count));
 
 8.1 基本用法
 
-仅在页面需要它渲染时才会调用加载内部实际组件的函数。实现延迟加载。
-
-与普通组件一样，异步组件可以使用 app.component() 全局注册：
+仅在需要页面渲染时加载组件。实现延迟加载。全局注册
 
 ```js
 app.component(
@@ -2097,7 +2021,7 @@ app.component(
 );
 ```
 
-也可以直接在父组件中直接定义它们
+局部注册
 
 ```vue
 <script setup>
@@ -2122,7 +2046,7 @@ const AsyncComp = defineAsyncComponent({
   // 加载函数
   loader: () => import("./Foo.vue"),
 
-  // 加载异步组件时使用的组件
+  // 加载中使用的组件
   loadingComponent: LoadingComponent,
   // 展示加载组件前的延迟时间，默认为 200ms
   delay: 200,
@@ -2142,8 +2066,6 @@ const AsyncComp = defineAsyncComponent({
 1.1 什么是 “组合式函数”
 
 “组合式函数”(Composables) 是一个利用 Vue 的组合式 API 来封装和复用有状态逻辑的函数。
-
-例如日期格式化函数。封装了无状态的逻辑，接收一些输入立刻返回所期望的输出。lodash 或是 date-fns 就是复用无状态逻辑的库。
 
 1.2 鼠标跟踪器示例
 
@@ -2175,7 +2097,7 @@ export function useMouse() {
 }
 ```
 
-在组件中使用的方式：
+在组件中使用的方式
 
 ```vue
 <script setup>
@@ -2187,9 +2109,7 @@ const { x, y } = useMouse();
 <template>Mouse position is at: {{ x }}, {{ y }}</template>
 ```
 
-一个组合式函数可以调用一个或多个其他的组合式函数。这样我们就可以用多个较小且逻辑独立的单元来组合形成复杂的逻辑。实际上，这正是为什么我们决定将实现了这一设计模式的 API 集合命名为组合式 API。
-
-举例来说，我们可以将添加和清除 DOM 事件监听器的逻辑也封装进一个组合式函数中：
+一个组合式函数可以调用一个或多个其他的组合式函数。这样就可以用多个较小且逻辑独立的单元来组合形成复杂的逻辑。举例来说，我们可以将添加和清除 DOM 事件监听器的逻辑也封装进一个组合式函数中。
 
 ```js
 // event.js
@@ -2229,67 +2149,29 @@ export function useMouse() {
 
 组合式函数约定用驼峰命名法命名，并以“use”作为开头。
 
-使用 toValue() 工具函数处理 ref 或 getter 的参数。
-
 ```js
 import { toValue } from "vue";
 
 function useFeature(maybeRefOrGetter) {
-  // 如果 maybeRefOrGetter 是一个 ref 或 getter，
-  // 将返回它的规范化值。
-  // 否则原样返回。
-  const value = toValue(maybeRefOrGetter);
+  // Todo
 }
 ```
-
-建议使用 ref 返回值，这样解包会保持响应性
-
-```js
-// x 和 y 是两个 ref
-const { x, y } = useMouse();
-```
-
-确保在 onUnmounted() 时清理副作用。举例来说，如果一个组合式函数设置了一个事件监听器，它就应该在 onUnmounted() 中被移除 (就像我们在 useMouse() 示例中看到的一样)。
 
 1.5 通过抽取组合式函数改变代码结构
 
 组合式 API 会给予你足够的灵活性，让你可以基于逻辑问题将组件代码拆分成更小的函数
 
-1.6 在选项式 API 中使用组合式函数
-
-如果你正在使用选项式 API，组合式函数必须在 setup() 中调用。且其返回的绑定必须在 setup() 中返回，以便暴露给 this 及其模板：
-
-```js
-import { useMouse } from "./mouse.js";
-import { useFetch } from "./fetch.js";
-
-export default {
-  setup() {
-    const { x, y } = useMouse();
-    const { data, error } = useFetch("...");
-    return { x, y, data, error };
-  },
-  mounted() {
-    // setup() 暴露的属性可以在通过 `this` 访问到
-    console.log(this.x);
-  },
-  // ...其他选项
-};
-```
-
-1.7 与其他模式的比较
+1.6 与其他模式的比较
 
 和 Mixin 的对比，mixins 有三个主要的短板：不清晰的数据来源、命名空间冲突、隐式的跨 mixin 交流
 
-和无渲染组件的对比：组合式函数不会产生额外的组件实例开销。当在整个应用中使用时，由无渲染组件产生的额外组件实例会带来无法忽视的性能开销。我们推荐在纯逻辑复用时使用组合式函数，在需要同时复用逻辑和视图布局时使用无渲染组件。
+和无渲染组件的对比：组合式函数不会产生额外的组件实例开销。
 
 2. 自定义指令
 
 2.1 介绍
 
-自定义指令主要是为了重用涉及普通元素的底层 DOM 访问的逻辑。
-
-一个自定义指令由一个包含类似组件生命周期钩子的对象来定义。钩子函数会接收到指令所绑定元素作为其参数。
+自定义指令主要是为了重用涉及普通元素的底层 DOM 访问的逻辑。一个自定义指令由一个包含类似组件生命周期钩子的对象来定义。钩子函数会接收到指令所绑定元素作为其参数。任何以 v 开头的驼峰式命名的变量都可以被用作一个自定义指令。
 
 ```vue
 <script setup>
@@ -2304,25 +2186,7 @@ const vFocus = {
 </template>
 ```
 
-在 <script setup> 中，任何以 v 开头的驼峰式命名的变量都可以被用作一个自定义指令。
-
-在没有使用 <script setup> 的情况下，自定义指令需要通过 directives 选项注册：
-
-```js
-export default {
-  setup() {
-    /*...*/
-  },
-  directives: {
-    // 在模板中启用 v-focus
-    focus: {
-      /* ... */
-    },
-  },
-};
-```
-
-将一个自定义指令全局注册到应用层级也是一种常见的做法：
+全局注册自定义指令
 
 ```js
 const app = createApp({});
@@ -2335,7 +2199,7 @@ app.directive("focus", {
 
 2.2 指令钩子
 
-一个指令的定义对象可以提供几种钩子函数 (都是可选的)：
+指令钩子函数都是可选的
 
 ```js
 const myDirective = {
@@ -2361,7 +2225,7 @@ const myDirective = {
 };
 ```
 
-指令的钩子会传递以下几种参数：
+指令的钩子会传递以下几种参数
 
 el：指令绑定到的元素。这可以用于直接操作 DOM。
 binding：一个对象，包含以下属性。
@@ -2374,7 +2238,7 @@ binding：一个对象，包含以下属性。
 vnode：代表绑定元素的底层 VNode。
 prevNode：代表之前的渲染中指令所绑定元素的 VNode。仅在 beforeUpdate 和 updated 钩子中可用。
 
-例子如下：
+例子如下
 
 ```html
 <div v-example:foo.bar="baz"></div>
@@ -2391,7 +2255,7 @@ prevNode：代表之前的渲染中指令所绑定元素的 VNode。仅在 befor
 
 2.3 简化形式
 
-一般情况下指令仅仅需要 mounted 和 updated 实现相同行为，可以直接用一个函数定义指令：
+一般情况指令仅需要 mounted 和 updated 实现相同行为，可以直接用一个函数定义指令：
 
 ```vue
 <div v-color="color"></div>
@@ -2419,10 +2283,6 @@ app.directive("demo", (el, binding) => {
 });
 ```
 
-2.5 在组件上使用
-
-不推荐
-
 3. 插件
 
 3.1 接受
@@ -2439,9 +2299,7 @@ app.use(myPlugin, {
 });
 ```
 
-一个插件可以是一个拥有 install() 方法的对象，也可以直接是一个安装函数本身。
-
-安装函数会接收到安装它的应用实例和传递给 app.use() 的额外选项作为参数：
+构建插件：拥有 install() 方法的对象，接受两个参数一个应用实例和一个传递给 app.use() 的额外参数。
 
 ```js
 const myPlugin = {
@@ -2451,22 +2309,9 @@ const myPlugin = {
 };
 ```
 
-插件没有严格定义的使用范围，但是插件发挥作用的常见场景主要包括以下几种：
-
-| 通过 app.component() 和 app.directive() 注册一到多个全局组件或自定义指令。
-| 通过 app.provide() 使一个资源可被注入进整个应用。
-| 向 app.config.globalProperties 中添加一些全局实例属性或方法
-| 一个可能上述三种都包含了的功能库 (例如 vue-router)。
-
 3.2 编写一个插件
 
-编写一个翻译函数，接收一个以 . 作为分隔符的 key 字符串。
-
-```vue
-<h1>{{ $translate('greetings.hello') }}</h1>
-```
-
-这个函数应当能够在任意模板中被全局调用。这一点可以通过在插件中将它添加到 app.config.globalProperties 上来实现：
+编写一个翻译函数，接收一个以 . 作为分隔符的 key 字符串。可以在全局使用，通过 app.config.globalProperties 实现。
 
 ```js
 // plugins/i18n.js
@@ -2484,7 +2329,7 @@ export default {
 };
 ```
 
-用于查找的翻译字典对象则应当在插件被安装时作为 app.use() 的额外参数被传入：
+翻译字典对象应当作为 app.use() 的额外参数被传入。
 
 ```js
 import i18nPlugin from "./plugins/i18n";
@@ -2496,43 +2341,21 @@ app.use(i18nPlugin, {
 });
 ```
 
-插件中的 Provide / Inject
-
-```js
-// plugins/i18n.js
-export default {
-  install: (app, options) => {
-    app.provide("i18n", options);
-  },
-};
-```
-
-插件用户就可以组件中以 i18n 为 key 注入并访问插件的选项对象了。
+使用插件
 
 ```vue
-<script setup>
-import { inject } from "vue";
-
-const i18n = inject("i18n");
-
-console.log(i18n.greetings.hello);
-</script>
+<h1>{{ $translate('greetings.hello') }}</h1>
 ```
 
 五 内置组件
 
 1. Transition
 
-Vue 提供了两个内置组件，可以帮助你制作基于状态变化的过渡和动画：
-
-| <Transition> 会在一个元素或组件进入和离开 DOM 时应用动画。
-| <TransitionGroup> 会在一个 v-for 列表中的元素或组件被插入，移动，或移除时应用动画。
+会在一个元素或组件进入和离开 DOM 时应用动画，如果内容是一个组件，这个组件必须仅有一个根元素。
 
 1.1 <Transition> 组件
 
-可以直接使用，无需注册。将过渡动画应用到通过默认插槽传递给的元素或组件上。动画过渡触发条件：v-if、v-show、<component>切换组件、改变特殊的 key 属性
-
-最基本用法的示例：
+可以直接使用，无需注册。动画过渡触发条件：v-if、v-show、<component>切换组件、改变特殊的 key 属性
 
 ```vue
 <button @click="show = !show">Toggle</button>
@@ -2542,29 +2365,22 @@ Vue 提供了两个内置组件，可以帮助你制作基于状态变化的过�
 ```
 
 ```css
-/* 下面我们会解释这些 class 是做什么的 */
+/* 进入，离开的过渡效果 */
 .v-enter-active,
 .v-leave-active {
   transition: opacity 0.5s ease;
 }
 
+/* 进入前，离开后的DOM状态 */
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
 }
 ```
 
-tip：<Transition> 仅支持单个元素或组件作为其插槽内容。如果内容是一个组件，这个组件必须仅有一个根元素。
-
-当一个 <Transition> 组件中的元素被插入或移除时，会发生下面这些事情：
-
-| Vue 自动检测是否有 css 动画过渡，如果有就应用
-| 如果有 JS 钩子，就自动调用
-| 都没有，DOM 的插入、删除就在下一个动作
-
 1.2 基于 CSS 的过渡效果
 
-一共有 6 个应用于进入与离开过渡效果的 CSS class。
+有 6 个应用于进入和离开过渡效果的 CSS class。
 
 | v-enter-from：进入动画的起始状态。
 | v-enter-active：进入动画的生效状态。
@@ -2651,14 +2467,14 @@ CSS 的 animation
 }
 ```
 
-可以自定义过渡 class，在你想集成第三方 CSS 动画库时非常有用，比如 Animate.css：
+可自定义过渡 class，在你想集成第三方 CSS 动画库时非常有用，比如 Animate.css：
 
-enter-from-class
-enter-active-class
-enter-to-class
-leave-from-class
-leave-active-class
-leave-to-class
+| enter-from-class
+| enter-active-class
+| enter-to-class
+| leave-from-class
+| leave-active-class
+| leave-to-class
 
 ```vue
 <!-- 假设你已经在页面中引入了 Animate.css -->
@@ -2832,9 +2648,10 @@ function onLeaveCancelled(el) {}
 
 1.7 过渡模式
 
-在几个元素切换时，进入和离开动画时同时开始的，就会出现布局问题，可以通过 position: absolute 解决，但是可能不符合需求，可以使用 mode 来解决。
+在DOM切换时，进入和离开动画是同时开始的，就会出现布局问题，可以通过 position: absolute 解决，但是可能不符合需求，可以使用 mode 来解决。
 
 ```vue
+<!-- 先执行离开动画，后执行进入动画 -->
 <Transition mode="out-in">
   ...
 </Transition>
@@ -2860,7 +2677,7 @@ function onLeaveCancelled(el) {}
 
 2. TransitionGroup
 
-用于给 v-for 列表元素的插入、移除、顺序改变添加动画。
+v-for 列表元素的插入、移除、顺序改变添加动画。
 
 2.1 和 <Transition> 的区别
 
@@ -3144,21 +2961,7 @@ TIPS: to 目标必须已经存在与 DOM 中，理想是挂载到 VUE 应用 DOM
       └─ <Stats>（异步组件）
 ```
 
-async setup()
-
-```js
-export default {
-  async setup() {
-    const res = await fetch(...)
-    const posts = await res.json()
-    return {
-      posts
-    }
-  }
-}
-```
-
-如果使用 <script setup>，那么顶层 await 表达式会自动让该组件成为一个异步依赖：
+顶层 await 表达式会自动让该组件成为一个异步依赖
 
 ```vue
 <script setup>
@@ -3233,7 +3036,7 @@ const posts = await res.json()
 
 1.1 介绍
 
-Vue 的单文件组件简称 SFC，是一种特殊的文件格式，使我们可以将 Vue 组件的模板、逻辑、样式封装在 SFC 中。如下：
+Vue 的单文件组件简称 SFC，是一种特殊的文件格式，可以将 Vue 组件的模板、逻辑、样式封装在 SFC 中。
 
 ```vue
 <script setup>
@@ -3274,7 +3077,7 @@ SFC 是 Vue 框架提供的一个功能，下列场景都是官方推荐的项�
 
 1.3 SFC 是如何工作的
 
-Vue SFC 是一个框架的文件格式，必须交由@vue/compiler-sfc 编译为标准的 JS 和 CSS，一个编译后的 SFC 是一个标准的 JS（ES）模块，意味着你可以像导入其他 ES 模块一样导入 SFC
+Vue SFC 是一个框架的文件格式，必须交由@vue/compiler-sfc 编译为标准的 JS 和 CSS，编译后的 SFC 是一个标准的 JS（ES）模块，意味着可以像导入其他 ES 模块一样导入 SFC
 
 ```js
 import MyComponent from "./MyComponent.vue";
@@ -3501,22 +3304,13 @@ export const store = reactive({
 
 4.4 Pinia
 
-手动状态管理解决方案在简单的场景中已经足够了，但是在大规模的生产应用中还有很多其他事项需要考虑：
-
-| 更强的团队协作约定
-| 与 Vue DevTools 集成，包括时间轴、组件内部审查和时间旅行调试
-| 模块热更新 (HMR)
-| 服务端渲染支持
-
-Pinia 都实现了，有 Vue 核心团队维护。官方建议使用 Pinia。Pinia 提供了更简洁直接的 API，并提供了组合式风格的 API，最重要的是，在使用 TypeScript 时它提供了更完善的类型推导。
+Pinia 有 Vue 核心团队维护。官方建议使用 Pinia。Pinia 提供了更简洁直接的 API，并提供了组合式风格的 API，最重要的是，在使用 TypeScript 时它提供了更完善的类型推导。
 
 5. 测试
 
 5.1 为什么需要测试
 
-自动化测试能够预防无意引入的 bug，并鼓励开发者将应用分解为可测试、可维护的函数、模块、类和组件。
-
-这能够帮助你和你的团队更快速、自信地构建复杂的 Vue 应用。
+自动化测试能预防无意引入的 bug，并鼓励开发者将应用分解为可测试、可维护的函数、模块、类和组件。这能够帮助你和你的团队更快速、自信地构建复杂的 Vue 应用。
 
 5.2 何时测试
 
@@ -3530,19 +3324,9 @@ Pinia 都实现了，有 Vue 核心团队维护。官方建议使用 Pinia。Pin
 
 端到端测试：检查跨越多个页面的功能，并对生产构建的 Vue 应用进行实际的网络请求。这些测试通常涉及到建立一个数据库或其他后端。
 
-5.4 总览
+5.4 单元测试
 
-我们将简要地讨论这些测试是什么，以及如何在 Vue 应用中实现它们，并提供一些普适性建议。
-
-5.5 单元测试
-
-编写单元测试是为了验证小的、独立的代码单元是否按预期工作。
-
-单元测试侧重于逻辑上的正确性，只关注应用整体功能的一小部分。
-
-单元测试将捕获函数的业务逻辑和逻辑正确性的问题。
-
-以这个 increment 函数为例：
+编写单元测试是为了验证小的、独立的代码单元是否按预期工作。侧重于逻辑上的正确性，只关注应用整体功能的一小部分。将捕获函数的业务逻辑和逻辑正确性的问题。以 increment 函数为例：如果任何一条断言失败了，那么问题一定是出在 increment 函数上。
 
 ```js
 // helpers.js
@@ -3553,8 +3337,6 @@ export function increment(current, max = 10) {
   return current;
 }
 ```
-
-如果任何一条断言失败了，那么问题一定是出在 increment 函数上。
 
 ```js
 // helpers.spec.js
@@ -3575,9 +3357,7 @@ describe("increment", () => {
 });
 ```
 
-单元测试通常适用于独立的业务逻辑、组件、类、模块或函数，不涉及 UI 渲染、网络请求或其他环境问题。
-
-一个组件可以通过两种方式测试：
+单元测试通常适用于独立的业务逻辑、组件、类、模块或函数，不涉及 UI 渲染、网络请求或其他环境问题。一个组件可以通过两种方式测试：
 
 | 白盒：单元测试，白盒测试知晓一个组件的实现细节和依赖关系。它们更专注于将组件进行更 独立 的测试。这些测试通常会涉及到模拟一些组件的部分子组件，以及设置插件的状态和依赖性（例如 Pinia）。
 
@@ -3585,19 +3365,17 @@ describe("increment", () => {
 
 [Vitest](https://cn.vitest.dev/) 正是一个针对此目标设计的单元测试框架，它由 Vue / Vite 团队成员开发和维护。在 Vite 的项目集成它会非常简单，而且速度非常快。
 
-5.6 组件测试
+5.5 组件测试
 
-组件测试应该捕捉组件中的 prop、事件、提供的插槽、样式、CSS class 名、生命周期钩子，和其他相关的问题。
+组件测试应该捕捉组件中的 prop、事件、提供的插槽、样式、CSS class 名、生命周期钩子，和其他相关的问题。当进行测试时，请记住，测试这个组件做了什么，而不是测试它是怎么做到的。
 
-当进行测试时，请记住，测试这个组件做了什么，而不是测试它是怎么做到的。
-
-5.7 端到端（E2E）测试
+5.6 端到端（E2E）测试
 
 端到端测试的重点是多页面的应用表现，针对你的应用在生产环境下进行网络请求。他们通常需要建立一个数据库或其他形式的后端，甚至可能针对一个预备上线的环境运行。
 
 端到端测试通常会捕捉到路由、状态管理库、顶级组件（常见为 App 或 Layout）、公共资源或任何请求处理方面的问题。如上所述，它们可以捕捉到单元测试或组件测试无法捕捉的关键问题。
 
-5.8 用例指南
+5.7 用例指南
 
 添加 Vitest 到项目中
 
@@ -3771,11 +3549,7 @@ server.listen(3000, () => {
 
 6.2.2 客户端激活
 
-点击按钮是无效的，因为这段 HTML 在客户端是完全静态的，浏览器中没有加载 Vue。
-
-为了让按钮可以交互，让 Vue 创建一个与服务端完全相同的应用实例，并将每个组件与它应该控制的 DOM 节点相匹配，并添加 DOM 事件监听器。
-
-使用 createSSRApp()：
+点击按钮是无效的，因为这段 HTML 在客户端是完全静态的，浏览器中没有加载 Vue。为了让按钮可以交互，让 Vue 创建一个与服务端完全相同的应用实例，并将每个组件与它应该控制的 DOM 节点相匹配，并添加 DOM 事件监听器。使用 createSSRApp()：
 
 ```js
 // 该文件运行在浏览器中
@@ -3996,34 +3770,18 @@ Vue.createApp({
 
 世上没有一种方案可以解决所有问题，所以 Vue 被设计成灵活的框架。
 
-1.1 独立脚本
-
-Vue 可以以一个单独 JS 文件的形式使用，无需构建步骤！
-
-1.2 作为 Web Component 嵌入
-
-你可以用 Vue 来构建标准的 Web Component，这些 Web Component 可以嵌入到任何 HTML 页面中，无论它们是如何被渲染的。
-
-1.3 单页面应用（SPA）
-一些应用在前端需要具有丰富的交互性、较深的会话和复杂的状态逻辑。
-
-1.4 全栈/SSR
-
-纯客户端的 SPA 在首屏加载和 SEO 方面有显著的问题，
-
-1.5 JAMStack/SSR
-
-如果所需的数据是静态的，那么服务端渲染可以提前完成。这一技术通常被称为静态站点生成 (SSG)，也被称为 JAMStack。
-
-1.6 Web 以外
-
-Vue 可以构建桌面应用、移动端应用、3DWebGL
+| 独立脚本：Vue 可以以一个单独 JS 文件的形式使用，无需构建步骤！
+| 作为 Web Component 嵌入： Vue 来构建标准的 Web Component，这些 Web Component 可以嵌入到任何 HTML 页面中，无论它们是如何被渲染的。
+| 单页面应用（SPA）：一些应用在前端需要具有丰富的交互性、较深的会话和复杂的状态逻辑。
+| 全栈/SSR：纯客户端的 SPA 在首屏加载和 SEO 方面有显著的问题，
+| JAMStack/SSR：如果所需的数据是静态的，那么服务端渲染可以提前完成。这一技术通常被称为静态站点生成 (SSG)，也被称为 JAMStack。
+| Web 以外：Vue 可以构建桌面应用、移动端应用、3DWebGL
 
 2. 组合式 Api 常见问答
 
 2.1 什么是组合式 API
 
-组合式 API (Composition API) 是一系列 API 的集合，使我们可以使用函数而不是声明选项的方式书写 Vue 组件
+组合式 API (Composition API) 是一系列 API 的集合，使用函数而不是声明选项的方式书写 Vue 组件
 
 | 响应式 API：例如 ref() 和 reactive()
 | 生命周期钩子：例如 onMounted() 和 onUnmounted()
@@ -4035,9 +3793,7 @@ Vue 可以构建桌面应用、移动端应用、3DWebGL
 
 2.3 与选项式 API 的关系
 
-在写组合式 API 的代码时也运用上所有普通 JS 代码组织的最佳实践。
-
-组合式 API 能够覆盖所有状态逻辑方面的需求。
+在写组合式 API 的代码时也运用上所有普通 JS 代码组织的最佳实践。组合式 API 能够覆盖所有状态逻辑方面的需求。
 
 2.4 与 ClassApi 的关系
 
