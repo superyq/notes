@@ -25,9 +25,7 @@ Vue 为什么可以称为“渐进式框架”：它是一个可以与你共同�
 
 1.3 单文件组件
 
-单文件组件是 Vue 的标志性功能。
-
-\*.vue、SFC 就是单文件组件：将一个组件的逻辑 (JS)，模板 (HTML) 和样式 (CSS) 封装在同一个文件里。
+单文件组件是 Vue 的标志性功能。\*.vue、SFC 就是单文件组件：将一个组件的逻辑 (JS)，模板 (HTML) 和样式 (CSS) 封装在同一个文件里。
 
 1.4 API 风格
 
@@ -69,7 +67,7 @@ npm create vue@latest
 </script>
 ```
 
-通过 CDN 以及原生 ES 模块使用 Vue：
+通过 CDN 以及原生 ES 模块使用 Vue
 
 ```html
 <div id="app">{{ message }}</div>
@@ -191,6 +189,11 @@ app.mount("#app");
 注意：确保在挂载应用实例之前完成所有应用配置！
 
 ```js
+import { createApp } from "vue";
+// 从一个单文件组件中导入根组件
+import App from "./App.vue";
+
+const app = createApp(App);
 // 应用实例的 .config 对象可以进行一些配置，例如配置错误处理器：用来捕获所有子组件上的错误：
 app.config.errorHandler = (err) => {
   /* 处理错误 */
@@ -201,12 +204,8 @@ app.component("TodoDeleteButton", TodoDeleteButton);
 
 // 全局属性的对象。
 app.config.globalProperties.msg = "hello";
-// 通过 this 访问
-export default {
-  mounted() {
-    console.log(this.msg); // 'hello'
-  },
-};
+
+app.mount("#app");
 ```
 
 1.5 多个应用实例
@@ -413,9 +412,9 @@ const proxy = reactive(raw);
 console.log(proxy === raw); // false
 ```
 
-reactive() API 有一些局限性,官方建议使用 ref() 作为声明响应式状态的主要 API。博主个人还是喜欢 ref，reactive 混着用，注意那些局限性就可以了。
+reactive() 局限性包括：只能用于对象类型（对象，数组，Map，Set）、不能替换整个对象、对结构操作不友好。
 
-局限性包括：只能用于对象类型（对象，数组，Map，Set）、不能替换整个对象、对结构操作不友好。
+reactive() API 有一些局限性,官方建议使用 ref() 作为声明响应式状态的主要 API。博主个人还是喜欢 ref，reactive 混着用，注意那些局限性就可以了。
 
 ```js
 // 不能替换整个对象
