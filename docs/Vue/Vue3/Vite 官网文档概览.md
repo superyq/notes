@@ -6,47 +6,37 @@
 
 1.1 现实问题
 
-在大型项目中，JS 代码量巨大，包含数千个模块，基于 JS 开发的工具就会遇到瓶颈：1. 启动开发服务慢（几分钟）。2，模块热替换（HMR）需要几秒钟才在浏览器反映出来。极大的影响了开发效率和开发幸福感。Vite 利用生态系统新进展解决上述问题：浏览器开始原生支持 ES 模块。越来越多的 JS 工具使用编译性语言编写。
+在大型项目中，JS 代码量巨大，模块多，就会导致基于 JS 开发的工具：1. 启动开发服务慢（几分钟）。2，模块热替换（HMR）需要几秒钟才在浏览器反映出来。极大影响了开发效率和开发幸福感。
 
-1.1.1 缓慢的服务器启动
+Vite 利用生态系统新进展解决上述问题：1. 浏览器开始原生支持 ES 模块。2. 越来越多的 JS 工具使用编译性语言编写。
 
-Vite 一开始将应用模块分为依赖和源码，加快了开发服务器启动时间。Vite 使用 esbuild 预构建依赖，esbuild 使用 go 编写，比 JS 编写的打包器预构建依赖块 10-100 倍。Vite 以 原生 ESM 方式提供源码。这实际上是让浏览器接管了打包程序的部分工作：Vite 只需要在浏览器请求源码时进行转换并按需提供源码。根据情景动态导入代码，即只在当前屏幕上实际使用时才会被处理。
+1.1.1 解决缓慢的服务器启动
 
-1.1.2 缓慢的更新
+Vite 将应用模块分为依赖和源码，加快了开发服务器启动时间。Vite 使用 esbuild 预构建依赖，esbuild 使用 go 编写，比 JS 编写的打包器预构建依赖块 10-100 倍。Vite 以原生 ESM 方式提供源码。这实际上是让浏览器接管了打包程序的部分工作：Vite 只需要在浏览器请求源码时进行转换并按需提供源码。
 
-基于打包器启动时，重建整个包的效率很低。原因显而易见：因为这样更新速度会随着应用体积增长而直线下降。
+1.1.2 解决 HMR 缓慢的更新
 
 在 Vite 中，HMR 是在原生 ESM 上执行的。当编辑一个文件时，Vite 只需要精确地使已编辑的模块与其最近的 HMR 边界之间的链失活[1]（大多数时候只是模块本身），使得无论应用大小如何，HMR 始终能保持快速更新。
 
 Vite 同时利用 HTTP 头来加速整个页面的重新加载（再次让浏览器为我们做更多事情）：源码模块的请求会根据 304 Not Modified 进行协商缓存，而依赖模块请求则会通过 Cache-Control: max-age=31536000,immutable 进行强缓存，因此一旦被缓存它们将不需要再次请求。
 
-一旦你体验到 Vite 的神速，你是否愿意再忍受像曾经那样使用打包器开发就要打上一个大大的问号了。
-
 1.2 为什么生产环境仍需打包
 
-尽管原生 ESM 现在得到了广泛支持，但由于嵌套导入会导致额外的网络往返，在生产环境中发布未打包的 ESM 仍然效率低下（即使使用 HTTP/2）。为了在生产环境中获得最佳的加载性能，最好还是将代码进行 tree-shaking、懒加载和 chunk 分割（以获得更好的缓存）。
-
-要确保开发服务器和生产环境构建之间的最优输出和行为一致并不容易。所以 Vite 附带了一套 构建优化 的 构建命令，开箱即用。
+嵌套导入会导致额外的网络往返，在生产环境中发布未打包的 ESM 效率低下（即使使用 HTTP/2）。为了在生产环境中获得最佳的加载性能，最好还是将代码进行 tree-shaking、懒加载和 chunk 分割（以获得更好的缓存）。
 
 1.2.1 为何不用 ESBuild 打包？
 
-Vite 目前的插件 API 与使用 esbuild 作为打包器并不兼容。尽管 esbuild 速度更快，但 Vite 采用了 Rollup 灵活的插件 API 和基础建设，这对 Vite 在生态中的成功起到了重要作用。目前来看，我们认为 Rollup 提供了更好的性能与灵活性方面的权衡。
+Vite 目前的插件 API 与使用 esbuild 作为打包器并不兼容。尽管 esbuild 速度更快，但 Vite 采用了 Rollup 灵活的插件 API 和基础建设。
 
 2. 开始
 
 2.1 总览
 
-Vite（法语意为 "快速的"，发音 /vit/，发音同 "veet"）是一种新型前端构建工具，能够显著提升前端开发体验。它主要由两部分组成：
-
-一个开发服务器，它基于 原生 ES 模块 提供了 丰富的内建功能，如速度快到惊人的 模块热更新（HMR）。
-
-一套构建指令，它使用 Rollup 打包你的代码，并且它是预配置的，可输出用于生产环境的高度优化过的静态资源。
+Vite（法语意为 "快速的"，发音 /vit/，发音同 "veet"）是一种新型前端构建工具，能够显著提升前端开发体验。主要由两部分组成：1. 一个开发服务器，它基于原生 ES 模块 提供了 丰富的内建功能，如速度快到惊人的 模块热更新（HMR）。2. 一套构建指令，它使用 Rollup 打包你的代码，并且它是预配置的，可输出用于生产环境的高度优化过的静态资源。
 
 2.2 浏览器支持
 
-在开发阶段，Vite 将 esnext 作为转换目标，因为我们假设使用的是现代浏览器，它支持所有最新的 JavaScript 和 CSS 特性。这样可以防止语法降级，让 Vite 尽可能地接近原始源代码。
-
-对于生产构建，默认情况下 Vite 的目标浏览器支持 原生 ES 模块、原生 ESM 动态导入 和 import.meta。旧版浏览器可以通过官方的 @vitejs/plugin-legacy。查看 构建生产环境 了解更多细节。
+对于生产构建，默认情况下 Vite 的目标浏览器支持 原生 ES 模块、原生 ESM 动态导入 和 import.meta。在开发阶段，支持所有最新的 JavaScript 和 CSS 特性。
 
 2.3 在线试用 Vite
 
@@ -327,27 +317,377 @@ npm add -D lightningcss
 
 3.7 静态资源处理
 
+导入一个静态资源会返回解析后的 URL：
+
+```js
+import imgUrl from "./img.png";
+document.getElementById("hero-img").src = imgUrl;
+```
+
+添加一些特殊的查询参数可以更改资源被引入的方式：
+
+```js
+// 显式加载资源为一个 URL
+import assetAsURL from "./asset.js?url";
+
+// 以字符串形式加载资源
+import assetAsString from "./shader.glsl?raw";
+
+// 加载为 Web Worker
+import Worker from "./worker.js?worker";
+
+// 在构建时 Web Worker 内联为 base64 字符串
+import InlineWorker from "./worker.js?worker&inline";
+```
+
 3.8 JSON
+
+JSON 可以被直接导入 —— 同样支持具名导入：
+
+```js
+// 导入整个对象
+import json from "./example.json";
+// 对一个根字段使用具名导入 —— 有效帮助 treeshaking！
+import { field } from "./example.json";
+```
+
 3.9 Glob 导入
+
+Vite 支持使用特殊的 import.meta.glob 函数从文件系统导入多个模块：
+
+```js
+const modules = import.meta.glob("./dir/*.js");
+```
+
+以上将会被转译为下面的样子：
+
+```js
+// vite 生成的代码
+const modules = {
+  "./dir/foo.js": () => import("./dir/foo.js"),
+  "./dir/bar.js": () => import("./dir/bar.js"),
+};
+```
+
+你可以遍历 modules 对象的 key 值来访问相应的模块：
+
+```js
+for (const path in modules) {
+  modules[path]().then((mod) => {
+    console.log(path, mod);
+  });
+}
+```
+
+匹配到的文件默认是懒加载的，通过动态导入实现，并会在构建时分离为独立的 chunk。如果你倾向于直接引入所有的模块（例如依赖于这些模块中的副作用首先被应用），你可以传入 { eager: true } 作为第二个参数：
+
+```js
+const modules = import.meta.glob("./dir/*.js", { eager: true });
+```
+
+以上会被转译为下面的样子：
+
+```js
+// vite 生成的代码
+import * as __glob__0_0 from "./dir/foo.js";
+import * as __glob__0_1 from "./dir/bar.js";
+const modules = {
+  "./dir/foo.js": __glob__0_0,
+  "./dir/bar.js": __glob__0_1,
+};
+```
+
+3.9.1 Glob 导入形式
+
+import.meta.glob 都支持以字符串形式导入文件，类似于 以字符串形式导入资源。在这里，我们使用了 Import Reflection 语法对导入进行断言：
+
+```js
+const modules = import.meta.glob("./dir/*.js", { as: "raw", eager: true });
+```
+
+上面的代码会被转换为下面这样：
+
+```js
+// code produced by vite（代码由 vite 输出）
+const modules = {
+  "./dir/foo.js": 'export default "foo"\n',
+  "./dir/bar.js": 'export default "bar"\n',
+};
+```
+
+3.9.2 多个匹配模式
+
+第一个参数可以是一个 glob 数组，例如：
+
+```js
+const modules = import.meta.glob(["./dir/*.js", "./another/*.js"]);
+```
+
+3.9.3 反面匹配模式
+
+同样也支持反面 glob 匹配模式（以 ! 作为前缀）。若要忽略结果中的一些文件，你可以添加“排除匹配模式”作为第一个参数：
+
+```js
+const modules = import.meta.glob(["./dir/*.js", "./another/*.js"]);
+```
+
+```js
+// vite 生成的代码
+const modules = {
+  "./dir/foo.js": () => import("./dir/foo.js"),
+};
+```
+
+也可能你只想要导入模块中的部分内容，那么可以利用 import 选项。
+
+```js
+const modules = import.meta.glob("./dir/*.js", { import: "setup" });
+
+// vite 生成的代码
+const modules = {
+  "./dir/foo.js": () => import("./dir/foo.js").then((m) => m.setup),
+  "./dir/bar.js": () => import("./dir/bar.js").then((m) => m.setup),
+};
+```
+
+当与 eager 一同存在时，甚至可以对这些模块进行 tree-shaking。
+
+```js
+const modules = import.meta.glob("./dir/*.js", {
+  import: "setup",
+  eager: true,
+});
+
+// vite 生成的代码
+import { setup as __glob__0_0 } from "./dir/foo.js";
+import { setup as __glob__0_1 } from "./dir/bar.js";
+const modules = {
+  "./dir/foo.js": __glob__0_0,
+  "./dir/bar.js": __glob__0_1,
+};
+```
+
+设置 import 为 default 可以加载默认导出。
+
+```js
+const modules = import.meta.glob("./dir/*.js", {
+  import: "default",
+  eager: true,
+});
+
+// vite 生成的代码
+import __glob__0_0 from "./dir/foo.js";
+import __glob__0_1 from "./dir/bar.js";
+const modules = {
+  "./dir/foo.js": __glob__0_0,
+  "./dir/bar.js": __glob__0_1,
+};
+```
+
+你也可以使用 query 选项来提供对导入的自定义查询，以供其他插件使用。
+
+```js
+const modules = import.meta.glob("./dir/*.js", {
+  query: { foo: "bar", bar: true },
+});
+
+// vite 生成的代码
+const modules = {
+  "./dir/foo.js": () => import("./dir/foo.js?foo=bar&bar=true"),
+  "./dir/bar.js": () => import("./dir/bar.js?foo=bar&bar=true"),
+};
+```
+
+3.9.4 Glob 导入注意事项
+
+请注意：
+
+这只是一个 Vite 独有的功能而不是一个 Web 或 ES 标准
+该 Glob 模式会被当成导入标识符：必须是相对路径（以 ./ 开头）或绝对路径（以 / 开头，相对于项目根目录解析）或一个别名路径（请看 resolve.alias 选项)。
+Glob 匹配是使用 fast-glob 来实现的 —— 阅读它的文档来查阅 支持的 Glob 模式。
+你还需注意，所有 import.meta.glob 的参数都必须以字面量传入。你 不 可以在其中使用变量或表达式。
+
 3.10 动态导入
+
+和 glob 导入 类似，Vite 也支持带变量的动态导入。注意变量仅代表一层深的文件名。如果 file 是 foo/bar，导入将会失败。
+
+```js
+const module = await import(`./dir/${file}.js`);
+```
+
 3.11 WebAssembly
+
+预编译的 .wasm 文件可以通过 ?init 来导入。 默认导出一个初始化函数，返回值为所导出 WebAssembly.Instance 实例对象的 Promise：
+
+```js
+import init from "./example.wasm?init";
+
+init().then((instance) => {
+  instance.exports.test();
+});
+```
+
+init 函数还可以将传递给 WebAssembly.instantiate 的导入对象作为其第二个参数：
+
+```js
+init({
+  imports: {
+    someFunc: () => {
+      /* ... */
+    },
+  },
+}).then(() => {
+  /* ... */
+});
+```
+
+在生产构建当中，体积小于 assetInlineLimit 的 .wasm 文件将会被内联为 base64 字符串。否则，它们将被视为 静态资源 ，并按需获取。
+
+3.11.1 访问 WebAssembly 模块
+
+如果需要访问 Module 对象，例如将它多次实例化，可以使用 显式 URL 引入 来解析资源，然后执行实例化：
+
+```js
+import wasmUrl from "foo.wasm?url";
+
+const main = async () => {
+  const responsePromise = fetch(wasmUrl);
+  const { module, instance } = await WebAssembly.instantiateStreaming(
+    responsePromise
+  );
+  /* ... */
+};
+
+main();
+```
+
+3.11.2 在 Node.js 中获取模块
+
+在 SSR 中，作为 ?init 导入的 fetch() 可能会失败，导致 TypeError: Invalid URL 报错。以下是一种替代方案，假设项目根目录在当前目录：
+
+```js
+import wasmUrl from "foo.wasm?url";
+import { readFile } from "node:fs/promises";
+
+const main = async () => {
+  const resolvedUrl = (await import("./test/boot.test.wasm?url")).default;
+  const buffer = await readFile("." + resolvedUrl);
+  const { instance } = await WebAssembly.instantiate(buffer, {
+    /* ... */
+  });
+  /* ... */
+};
+
+main();
+```
+
 3.12 Web Workers
+
+3.12.1 通过构造器导入
+
+一个 Web Worker 可以使用 new Worker() 和 new SharedWorker() 导入。与 worker 后缀相比，这种语法更接近于标准，是创建 worker 的 推荐 方式。
+
+```ts
+const worker = new Worker(new URL("./worker.js", import.meta.url));
+```
+
+worker 构造函数会接受可以用来创建 “模块” worker 的选项：
+
+```ts
+const worker = new Worker(new URL("./worker.js", import.meta.url), {
+  type: "module",
+});
+```
+
+3.12.2 带有查询后缀的导入
+
+你可以在导入请求上添加 ?worker 或 ?sharedworker 查询参数来直接导入一个 web worker 脚本。默认导出会是一个自定义 worker 的构造函数：
+
+```js
+import MyWorker from "./worker?worker";
+
+const worker = new MyWorker();
+```
+
+这个 worker 脚本也可以使用 ESM import 语句而不是 importScripts()。注意：在开发时，这依赖于 浏览器原生支持，但是在生产构建中，它会被编译掉。
+
+默认情况下，worker 脚本将在生产构建中编译成单独的 chunk。如果你想将 worker 内联为 base64 字符串，请添加 inline 查询参数：
+
+```js
+import MyWorker from "./worker?worker&inline";
+```
+
+如果你想要以一个 URL 的形式读取该 worker，请添加 url 这个 query：
+
+```js
+import MyWorker from "./worker?worker&url";
+```
+
 3.13 构建优化
 
-1. 命令行界面
-2. 使用插件
-3. 依赖预构建
-4. 静态资源处理
-5. 构建生产版本
-6. 部署静态站点
-7. 环境变量与模式
-8. 服务端渲染（SSR）
-9. 后端集成
-10. 比较
-11. 故障排除
-12. 性能
-13. 理念
-14. 从 v4 迁移
+下面所罗列的功能会自动应用为构建过程的一部分，除非你想禁用它们，否则没有必要显式配置。
+
+3.13.1 CSS 代码分割
+
+Vite 会自动地将一个异步 chunk 模块中使用到的 CSS 代码抽取出来并为其生成一个单独的文件。这个 CSS 文件将在该异步 chunk 加载完成时自动通过一个 <link> 标签载入，该异步 chunk 会保证只在 CSS 加载完毕后再执行，避免发生 FOUC 。
+
+如果你更倾向于将所有的 CSS 抽取到一个文件中，你可以通过设置 build.cssCodeSplit 为 false 来禁用 CSS 代码分割。
+
+3.13.2 预加载指令生成
+
+Vite 会为入口 chunk 和它们在打包出的 HTML 中的直接引入自动生成 <link rel="modulepreload"> 指令。
+
+3.13.3 异步 Chunk 加载优化
+
+在实际项目中，Rollup 通常会生成 “共用” chunk —— 被两个或以上的其他 chunk 共享的 chunk。与动态导入相结合，会很容易出现下面这种场景：
+
+在无优化的情境下，当异步 chunk A 被导入时，浏览器将必须请求和解析 A，然后它才能弄清楚它也需要共用 chunk C。这会导致额外的网络往返：
+
+```
+Entry ---> A ---> C
+```
+
+Vite 将使用一个预加载步骤自动重写代码，来分割动态导入调用，以实现当 A 被请求时，C 也将 同时 被请求：
+
+```
+Entry ---> (A + C)
+```
+
+C 也可能有更深的导入，在未优化的场景中，这会导致更多的网络往返。Vite 的优化会跟踪所有的直接导入，无论导入的深度如何，都能够完全消除不必要的往返。
+
+4. 命令行界面
+
+4.1 开发服务器
+
+```sh
+# 启动 Vite 开发服务器
+vite [root]
+
+
+# 构建生产版本
+vite build [root]
+
+
+# 预构建依赖
+vite optimize [root]
+
+# 本地预览构建产物
+vite preview [root]
+```
+
+5. 使用插件
+6. 依赖预构建
+7. 静态资源处理
+8. 构建生产版本
+9. 部署静态站点
+10. 环境变量与模式
+11. 服务端渲染（SSR）
+12. 后端集成
+13. 比较
+14. 故障排除
+15. 性能
+16. 理念
+17. 从 v4 迁移
 
 二. API
 
