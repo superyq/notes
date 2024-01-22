@@ -676,18 +676,421 @@ vite preview [root]
 ```
 
 5. 使用插件
+
+Vite 可以使用插件进行扩展，这得益于 Rollup 优秀的插件接口设计和一部分 Vite 独有的额外选项。这意味着 Vite 用户可以利用 Rollup 插件的强大生态系统，同时根据需要也能够扩展开发服务器和 SSR 功能。
+
+5.1 添加一个插件
+
+将它添加到项目的 devDependencies 并在 vite.config.js 配置文件中的 plugins 数组中引入它。例如，要想为传统浏览器提供支持：
+
+```sh
+$ npm add -D @vitejs/plugin-legacy
+```
+
+```js
+// vite.config.js
+import legacy from '@vitejs/plugin-legacy'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  plugins: [
+    legacy({
+      targets: ['defaults', 'not IE 11'],
+    }),
+  ],
+})
+```
+
+5.2 强制插件顺序
+
+为了与某些 Rollup 插件兼容，可能需要强制修改插件的执行顺序，或者只在构建时使用。这应该是 Vite 插件的实现细节。可以使用 enforce 修饰符来强制插件的位置:
+
+```js
+// vite.config.js
+import image from '@rollup/plugin-image'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  plugins: [
+    {
+      ...image(),
+      // pre：在 Vite 核心插件之前调用该插件
+      // 默认：在 Vite 核心插件之后调用该插件
+      // post：在 Vite 构建插件之后调用该插件
+      enforce: 'pre',
+    },
+  ],
+})
+```
+
+5.3 按需应用
+
+默认情况下插件在开发 (serve) 和生产 (build) 模式中都会调用。如果插件在服务或构建期间按需使用，请使用 apply 属性指明它们仅在 'build' 或 'serve' 模式时调用：
+
+```js
+// vite.config.js
+import typescript2 from 'rollup-plugin-typescript2'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  plugins: [
+    {
+      ...typescript2(),
+      apply: 'build',
+    },
+  ],
+})
+```
+
 6. 依赖预构建
+
+当你首次启动 vite 时，Vite 在本地加载你的站点之前预构建了项目依赖。默认情况下，它是自动且透明地完成的。依赖预构建仅适用于开发模式，并使用 esbuild 将依赖项转换为 ES 模块。在生产构建中，将使用 @rollup/plugin-commonjs。
+
+6.1 原因
+
+这就是 Vite 执行时所做的“依赖预构建”。这个过程有两个目的：
+
+| 1. CommonJS 和 UMD 兼容性: 在开发阶段中，Vite 的开发服务器将所有代码视为原生 ES 模块。因此，Vite 必须先将以 CommonJS 或 UMD 形式提供的依赖项转换为 ES 模块。
+| 2. 性能： 为了提高后续页面的加载性能，Vite将那些具有许多内部模块的 ESM 依赖项转换为单个模块。
+
+6.2 自动依赖搜寻
+
+如果没有找到现有的缓存，Vite 会扫描您的源代码，并自动寻找引入的依赖项（即 "bare import"，表示期望从 node_modules 中解析），并将这些依赖项作为预构建的入口点。预打包使用 esbuild 执行，因此通常速度非常快。
+
+在服务器已经启动后，如果遇到尚未在缓存中的新依赖项导入，则 Vite 将重新运行依赖项构建过程，并在需要时重新加载页面。
+
+6.3 Monorepo 和链接依赖
+
+在一个 monorepo 启动中，该仓库中的某个包可能会成为另一个包的依赖。Vite 会自动侦测没有从 node_modules 解析的依赖项，并将链接的依赖视为源码。它不会尝试打包被链接的依赖，而是会分析被链接依赖的依赖列表。
+
+然而，这需要被链接的依赖被导出为 ESM 格式。如果不是，那么你可以在配置里将此依赖添加到 optimizeDeps.include 和 build.commonjsOptions.include 这两项中。
+
+```js
+export default defineConfig({
+  optimizeDeps: {
+    include: ['linked-dep'],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/linked-dep/, /node_modules/],
+    },
+  },
+})
+```
+
+6.4 自定义行为
+
+有时候默认的依赖启发式算法（discovery heuristics）可能并不总是理想的。如果您想要明确地包含或排除依赖项，可以使用 optimizeDeps 配置项 来进行设置。
+
+optimizeDeps.include 或 optimizeDeps.exclude 的一个典型使用场景，是当 Vite 在源码中无法直接发现 import 的时候。例如，import 可能是插件转换的结果。这意味着 Vite 无法在初始扫描时发现 import —— 只能在文件被浏览器请求并转换后才能发现。这将导致服务器在启动后立即重新打包。
+
+include 和 exclude 都可以用来处理这个问题。如果依赖项很大（包含很多内部模块）或者是 CommonJS，那么你应该包含它；如果依赖项很小，并且已经是有效的 ESM，则可以排除它，让浏览器直接加载它。
+
+6.5 缓存
+
+Vite 将预构建的依赖项缓存到 node_modules/.vite 中。它会基于以下几个来源来决定是否需要重新运行预构建步骤：
+
+包管理器的锁文件内容，例如 package-lock.json，yarn.lock，pnpm-lock.yaml，或者 bun.lockb；
+补丁文件夹的修改时间；
+vite.config.js 中的相关字段；
+NODE_ENV 的值。
+
+只有在上述其中一项发生更改时，才需要重新运行预构建。
+
+如果出于某些原因你想要强制 Vite 重新构建依赖项，你可以在启动开发服务器时指定 --force 选项，或手动删除 node_modules/.vite 缓存目录。
+
+已预构建的依赖请求使用 HTTP 头 max-age=31536000, immutable 进行强缓存，以提高开发期间页面重新加载的性能。一旦被缓存，这些请求将永远不会再次访问开发服务器。如果安装了不同版本的依赖项（这反映在包管理器的 lockfile 中），则会通过附加版本查询自动失效。如果你想通过本地编辑来调试依赖项，您可以：
+
+通过浏览器开发工具的 Network 选项卡暂时禁用缓存；
+重启 Vite 开发服务器指定 --force 选项，来重新构建依赖项;
+重新载入页面。
+
 7. 静态资源处理
+
+7.1 将资源引入为URL
+
+服务时引入一个静态资源会返回解析后的公共路径。例如，imgUrl 在开发时会是 /img.png，在生产构建后会是 /assets/img.2d8efhg.png:
+
+```js
+import imgUrl from './img.png'
+document.getElementById('hero-img').src = imgUrl
+```
+
+被包含在内部列表或 assetsInclude 中的资源，可以使用 ?url 后缀显式导入为一个 URL。这十分有用，例如，要导入 Houdini Paint Worklets 时：
+
+```js
+import workletURL from 'extra-scalloped-border/worklet.js?url'
+CSS.paintWorklet.addModule(workletURL)
+```
+
+资源可以使用 ?raw 后缀声明作为字符串引入：
+
+```js
+import shaderString from './shader.glsl?raw'
+```
+
+脚本可以通过 ?worker 或 ?sharedworker 后缀导入为 web worker：
+
+```js
+// 在生产构建中将会分离出 chunk
+import Worker from './shader.js?worker'
+const worker = new Worker()
+```
+
+```js
+// sharedworker
+import SharedWorker from './shader.js?sharedworker'
+const sharedWorker = new SharedWorker()
+```
+
+```js
+// 内联为 base64 字符串
+import InlineWorker from './shader.js?worker&inline'
+```
+
+如果你有下列这些资源：
+
+不会被源码引用（例如 robots.txt）
+必须保持原有文件名（没有经过 hash）
+...或者你压根不想引入该资源，只是想得到其 URL。
+
+那么你可以将该资源放在指定的 public 目录中，它应位于你的项目根目录。该目录中的资源在开发时能直接通过 / 根路径访问到，并且打包时会被完整复制到目标目录的根目录下。
+
+目录默认是 <root>/public，但可以通过 publicDir 选项 来配置。
+
+请注意：引入 public 中的资源永远应该使用根绝对路径 —— 举个例子，public/icon.png 应该在源码中被引用为 /icon.png。public 中的资源不应该被 JavaScript 文件引用。
+
+7.2 new URL(url，import，meta.url)
+
+import.meta.url 是一个 ESM 的原生功能，会暴露当前模块的 URL。将它与原生的 URL 构造器 组合使用，在一个 JavaScript 模块中，通过相对路径我们就能得到一个被完整解析的静态资源 URL：
+
+```js
+const imgUrl = new URL('./img.png', import.meta.url).href
+
+document.getElementById('hero-img').src = imgUrl
+```
+
+在生产构建时，Vite 才会进行必要的转换保证 URL 在打包和资源哈希后仍指向正确的地址。然而，这个 URL 字符串必须是静态的，这样才好分析。否则代码将被原样保留、因而在 build.target 不支持 import.meta.url 时会导致运行时错误。
+
+```js
+// Vite 不会转换这个
+const imgUrl = new URL(imagePath, import.meta.url).href
+```
+
 8. 构建生产版本
-9. 部署静态站点
-10. 环境变量与模式
-11. 服务端渲染（SSR）
-12. 后端集成
-13. 比较
-14. 故障排除
-15. 性能
-16. 理念
-17. 从 v4 迁移
+
+当需要将应用部署到生产环境时，只需运行 vite build 命令。默认情况下，它使用 <root>/index.html 作为其构建入口点，并生成能够静态部署的应用程序包。
+
+8.1 浏览器兼容性
+
+用于生产环境的构建包会假设目标浏览器支持现代 JavaScript 语法。默认情况下，Vite 的目标是能够 支持原生 ESM script 标签、支持原生 ESM 动态导入 和 import.meta 的浏览器：Chrome >=87、Firefox >=78、Safari >=14、Edge >=88。你也可以通过 build.target 配置项 指定构建目标，最低支持 es2015。
+
+请注意，默认情况下 Vite 只处理语法转译，且 不包含任何 polyfill，传统浏览器可以通过插件 @vitejs/plugin-legacy 来支持，它将自动生成传统版本的 chunk 及与其相对应 ES 语言特性方面的 polyfill。兼容版的 chunk 只会在不支持原生 ESM 的浏览器中进行按需加载。
+
+8.2 公共基础路径
+
+如果你需要在嵌套的公共路径下部署项目，只需指定 base 配置项，然后所有资源的路径都将据此配置重写。这个选项也可以通过命令行参数指定，例如 vite build --base=/my/public/path/。
+
+当然，情况也有例外，当访问过程中需要使用动态连接的 url 时，可以使用全局注入的 import.meta.env.BASE_URL 变量，它的值为公共基础路径。注意，这个变量在构建时会被静态替换，因此，它必须按 import.meta.env.BASE_URL 的原样出现（例如 import.meta.env['BASE_URL'] 是无效的）
+
+8.3 自定义构建
+
+构建过程可以通过多种 构建配置选项 来自定义构建。具体来说，你可以通过 build.rollupOptions 直接调整底层的 Rollup 选项：
+
+```js
+// vite.config.js
+export default defineConfig({
+  build: {
+    rollupOptions: {
+      // https://rollupjs.org/configuration-options/
+    },
+  },
+})
+```
+
+8.4 产物分块策略
+
+你可以通过配置 build.rollupOptions.output.manualChunks 来自定义 chunk 分割策略（查看 Rollup 相应文档）
+
+在 Vite 2.8 及更早版本中，默认的策略是将 chunk 分割为 index 和 vendor。这对一些 SPA 来说是好的策略，但是要对所有应用场景提供一种通用解决方案是非常困难的。从 Vite 2.9 起，manualChunks 默认情况下不再被更改。你可以通过在配置文件中添加 splitVendorChunkPlugin 来继续使用 “分割 Vendor Chunk” 策略：
+
+```js
+// vite.config.js
+import { splitVendorChunkPlugin } from 'vite'
+export default defineConfig({
+  plugins: [splitVendorChunkPlugin()],
+})
+```
+
+也可以用一个工厂函数 splitVendorChunk({ cache: SplitVendorChunkCache }) 来提供该策略，在需要与自定义逻辑组合的情况下，cache.reset() 需要在 buildStart 阶段被调用，以便构建的 watch 模式在这种情况下正常工作。
+
+警告：你应该使用 build.rollupOptions.output.manualChunks 函数形式来使用此插件。如果使用对象形式，插件将不会生效。
+
+8.5 文件变化时重新构建
+
+你可以使用 vite build --watch 来启用 rollup 的监听器。或者，你可以直接通过 build.watch 调整底层的 WatcherOptions 选项：
+
+```js
+// vite.config.js
+export default defineConfig({
+  build: {
+    watch: {
+      // https://rollupjs.org/configuration-options/#watch
+    },
+  },
+})
+```
+
+当启用 --watch 标志时，对 vite.config.js 的改动，以及任何要打包的文件，都将触发重新构建。
+
+8.6 多页面应用模式
+
+假设你有下面这样的项目文件结构：
+
+```
+├── package.json
+├── vite.config.js
+├── index.html
+├── main.js
+└── nested
+    ├── index.html
+    └── nested.js
+```
+
+在开发过程中，简单地导航或链接到 /nested/ - 将会按预期工作，与正常的静态文件服务器表现一致。
+
+在构建过程中，你只需指定多个 .html 文件作为入口点即可：
+
+```js
+// vite.config.js
+import { resolve } from 'path'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        nested: resolve(__dirname, 'nested/index.html'),
+      },
+    },
+  },
+})
+```
+
+如果你指定了另一个根目录，请记住，在解析输入路径时，__dirname 的值将仍然是 vite.config.js 文件所在的目录。因此，你需要把对应入口文件的 root 的路径添加到 resolve 的参数中。
+
+请注意，在 HTML 文件中，Vite 忽略了 rollupOptions.input 对象中给定的入口名称，而是在生成 dist 文件夹中的 HTML 资源文件时，使用了文件已解析的路径 ID。这确保了与开发服务器的工作方式保持一致的结构。
+
+8.7 库模式
+
+当你开发面向浏览器的库时，你可能会将大部分时间花在该库的测试/演示页面上。在 Vite 中你可以使用 index.html 获得如丝般顺滑的开发体验。
+
+当这个库要进行发布构建时，请使用 build.lib 配置项，以确保将那些你不想打包进库的依赖进行外部化处理，例如 vue 或 react：
+
+```js
+// vite.config.js
+import { resolve } from 'path'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  build: {
+    lib: {
+      // Could also be a dictionary or array of multiple entry points
+      entry: resolve(__dirname, 'lib/main.js'),
+      name: 'MyLib',
+      // the proper extensions will be added
+      fileName: 'my-lib',
+    },
+    rollupOptions: {
+      // 确保外部化处理那些你不想打包进库的依赖
+      external: ['vue'],
+      output: {
+        // 在 UMD 构建模式下为这些外部化的依赖提供一个全局变量
+        globals: {
+          vue: 'Vue',
+        },
+      },
+    },
+  },
+})
+```
+
+入口文件将包含可以由你的包的用户导入的导出：
+
+```js
+// lib/main.js
+import Foo from './Foo.vue'
+import Bar from './Bar.vue'
+export { Foo, Bar }
+```
+
+使用如上配置运行 vite build 时，将会使用一套面向库的 Rollup 预设，并且将为该库提供两种构建格式：es 和 umd (可在 build.lib 中配置)：
+
+```sh
+$ vite build
+building for production...
+dist/my-lib.js      0.08 kB / gzip: 0.07 kB
+dist/my-lib.umd.cjs 0.30 kB / gzip: 0.16 kB
+```
+
+推荐在你库的 package.json 中使用如下格式：
+
+```json
+{
+  "name": "my-lib",
+  "type": "module",
+  "files": ["dist"],
+  "main": "./dist/my-lib.umd.cjs",
+  "module": "./dist/my-lib.js",
+  "exports": {
+    ".": {
+      "import": "./dist/my-lib.js",
+      "require": "./dist/my-lib.umd.cjs"
+    }
+  }
+}
+```
+
+或者，如果暴露了多个入口起点：
+
+```json
+{
+  "name": "my-lib",
+  "type": "module",
+  "files": ["dist"],
+  "main": "./dist/my-lib.cjs",
+  "module": "./dist/my-lib.js",
+  "exports": {
+    ".": {
+      "import": "./dist/my-lib.js",
+      "require": "./dist/my-lib.cjs"
+    },
+    "./secondary": {
+      "import": "./dist/secondary.js",
+      "require": "./dist/secondary.cjs"
+    }
+  }
+}
+```
+
+文件扩展名：如果 package.json 不包含 "type": "module"，Vite 会生成不同的文件后缀名以兼容 Node.js。.js 会变为 .mjs 而 .cjs 会变为 .js 。
+
+环境变量：在库模式中，所有 import.meta.env.* 的使用都会在构建生产版本时被静态替换。但是，process.env.* 的使用不会，这样你的库的使用者就可以动态地改变它。如果这是不可取的，你可以使用 define: { 'process.env.NODE_ENV': '"production"' } 来静态替换它们，或者使用 esm-env 来更好地兼容打包工具和运行时。
+
+进阶用法：库模式包括了一种简单而又有见地的配置，适用于面向浏览器和 JS 框架的库。如果你正在构建非面向浏览器的库，或需要高级构建流程，可以直接使用 Rollup 或 esbuild。
+
+8.8 进阶基础路径选择
+
+1.  部署静态站点
+2.  环境变量与模式
+3.  服务端渲染（SSR）
+4.  后端集成
+5.  比较
+6.  故障排除
+7.  性能
+8.  理念
+9.  从 v4 迁移
 
 二. API
 
