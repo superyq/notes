@@ -689,16 +689,16 @@ $ npm add -D @vitejs/plugin-legacy
 
 ```js
 // vite.config.js
-import legacy from '@vitejs/plugin-legacy'
-import { defineConfig } from 'vite'
+import legacy from "@vitejs/plugin-legacy";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [
     legacy({
-      targets: ['defaults', 'not IE 11'],
+      targets: ["defaults", "not IE 11"],
     }),
   ],
-})
+});
 ```
 
 5.2 强制插件顺序
@@ -707,8 +707,8 @@ export default defineConfig({
 
 ```js
 // vite.config.js
-import image from '@rollup/plugin-image'
-import { defineConfig } from 'vite'
+import image from "@rollup/plugin-image";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [
@@ -717,10 +717,10 @@ export default defineConfig({
       // pre：在 Vite 核心插件之前调用该插件
       // 默认：在 Vite 核心插件之后调用该插件
       // post：在 Vite 构建插件之后调用该插件
-      enforce: 'pre',
+      enforce: "pre",
     },
   ],
-})
+});
 ```
 
 5.3 按需应用
@@ -729,17 +729,17 @@ export default defineConfig({
 
 ```js
 // vite.config.js
-import typescript2 from 'rollup-plugin-typescript2'
-import { defineConfig } from 'vite'
+import typescript2 from "rollup-plugin-typescript2";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [
     {
       ...typescript2(),
-      apply: 'build',
+      apply: "build",
     },
   ],
-})
+});
 ```
 
 6. 依赖预构建
@@ -751,7 +751,7 @@ export default defineConfig({
 这就是 Vite 执行时所做的“依赖预构建”。这个过程有两个目的：
 
 | 1. CommonJS 和 UMD 兼容性: 在开发阶段中，Vite 的开发服务器将所有代码视为原生 ES 模块。因此，Vite 必须先将以 CommonJS 或 UMD 形式提供的依赖项转换为 ES 模块。
-| 2. 性能： 为了提高后续页面的加载性能，Vite将那些具有许多内部模块的 ESM 依赖项转换为单个模块。
+| 2. 性能： 为了提高后续页面的加载性能，Vite 将那些具有许多内部模块的 ESM 依赖项转换为单个模块。
 
 6.2 自动依赖搜寻
 
@@ -768,14 +768,14 @@ export default defineConfig({
 ```js
 export default defineConfig({
   optimizeDeps: {
-    include: ['linked-dep'],
+    include: ["linked-dep"],
   },
   build: {
     commonjsOptions: {
       include: [/linked-dep/, /node_modules/],
     },
   },
-})
+});
 ```
 
 6.4 自定义行为
@@ -807,45 +807,45 @@ NODE_ENV 的值。
 
 7. 静态资源处理
 
-7.1 将资源引入为URL
+7.1 将资源引入为 URL
 
 服务时引入一个静态资源会返回解析后的公共路径。例如，imgUrl 在开发时会是 /img.png，在生产构建后会是 /assets/img.2d8efhg.png:
 
 ```js
-import imgUrl from './img.png'
-document.getElementById('hero-img').src = imgUrl
+import imgUrl from "./img.png";
+document.getElementById("hero-img").src = imgUrl;
 ```
 
 被包含在内部列表或 assetsInclude 中的资源，可以使用 ?url 后缀显式导入为一个 URL。这十分有用，例如，要导入 Houdini Paint Worklets 时：
 
 ```js
-import workletURL from 'extra-scalloped-border/worklet.js?url'
-CSS.paintWorklet.addModule(workletURL)
+import workletURL from "extra-scalloped-border/worklet.js?url";
+CSS.paintWorklet.addModule(workletURL);
 ```
 
 资源可以使用 ?raw 后缀声明作为字符串引入：
 
 ```js
-import shaderString from './shader.glsl?raw'
+import shaderString from "./shader.glsl?raw";
 ```
 
 脚本可以通过 ?worker 或 ?sharedworker 后缀导入为 web worker：
 
 ```js
 // 在生产构建中将会分离出 chunk
-import Worker from './shader.js?worker'
-const worker = new Worker()
+import Worker from "./shader.js?worker";
+const worker = new Worker();
 ```
 
 ```js
 // sharedworker
-import SharedWorker from './shader.js?sharedworker'
-const sharedWorker = new SharedWorker()
+import SharedWorker from "./shader.js?sharedworker";
+const sharedWorker = new SharedWorker();
 ```
 
 ```js
 // 内联为 base64 字符串
-import InlineWorker from './shader.js?worker&inline'
+import InlineWorker from "./shader.js?worker&inline";
 ```
 
 如果你有下列这些资源：
@@ -865,16 +865,16 @@ import InlineWorker from './shader.js?worker&inline'
 import.meta.url 是一个 ESM 的原生功能，会暴露当前模块的 URL。将它与原生的 URL 构造器 组合使用，在一个 JavaScript 模块中，通过相对路径我们就能得到一个被完整解析的静态资源 URL：
 
 ```js
-const imgUrl = new URL('./img.png', import.meta.url).href
+const imgUrl = new URL("./img.png", import.meta.url).href;
 
-document.getElementById('hero-img').src = imgUrl
+document.getElementById("hero-img").src = imgUrl;
 ```
 
 在生产构建时，Vite 才会进行必要的转换保证 URL 在打包和资源哈希后仍指向正确的地址。然而，这个 URL 字符串必须是静态的，这样才好分析。否则代码将被原样保留、因而在 build.target 不支持 import.meta.url 时会导致运行时错误。
 
 ```js
 // Vite 不会转换这个
-const imgUrl = new URL(imagePath, import.meta.url).href
+const imgUrl = new URL(imagePath, import.meta.url).href;
 ```
 
 8. 构建生产版本
@@ -905,7 +905,7 @@ export default defineConfig({
       // https://rollupjs.org/configuration-options/
     },
   },
-})
+});
 ```
 
 8.4 产物分块策略
@@ -916,10 +916,10 @@ export default defineConfig({
 
 ```js
 // vite.config.js
-import { splitVendorChunkPlugin } from 'vite'
+import { splitVendorChunkPlugin } from "vite";
 export default defineConfig({
   plugins: [splitVendorChunkPlugin()],
-})
+});
 ```
 
 也可以用一个工厂函数 splitVendorChunk({ cache: SplitVendorChunkCache }) 来提供该策略，在需要与自定义逻辑组合的情况下，cache.reset() 需要在 buildStart 阶段被调用，以便构建的 watch 模式在这种情况下正常工作。
@@ -938,7 +938,7 @@ export default defineConfig({
       // https://rollupjs.org/configuration-options/#watch
     },
   },
-})
+});
 ```
 
 当启用 --watch 标志时，对 vite.config.js 的改动，以及任何要打包的文件，都将触发重新构建。
@@ -963,22 +963,22 @@ export default defineConfig({
 
 ```js
 // vite.config.js
-import { resolve } from 'path'
-import { defineConfig } from 'vite'
+import { resolve } from "path";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
-        nested: resolve(__dirname, 'nested/index.html'),
+        main: resolve(__dirname, "index.html"),
+        nested: resolve(__dirname, "nested/index.html"),
       },
     },
   },
-})
+});
 ```
 
-如果你指定了另一个根目录，请记住，在解析输入路径时，__dirname 的值将仍然是 vite.config.js 文件所在的目录。因此，你需要把对应入口文件的 root 的路径添加到 resolve 的参数中。
+如果你指定了另一个根目录，请记住，在解析输入路径时，\_\_dirname 的值将仍然是 vite.config.js 文件所在的目录。因此，你需要把对应入口文件的 root 的路径添加到 resolve 的参数中。
 
 请注意，在 HTML 文件中，Vite 忽略了 rollupOptions.input 对象中给定的入口名称，而是在生成 dist 文件夹中的 HTML 资源文件时，使用了文件已解析的路径 ID。这确保了与开发服务器的工作方式保持一致的结构。
 
@@ -990,39 +990,39 @@ export default defineConfig({
 
 ```js
 // vite.config.js
-import { resolve } from 'path'
-import { defineConfig } from 'vite'
+import { resolve } from "path";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   build: {
     lib: {
       // Could also be a dictionary or array of multiple entry points
-      entry: resolve(__dirname, 'lib/main.js'),
-      name: 'MyLib',
+      entry: resolve(__dirname, "lib/main.js"),
+      name: "MyLib",
       // the proper extensions will be added
-      fileName: 'my-lib',
+      fileName: "my-lib",
     },
     rollupOptions: {
       // 确保外部化处理那些你不想打包进库的依赖
-      external: ['vue'],
+      external: ["vue"],
       output: {
         // 在 UMD 构建模式下为这些外部化的依赖提供一个全局变量
         globals: {
-          vue: 'Vue',
+          vue: "Vue",
         },
       },
     },
   },
-})
+});
 ```
 
 入口文件将包含可以由你的包的用户导入的导出：
 
 ```js
 // lib/main.js
-import Foo from './Foo.vue'
-import Bar from './Bar.vue'
-export { Foo, Bar }
+import Foo from "./Foo.vue";
+import Bar from "./Bar.vue";
+export { Foo, Bar };
 ```
 
 使用如上配置运行 vite build 时，将会使用一套面向库的 Rollup 预设，并且将为该库提供两种构建格式：es 和 umd (可在 build.lib 中配置)：
@@ -1076,7 +1076,7 @@ dist/my-lib.umd.cjs 0.30 kB / gzip: 0.16 kB
 
 文件扩展名：如果 package.json 不包含 "type": "module"，Vite 会生成不同的文件后缀名以兼容 Node.js。.js 会变为 .mjs 而 .cjs 会变为 .js 。
 
-环境变量：在库模式中，所有 import.meta.env.* 的使用都会在构建生产版本时被静态替换。但是，process.env.* 的使用不会，这样你的库的使用者就可以动态地改变它。如果这是不可取的，你可以使用 define: { 'process.env.NODE_ENV': '"production"' } 来静态替换它们，或者使用 esm-env 来更好地兼容打包工具和运行时。
+环境变量：在库模式中，所有 import.meta.env._ 的使用都会在构建生产版本时被静态替换。但是，process.env._ 的使用不会，这样你的库的使用者就可以动态地改变它。如果这是不可取的，你可以使用 define: { 'process.env.NODE_ENV': '"production"' } 来静态替换它们，或者使用 esm-env 来更好地兼容打包工具和运行时。
 
 进阶用法：库模式包括了一种简单而又有见地的配置，适用于面向浏览器和 JS 框架的库。如果你正在构建非面向浏览器的库，或需要高级构建流程，可以直接使用 Rollup 或 esbuild。
 
@@ -1188,7 +1188,7 @@ name: Deploy static content to Pages
 on:
   # 仅在推送到默认分支时运行。
   push:
-    branches: ['main']
+    branches: ["main"]
 
   # 这个选项可以使你手动在 Action tab 页面触发工作流
   workflow_dispatch:
@@ -1201,7 +1201,7 @@ permissions:
 
 # 允许一个并发的部署
 concurrency:
-  group: 'pages'
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
@@ -1218,7 +1218,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
       - name: Install dependencies
         run: npm install
       - name: Build
@@ -1229,7 +1229,7 @@ jobs:
         uses: actions/upload-pages-artifact@v2
         with:
           # Upload dist repository
-          path: './dist'
+          path: "./dist"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
@@ -1266,20 +1266,19 @@ pages:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 ```
 
-10.  环境变量与模式
+10. 环境变量与模式
 
 10.1 环境变量
 
 Vite 在一个特殊的 import.meta.env 对象上暴露环境变量。这里有一些在所有情况下都可以使用的内建变量：
 
 import.meta.env.MODE: {string} 应用运行的模式。
-import.meta.env.BASE_URL: {string} 部署应用时的基本 URL。他由base 配置项决定。
+import.meta.env.BASE_URL: {string} 部署应用时的基本 URL。他由 base 配置项决定。
 import.meta.env.PROD: {boolean} 应用是否运行在生产环境（使用 NODE_ENV='production' 运行开发服务器或构建应用时使用 NODE_ENV='production' ）。
-import.meta.env.DEV: {boolean} 应用是否运行在开发环境 (永远与 import.meta.env.PROD相反)。
+import.meta.env.DEV: {boolean} 应用是否运行在开发环境 (永远与 import.meta.env.PROD 相反)。
 import.meta.env.SSR: {boolean} 应用是否运行在 server 上。
 
-
-10.2 .env文件
+10.2 .env 文件
 
 Vite 使用 dotenv 从你的 环境目录 中的下列文件加载额外的环境变量：
 
@@ -1300,7 +1299,7 @@ Vite 使用 dotenv 从你的 环境目录 中的下列文件加载额外的环�
 
 加载的环境变量也会通过 import.meta.env 以字符串形式暴露给客户端源码。
 
-为了防止意外地将一些环境变量泄漏到客户端，只有以 VITE_ 为前缀的变量才会暴露给经过 vite 处理的代码。例如下面这些环境变量：
+为了防止意外地将一些环境变量泄漏到客户端，只有以 VITE\_ 为前缀的变量才会暴露给经过 vite 处理的代码。例如下面这些环境变量：
 
 ```
 VITE_SOME_KEY=123
@@ -1310,8 +1309,8 @@ DB_PASSWORD=foobar
 只有 VITE_SOME_KEY 会被暴露为 import.meta.env.VITE_SOME_KEY 提供给客户端源码，而 DB_PASSWORD 则不会。
 
 ```js
-console.log(import.meta.env.VITE_SOME_KEY) // 123
-console.log(import.meta.env.DB_PASSWORD) // undefined
+console.log(import.meta.env.VITE_SOME_KEY); // 123
+console.log(import.meta.env.DB_PASSWORD); // undefined
 ```
 
 请注意，如果想要在环境变量中使用 $ 符号，则必须使用 \ 对其进行转义。
@@ -1323,9 +1322,9 @@ NEW_KEY2=test\$foo  # test$foo
 NEW_KEY3=test$KEY   # test123
 ```
 
-安全注意事项：.env.*.local 文件应是本地的，可以包含敏感变量。你应该将 *.local 添加到你的 .gitignore 中，以避免它们被 git 检入。由于任何暴露给 Vite 源码的变量最终都将出现在客户端包中，VITE_* 变量应该不包含任何敏感信息。
+安全注意事项：.env._.local 文件应是本地的，可以包含敏感变量。你应该将 _.local 添加到你的 .gitignore 中，以避免它们被 git 检入。由于任何暴露给 Vite 源码的变量最终都将出现在客户端包中，VITE\_\* 变量应该不包含任何敏感信息。
 
-默认情况下，Vite 在 vite/client.d.ts 中为 import.meta.env 提供了类型定义。随着在 .env[mode] 文件中自定义了越来越多的环境变量，你可能想要在代码中获取这些以 VITE_ 为前缀的用户自定义环境变量的 TypeScript 智能提示。
+默认情况下，Vite 在 vite/client.d.ts 中为 import.meta.env 提供了类型定义。随着在 .env[mode] 文件中自定义了越来越多的环境变量，你可能想要在代码中获取这些以 VITE\_ 为前缀的用户自定义环境变量的 TypeScript 智能提示。
 
 要想做到这一点，你可以在 src 目录下创建一个 env.d.ts 文件，接着按下面这样增加 ImportMetaEnv 的定义：
 
@@ -1333,12 +1332,12 @@ NEW_KEY3=test$KEY   # test123
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_APP_TITLE: string
+  readonly VITE_APP_TITLE: string;
   // 更多环境变量...
 }
 
 interface ImportMeta {
-  readonly env: ImportMetaEnv
+  readonly env: ImportMetaEnv;
 }
 ```
 
@@ -1350,7 +1349,7 @@ interface ImportMeta {
 }
 ```
 
-10.3 HTML环境变量替换
+10.3 HTML 环境变量替换
 
 Vite 还支持在 HTML 文件中替换环境变量。import.meta.env 中的任何属性都可以通过特殊的 %ENV_NAME% 语法在 HTML 文件中使用：
 
@@ -1394,7 +1393,7 @@ VITE_APP_TITLE=My App (staging)
 NODE_ENV=development
 ```
 
-11.  服务端渲染（SSR）
+11. 服务端渲染（SSR）
 
 注意：SSR 特别指支持在 Node.js 中运行相同应用程序的前端框架（例如 React、Preact、Vue 和 Svelte），将其预渲染成 HTML，最后在客户端进行水合处理。如果你正在寻找与传统服务器端框架的集成，请查看 后端集成指南。下面的指南还假定你在选择的框架中有使用 SSR 的经验，并且只关注特定于 Vite 的集成细节。
 
@@ -1402,7 +1401,7 @@ Low-level API：这是一个底层 API，是为库和框架作者准备的。如
 
 11.1 示例项目
 
-Vite 为服务端渲染（SSR）提供了内建支持。create-vite-extra 包含了一些你可以用作参考的SSR设置示例：[Vue](https://github.com/bluwy/create-vite-extra/tree/master/template-ssr-vue)，[React](https://github.com/bluwy/create-vite-extra/tree/master/template-ssr-react)，[Svelte](https://github.com/bluwy/create-vite-extra/tree/master/template-ssr-svelte)
+Vite 为服务端渲染（SSR）提供了内建支持。create-vite-extra 包含了一些你可以用作参考的 SSR 设置示例：[Vue](https://github.com/bluwy/create-vite-extra/tree/master/template-ssr-vue)，[React](https://github.com/bluwy/create-vite-extra/tree/master/template-ssr-react)，[Svelte](https://github.com/bluwy/create-vite-extra/tree/master/template-ssr-svelte)
 
 你也可以通过 运行 create-vite 在本地搭建这些项目，并在框架选项下选择 Others > create-vite-extra。
 
@@ -1444,24 +1443,24 @@ index.html 将需要引用 entry-client.js 并包含一个占位标记供给服�
 
 ```js
 // server.js
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import express from 'express'
-import { createServer as createViteServer } from 'vite'
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import express from "express";
+import { createServer as createViteServer } from "vite";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function createServer() {
-  const app = express()
+  const app = express();
 
   // 以中间件模式创建 Vite 应用，并将 appType 配置为 'custom'
   // 这将禁用 Vite 自身的 HTML 服务逻辑
   // 并让上级服务器接管控制
   const vite = await createViteServer({
     server: { middlewareMode: true },
-    appType: 'custom'
-  })
+    appType: "custom",
+  });
 
   // 使用 vite 的 Connect 实例作为中间件
   // 如果你使用了自己的 express 路由（express.Router()），你应该使用 router.use
@@ -1470,61 +1469,61 @@ async function createServer() {
     // `vite.middlewares` 将会被重新赋值。在包装处理程序中调用
     // `vite.middlewares` 可以确保
     // 始终使用最新的 Vite 中间件。
-    vite.middlewares.handle(req, res, next)
-  })
+    vite.middlewares.handle(req, res, next);
+  });
 
-  app.use('*', async (req, res) => {
+  app.use("*", async (req, res) => {
     // 服务 index.html - 下面我们来处理这个问题
-  })
+  });
 
-  app.listen(5173)
+  app.listen(5173);
 }
 
-createServer()
+createServer();
 ```
 
 这里 vite 是 ViteDevServer 的一个实例。vite.middlewares 是一个 Connect 实例，它可以在任何一个兼容 connect 的 Node.js 框架中被用作一个中间件。
 
-下一步是实现 * 处理程序供给服务端渲染的 HTML：
+下一步是实现 \* 处理程序供给服务端渲染的 HTML：
 
 ```js
-app.use('*', async (req, res, next) => {
-  const url = req.originalUrl
+app.use("*", async (req, res, next) => {
+  const url = req.originalUrl;
 
   try {
     // 1. 读取 index.html
     let template = fs.readFileSync(
-      path.resolve(__dirname, 'index.html'),
-      'utf-8',
-    )
+      path.resolve(__dirname, "index.html"),
+      "utf-8"
+    );
 
     // 2. 应用 Vite HTML 转换。这将会注入 Vite HMR 客户端，
     //    同时也会从 Vite 插件应用 HTML 转换。
     //    例如：@vitejs/plugin-react 中的 global preambles
-    template = await vite.transformIndexHtml(url, template)
+    template = await vite.transformIndexHtml(url, template);
 
     // 3. 加载服务器入口。vite.ssrLoadModule 将自动转换
     //    你的 ESM 源码使之可以在 Node.js 中运行！无需打包
     //    并提供类似 HMR 的根据情况随时失效。
-    const { render } = await vite.ssrLoadModule('/src/entry-server.js')
+    const { render } = await vite.ssrLoadModule("/src/entry-server.js");
 
     // 4. 渲染应用的 HTML。这假设 entry-server.js 导出的 `render`
     //    函数调用了适当的 SSR 框架 API。
     //    例如 ReactDOMServer.renderToString()
-    const appHtml = await render(url)
+    const appHtml = await render(url);
 
     // 5. 注入渲染后的应用程序 HTML 到模板中。
-    const html = template.replace(`<!--ssr-outlet-->`, appHtml)
+    const html = template.replace(`<!--ssr-outlet-->`, appHtml);
 
     // 6. 返回渲染后的 HTML。
-    res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
+    res.status(200).set({ "Content-Type": "text/html" }).end(html);
   } catch (e) {
     // 如果捕获到了一个错误，让 Vite 来修复该堆栈，这样它就可以映射回
     // 你的实际源码中。
-    vite.ssrFixStacktrace(e)
-    next(e)
+    vite.ssrFixStacktrace(e);
+    next(e);
   }
-})
+});
 ```
 
 package.json 中的 dev 脚本也应该相应地改变，使用服务器脚本：
@@ -1578,8 +1577,8 @@ vite build 支持使用 --ssrManifest 标志，这将会在构建输出目录中
 
 ```js
 // src/entry-server.js
-const ctx = {}
-const html = await vueServerRenderer.renderToString(app, ctx)
+const ctx = {};
+const html = await vueServerRenderer.renderToString(app, ctx);
 // ctx.modules 现在是一个渲染期间使用的模块 ID 的 Set
 ```
 
@@ -1606,13 +1605,13 @@ const html = await vueServerRenderer.renderToString(app, ctx)
 ```js
 export function mySSRPlugin() {
   return {
-    name: 'my-ssr',
+    name: "my-ssr",
     transform(code, id, options) {
       if (options?.ssr) {
         // 执行 ssr 专有转换...
       }
     },
-  }
+  };
 }
 ```
 
@@ -1622,7 +1621,7 @@ Note：Vite 2.7 之前的版本，会提示你 ssr 参数的位置不应该是 o
 
 11.10 SSR 构建目标
 
-SSR 构建的默认目标为 node 环境，但你也可以让服务运行在 Web Worker 上。每个平台的打包条目解析是不同的。你可以将ssr.target 设置为 webworker，以将目标配置为 Web Worker。
+SSR 构建的默认目标为 node 环境，但你也可以让服务运行在 Web Worker 上。每个平台的打包条目解析是不同的。你可以将 ssr.target 设置为 webworker，以将目标配置为 Web Worker。
 
 11.11 SSR 构建产物
 
@@ -1637,7 +1636,7 @@ CLI 命令 $ vite dev 和 $ vite preview 也可以用于 SSR 应用：你可以�
 
 注意：使用一个后置钩子，使得你的 SSR 中间件在 Vite 的中间件 之后 运行。
 
-12.  后端集成
+12. 后端集成
 
 Note：如果你想使用传统的后端（如 Rails, Laravel）来服务 HTML，但使用 Vite 来服务其他资源，可以查看在 Awesome Vite 上的已有的后端集成列表。
 如果你需要自定义集成，你可以按照本指南的步骤配置它：
@@ -1652,17 +1651,17 @@ export default defineConfig({
     manifest: true,
     rollupOptions: {
       // 覆盖默认的 .html 入口
-      input: '/path/to/main.js'
-    }
-  }
-})
+      input: "/path/to/main.js",
+    },
+  },
+});
 ```
 
 如果你没有禁用 module preload 的 polyfill，你还需在你的入口处添加此 polyfill：
 
 ```js
 // 在你应用的入口起始处添加此 polyfill
-import 'vite/modulepreload-polyfill'
+import "vite/modulepreload-polyfill";
 ```
 
 在开发环境中，在服务器的 HTML 模板中注入以下内容（用正在运行的本地 URL 替换 http://localhost:5173）：
@@ -1684,11 +1683,11 @@ import 'vite/modulepreload-polyfill'
 
 ```html
 <script type="module">
-  import RefreshRuntime from 'http://localhost:5173/@react-refresh'
-  RefreshRuntime.injectIntoGlobalHook(window)
-  window.$RefreshReg$ = () => {}
-  window.$RefreshSig$ = () => (type) => type
-  window.__vite_plugin_react_preamble_installed__ = true
+  import RefreshRuntime from "http://localhost:5173/@react-refresh";
+  RefreshRuntime.injectIntoGlobalHook(window);
+  window.$RefreshReg$ = () => {};
+  window.$RefreshSig$ = () => (type) => type;
+  window.__vite_plugin_react_preamble_installed__ = true;
 </script>
 ```
 
@@ -1718,7 +1717,7 @@ import 'vite/modulepreload-polyfill'
 
 清单是一个 Record<name, chunk> 结构的对象。
 对于 入口 或动态入口 chunk，键是相对于项目根目录的资源路径。
-对于非入口 chunk，键是生成文件的名称并加上前缀 _。
+对于非入口 chunk，键是生成文件的名称并加上前缀 \_。
 Chunk 将信息包含在其静态和动态导入上（两者都是映射到清单中相应 chunk 的键)，以及任何与之相关的 CSS 和资源文件。
 
 你可以使用这个文件来渲染链接或者用散列文件名预加载指令（注意：这里的语法只是为了解释，实际使用时请你的服务器模板语言代替）：
@@ -1766,8 +1765,8 @@ vite.config.js 配置文件的内容使用 ESM 语法。
 
 对于其他项目，有几种常见的方法：
 
-| 配置 ESM 为默认，如果需要则选择 CJS： 在项目 package.json 中添加 "type": "module"。所有 *.js 文件现在都被解释为 ESM，并且需要使用 ESM 语法。你可以将一个文件重命名为 .cjs 扩展名来继续使用 CJS。
-| 保持 CJS 为默认，如果需要则选择 ESM： 如果项目 package.json 没有 "type": "module"，所有 *.js 文件都被解释为 CJS。你可以将一个文件重命名为 .mjs 扩展名来使用 ESM。
+| 配置 ESM 为默认，如果需要则选择 CJS： 在项目 package.json 中添加 "type": "module"。所有 _.js 文件现在都被解释为 ESM，并且需要使用 ESM 语法。你可以将一个文件重命名为 .cjs 扩展名来继续使用 CJS。
+| 保持 CJS 为默认，如果需要则选择 ESM： 如果项目 package.json 没有 "type": "module"，所有 _.js 文件都被解释为 CJS。你可以将一个文件重命名为 .mjs 扩展名来使用 ESM。
 | 动态导入 Vite： 如果你需要继续使用 CJS，你可以使用 import('vite') 动态导入 Vite。这要求你的代码必须在一个 async 上下文中编写，但是由于 Vite 的 API 大多是异步的，所以应该还是可以管理的。
 
 如果你不确定警告来自哪里，你可以通过 VITE_CJS_TRACE=true 标志运行你的脚本来记录堆栈跟踪：
@@ -1845,13 +1844,13 @@ sudo sysctl fs.inotify.max_user_watches=524288
 | /etc/systemd/system.conf
 | /etc/systemd/user.conf
 
-对于 Ubuntu Linux 操作系统，你可能需要添加一行 * - nofile 65536 到文件 /etc/security/limits.conf 之中，而不是更新 systemd 配置文件。请注意，这些配置会持久作用，但需要 重新启动。
+对于 Ubuntu Linux 操作系统，你可能需要添加一行 \* - nofile 65536 到文件 /etc/security/limits.conf 之中，而不是更新 systemd 配置文件。请注意，这些配置会持久作用，但需要 重新启动。
 
 错误：网络请求停止加载
 
-使用自签名SSL证书时，Chrome 会忽略所有缓存指令并重新加载内容。而 Vite 依赖于这些缓存指令。
+使用自签名 SSL 证书时，Chrome 会忽略所有缓存指令并重新加载内容。而 Vite 依赖于这些缓存指令。
 
-要解决此问题，请使用受信任的SSL证书。
+要解决此问题，请使用受信任的 SSL 证书。
 
 macOS：您可以使用以下命令通过 CLI 安装受信任的证书：
 
@@ -1876,7 +1875,7 @@ security add-trusted-cert -d -r trustRoot -k ~/Library/Keychains/login.keychain-
 你可能导入了一个拥有不同大小写的文件，例如，存在 src/foo.js 文件而 src/bar.js 导入了它：
 
 ```js
-import './Foo.js' // 应该为 './foo.js'
+import "./Foo.js"; // 应该为 './foo.js'
 ```
 
 错误：Vite 没有检测到文件变化
@@ -1958,7 +1957,7 @@ Vite 无法处理、也不支持仅可在非严格模式（sloppy mode）下运�
 | 通过 subst 命令将虚拟驱动器链接到一个文件夹
 | 通过 mklink 命令将符号链接/联接到另一个驱动器（例如 Yarn 全局缓存）
 
-15.  性能
+15. 性能
 
 虽然 Vite 默认运行速度很快，但随着项目需求的增长，性能问题可能会悄然出现。本指南旨在帮助您识别并修复常见的性能问题，例如：
 
@@ -1972,7 +1971,7 @@ Vite 的内部和官方插件已经优化，以在提供与更广泛的生态系
 
 然而，社区插件的性能是 Vite 无法控制的，这可能会影响开发者的体验。在使用额外的 Vite 插件时，有一些事情可以注意：
 
-| 只在特定情况下，大型依赖项应动态导入，以减少Node.js的启动时间。重构示例：vite-plugin-react#212 和 vite-plugin-pwa#224。
+| 只在特定情况下，大型依赖项应动态导入，以减少 Node.js 的启动时间。重构示例：vite-plugin-react#212 和 vite-plugin-pwa#224。
 | buildStart，config，和 configResolved 钩子不应运行过长的时间和进行大量的操作。这些钩子会在开发服务器启动期间等待，这会延迟可以在浏览器中访问站点的时间。
 | resolveId，load，和 transform 钩子可能会导致一些文件加载速度比其他文件慢。虽然有时无法避免，但仍值得检查可能的优化区域。例如，检查 code 是否包含特定关键字，或 id 是否匹配特定扩展名，然后再进行完整的转换。
 
@@ -2009,9 +2008,9 @@ TypeScript：如果你正在使用 TypeScript，启用 tsconfig.json 中的 comp
 
 ```js
 // src/utils/index.js
-export * from './color.js'
-export * from './dom.js'
-export * from './slash.js'
+export * from "./color.js";
+export * from "./dom.js";
+export * from "./slash.js";
 ```
 
 当你只导入一个单独的 API，例如 import { slash } from './utils'，需要获取和转换桶文件中的所有文件，因为它们可能包含 slash API，也可能包含在初始化时运行的其他副作用。这意味着在初始页面加载时，你加载的文件比所需的要更多，导致页面加载速度变慢。
@@ -2045,12 +2044,12 @@ export default defineConfig({
   server: {
     warmup: {
       clientFiles: [
-        './src/components/BigComponent.vue',
-        './src/utils/big-utils.js',
+        "./src/components/BigComponent.vue",
+        "./src/utils/big-utils.js",
       ],
     },
   },
-})
+});
 ```
 
 请注意，只应该预热频繁使用的文件，以免在启动时过载 Vite 开发服务器。
@@ -2092,9 +2091,9 @@ Vite 现在使用 Rollup 4，它也带来了一些重大的变化，特别是：
 
 CJS 的 Node API 已经被废弃。当调用 require('vite') 时，将会记录一个废弃警告。你应该更新你的文件或框架来导入 Vite 的 ESM 构建。
 
-16.4 重新设计 define 和 import.meta.env.* 的替换策略
+16.4 重新设计 define 和 import.meta.env.\* 的替换策略
 
-在 Vite 4 中，define 和 import.meta.env.* 特性在开发和构建中使用的是不同的替换策略：
+在 Vite 4 中，define 和 import.meta.env.\* 特性在开发和构建中使用的是不同的替换策略：
 
 | 在开发时，这两个特性分别作为全局变量注入到 globalThis 和 import.meta 中。
 | 在构建时，这两个特性都使用正则表达式进行静态替换。
@@ -2105,17 +2104,17 @@ CJS 的 Node API 已经被废弃。当调用 require('vite') 时，将会记录�
 // vite.config.js
 export default defineConfig({
   define: {
-    __APP_VERSION__: JSON.stringify('1.0.0'),
+    __APP_VERSION__: JSON.stringify("1.0.0"),
   },
-})
+});
 ```
 
 ```js
-const data = { __APP_VERSION__ }
+const data = { __APP_VERSION__ };
 // 开发：{ __APP_VERSION__: "1.0.0" } ✅
 // 构建：{ "1.0.0" } ❌
 
-const docs = 'I like import.meta.env.MODE'
+const docs = "I like import.meta.env.MODE";
 // 开发："I like import.meta.env.MODE" ✅
 // 构建："I like "production"" ❌
 ```
@@ -2124,32 +2123,30 @@ const docs = 'I like import.meta.env.MODE'
 
 | 为了与 esbuild 行为保持一致，表达式必须是一个 JSON 对象（null、boolean、number、string、array 或 object）或一个单一标识符字符串。
 
-
 16.4 其他一般性变化
 
 16.4.1 SSR 外部模块值现在符合生产环境行为
 
-在 Vite 4 中，服务器端渲染的外部模块被包装为 .default 和 .__esModule 处理，以实现更好的互操作性，但是它并不符合运行时环境（例如 Node.js）加载时的生产环境行为，导致难以捕获的不一致性。默认情况下，所有直接的项目依赖都是 SSR 外部化的。
+在 Vite 4 中，服务器端渲染的外部模块被包装为 .default 和 .\_\_esModule 处理，以实现更好的互操作性，但是它并不符合运行时环境（例如 Node.js）加载时的生产环境行为，导致难以捕获的不一致性。默认情况下，所有直接的项目依赖都是 SSR 外部化的。
 
-Vite 5 现在删除了 .default 和 .__esModule 处理，以匹配生产环境行为。在实践中，这不应影响正确打包的依赖项，但是如果你在加载模块时遇到新的问题，你可以尝试以下重构：
-
+Vite 5 现在删除了 .default 和 .\_\_esModule 处理，以匹配生产环境行为。在实践中，这不应影响正确打包的依赖项，但是如果你在加载模块时遇到新的问题，你可以尝试以下重构：
 
 ```js
 // 之前：
-import { foo } from 'bar'
+import { foo } from "bar";
 
 // 之后：
-import _bar from 'bar'
-const { foo } = _bar
+import _bar from "bar";
+const { foo } = _bar;
 ```
 
 ```js
 // 之前：
-import foo from 'bar'
+import foo from "bar";
 
 // 之后：
-import * as _foo from 'bar'
-const foo = _foo.default
+import * as _foo from "bar";
+const foo = _foo.default;
 ```
 
 注意，这些更改符合 Node.js 的行为，因此也可以在 Node.js 中运行这些导入进行测试。如果你更喜欢坚持使用之前的方式，你可以将 legacy.proxySsrExternalModules 设置为 true。
@@ -2167,6 +2164,85 @@ const foo = _foo.default
 二. API
 
 1. 插件 API
+
+Vite 插件扩展了设计出色的 Rollup 接口，带有一些 Vite 独有的配置项。因此，你只需要编写一个 Vite 插件，就可以同时为开发环境和生产环境工作。
+
+推荐在阅读下面的章节之前，首先阅读下 [Rollup 插件文档](https://cn.rollupjs.org/plugin-development/)
+
+1.1 约定
+
+Rollup 插件名称约定：rollup-plugin- 前缀，在 package.json 中包含 rollup-plugin 和 vite-plugin 关键字
+
+Vite 专属的插件：vite-plugin- 前缀，在 package.json 中包含 vite-plugin 关键字。
+
+如果插件只适用于特定的框架，它的名字应该遵循这些前缀格式：vite-plugin-vue- 前缀作为 Vue 插件、vite-plugin-react- 前缀作为 React 插件、vite-plugin-svelte- 前缀作为 Svelte 插件
+
+1.2 插件配置
+
+plugins 选项配置它们。
+
+```js
+// vite.config.js
+import vitePlugin from "vite-plugin-feature";
+import rollupPlugin from "rollup-plugin-feature";
+
+export default defineConfig({
+  plugins: [vitePlugin(), rollupPlugin()],
+});
+```
+
+plugins 也可以接受将多个插件作为单个元素的预设。
+
+```js
+// 框架插件
+import frameworkRefresh from "vite-plugin-framework-refresh";
+import frameworkDevtools from "vite-plugin-framework-devtools";
+
+export default function framework(config) {
+  return [frameworkRefresh(config), frameworkDevTools(config)];
+}
+```
+
+```js
+// vite.config.js
+import { defineConfig } from "vite";
+import framework from "vite-plugin-framework";
+
+export default defineConfig({
+  plugins: [framework()],
+});
+```
+
+1.3 简单示例
+
+```js
+// 转换自定义文件类型
+const fileRegex = /\.(my-file-ext)$/;
+
+export default function myPlugin() {
+  return {
+    name: "transform-file",
+
+    transform(src, id) {
+      if (fileRegex.test(id)) {
+        return {
+          code: compileFileToJS(src),
+          map: null, // 如果可行将提供 source map
+        };
+      }
+    },
+  };
+}
+```
+
+1.4 通用钩子
+
+服务器启动时被调用：options、buildStart
+
+每个传入模块请求时被调用：resolveId、load、transform
+
+服务器关闭时被调用：buildEnd、closeBundle
+
 2. HMR API
 3. JS API
 
