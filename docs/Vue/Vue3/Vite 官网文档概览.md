@@ -2161,95 +2161,119 @@ const foo = _foo.default;
 
 注意浏览器将不再在控制台中显示 404 错误消息，如果你将图片路径指向一个不存在的文件（例如 <img src="./file-does-not-exist.png">）。
 
-二. API
-
-1. 插件 API
-
-Vite 插件扩展了设计出色的 Rollup 接口，带有一些 Vite 独有的配置项。因此，你只需要编写一个 Vite 插件，就可以同时为开发环境和生产环境工作。
-
-推荐在阅读下面的章节之前，首先阅读下 [Rollup 插件文档](https://cn.rollupjs.org/plugin-development/)
-
-1.1 约定
-
-Rollup 插件名称约定：rollup-plugin- 前缀，在 package.json 中包含 rollup-plugin 和 vite-plugin 关键字
-
-Vite 专属的插件：vite-plugin- 前缀，在 package.json 中包含 vite-plugin 关键字。
-
-如果插件只适用于特定的框架，它的名字应该遵循这些前缀格式：vite-plugin-vue- 前缀作为 Vue 插件、vite-plugin-react- 前缀作为 React 插件、vite-plugin-svelte- 前缀作为 Svelte 插件
-
-1.2 插件配置
-
-plugins 选项配置它们。
-
-```js
-// vite.config.js
-import vitePlugin from "vite-plugin-feature";
-import rollupPlugin from "rollup-plugin-feature";
-
-export default defineConfig({
-  plugins: [vitePlugin(), rollupPlugin()],
-});
-```
-
-plugins 也可以接受将多个插件作为单个元素的预设。
-
-```js
-// 框架插件
-import frameworkRefresh from "vite-plugin-framework-refresh";
-import frameworkDevtools from "vite-plugin-framework-devtools";
-
-export default function framework(config) {
-  return [frameworkRefresh(config), frameworkDevTools(config)];
-}
-```
-
-```js
-// vite.config.js
-import { defineConfig } from "vite";
-import framework from "vite-plugin-framework";
-
-export default defineConfig({
-  plugins: [framework()],
-});
-```
-
-1.3 简单示例
-
-```js
-// 转换自定义文件类型
-const fileRegex = /\.(my-file-ext)$/;
-
-export default function myPlugin() {
-  return {
-    name: "transform-file",
-
-    transform(src, id) {
-      if (fileRegex.test(id)) {
-        return {
-          code: compileFileToJS(src),
-          map: null, // 如果可行将提供 source map
-        };
-      }
-    },
-  };
-}
-```
-
-1.4 通用钩子
-
-服务器启动时被调用：options、buildStart
-
-每个传入模块请求时被调用：resolveId、load、transform
-
-服务器关闭时被调用：buildEnd、closeBundle
-
-2. HMR API
-3. JS API
-
-三. 配置
+二. 配置
 
 1. 配置 Vite
+
+运行 vite 时会自动解析 项目根目录 下名为 vite.config.js 的配置文件。
+
+最基础的配置：
+
+```js
+// vite.config.js
+export default {
+  // 配置选项
+};
+```
+
+通过 --config 命令行选项指定一个配置文件
+
+```sh
+vite --config my-config.js
+```
+
+1.1 情景配置
+
+如果配置文件需要基于（dev/serve 或 build）命令或者不同的 模式 来决定选项：
+
+```js
+export default defineConfig(({ command, mode, isSsrBuild, isPreview }) => {
+  // "serve" 开发环境，"build" 生产环境
+  if (command === "serve") {
+    return {
+      // dev 独有配置
+    };
+  } else {
+    // command === 'build'
+    return {
+      // build 独有配置
+    };
+  }
+});
+```
+
+1.2 在配置中使用环境变量
+
+环境变量通常可以从 process.env 获得。
+
+注意：Vite 默认是不加载 .env 文件的，因为这些文件需要在执行完 Vite 配置后才能确定加载哪一个，举个例子，root 和 envDir 选项会影响加载行为。不过当你的确需要时，你可以使用 Vite 导出的 loadEnv 函数来加载指定的 .env 文件。
+
+```js
+import { defineConfig, loadEnv } from "vite";
+
+export default defineConfig(({ command, mode }) => {
+  // 根据当前工作目录中的 `mode` 加载 .env 文件
+  // 设置第三个参数为 '' 来加载所有环境变量，而不管是否有 `VITE_` 前缀。
+  const env = loadEnv(mode, process.cwd(), "");
+  return {
+    // vite 配置
+    define: {
+      __APP_ENV__: JSON.stringify(env.APP_ENV),
+    },
+  };
+});
+```
+
 2. 共享选项
+
+2.1 root
+
+类型：string，默认：process.cwd();
+
+项目根目录（index.html 文件所在的位置）。
+
+2.2 base
+
+类型：string，默认：/
+
+开发或生产环境服务的公共基础路径。
+
+2.3 mode
+
+类型：string，默认：'development' 开发，'production' 构建
+
+配置后会将 serve 和 build 时的模式都覆盖掉。
+
+2.4 define
+
+类型：Record<string, any>
+
+定义全局常量替换方式。
+
+```js
+export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify("v1.0.0"),
+    __API_URL__: "window.__backend_api_url",
+  },
+});
+```
+
+NOTE：对于使用 TypeScript 的开发者来说，请确保在 env.d.ts 或 vite-env.d.ts 文件中添加类型声明，以获得类型检查以及代码提示。
+
+```ts
+// vite-env.d.ts
+declare const __APP_VERSION__: string;
+```
+
+2.5 plugins
+
+类型：(Plugin | Plugin[] | Promise<Plugin | Plugin[]>)[]
+
+需要用到的插件数组。
+
+2.6 publicDir
+
 3. 服务器选择
 4. 构建选择
 5. 预览选择
