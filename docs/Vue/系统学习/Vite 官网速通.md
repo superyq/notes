@@ -278,7 +278,7 @@ export default defineConfig({
 
 8.1 构建应用
 
-运行 npm run build 打包，默认打包到dist文件夹，可以将dist文件夹部署到你喜欢的平台。构建完成后通过npm run preview在本地启动一个静态wbe服务器，将 dist 文件夹运行在 http://localhost:4173，这样可以在本地查看构建产物是否正常运行。可以通过 --port 配置端口。
+运行 npm run build 打包，默认打包到 dist 文件夹，可以将 dist 文件夹部署到你喜欢的平台。构建完成后通过 npm run preview 在本地启动一个静态 wbe 服务器，将 dist 文件夹运行在 http://localhost:4173，这样可以在本地查看构建产物是否正常运行。可以通过 --port 配置端口。
 
 ```sh
 # 打包
@@ -290,113 +290,48 @@ npm run preview
 npm run preview --port 8080
 ```
 
-9.2 GitHub Pages
+8.2 GitHub Pages
 
-在 vite.config.js 中设置正确的 base：
+在 vite.config.js 中配置 base，设置部署根目录。比如部署到 https://<USERNAME>.github.io/，base 设置为'/'，如果部署到 https://<USERNAME>.github.io/<REPO>/，base 设置为'/<REPO>/'。
 
-如果你正要部署到 https://<USERNAME>.github.io/，或者通过 GitHub Pages 部署到一个自定义域名（例如 www.example.com），请将 base 设置为 '/'。或者，你也可以从配置中移除 base，因为它默认为 '/'。
-如果你正在部署到 https://<USERNAME>.github.io/<REPO>/（例如你的仓库地址为 https://github.com<USERNAME>/<REPO>），那么请将 base 设置为 '/<REPO>/'。
+```html
+<!-- base: 'admin' -->
+<script
+  type="module"
+  crossorigin
+  src="/admin/assets/index-qcvr7oK4.js"
+></script>
+<link rel="stylesheet" crossorigin href="/admin/assets/index-ICKpZ_al.css" />
 
-进入仓库 settings 页面的 GitHub Pages 配置，选择部署来源为“GitHub Actions”，这将引导你创建一个构建和部署项目的工作流程，我们提供了一个安装依赖项和使用 npm 构建的工作流程样本：
-
-```yml
-# 将静态内容部署到 GitHub Pages 的简易工作流程
-name: Deploy static content to Pages
-
-on:
-  # 仅在推送到默认分支时运行。
-  push:
-    branches: ["main"]
-
-  # 这个选项可以使你手动在 Action tab 页面触发工作流
-  workflow_dispatch:
-
-# 设置 GITHUB_TOKEN 的权限，以允许部署到 GitHub Pages。
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# 允许一个并发的部署
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-
-jobs:
-  # 单次部署的工作描述
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: "npm"
-      - name: Install dependencies
-        run: npm install
-      - name: Build
-        run: npm run build
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          # Upload dist repository
-          path: "./dist"
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
+<!-- base: '/' -->
+<script type="module" crossorigin src="/assets/index-qcvr7oK4.js"></script>
+<link rel="stylesheet" crossorigin href="/assets/index-ICKpZ_al.css" />
 ```
 
-9.3 GitLab Pages 配合 GitLab CI
+9. 环境变量与模式
 
-在 vite.config.js 中设置正确的 base。
+9.1 内置环境变量
 
-如果你要部署在 https://<USERNAME or GROUP>.gitlab.io/ 上，你可以省略 base 使其默认为 '/'。
-如果你要部署在 https://<USERNAME or GROUP>.gitlab.io/<REPO>/ 上，例如你的仓库地址为 https://gitlab.com/<USERNAME>/<REPO>，那么请设置 base 为 '/<REPO>/'。
-
-在项目根目录创建一个 .gitlab-ci.yml 文件，并包含以下内容。它将使得每次你更改内容时都重新构建与部署站点：
-
-```yaml
-image: node:16.5.0
-pages:
-  stage: deploy
-  cache:
-    key:
-      files:
-        - package-lock.json
-      prefix: npm
-    paths:
-      - node_modules/
-  script:
-    - npm install
-    - npm run build
-    - cp -a dist/. public/
-  artifacts:
-    paths:
-      - public
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+```js
+import = {
+  meta: {
+    env: {
+      // 运行模式
+      MODE: 'development',
+      // 部署的基本 URL
+      BASE_URL: '/',
+      // 是否运行在生产环境
+      PROD: false,
+      // 是否运行在开发环境
+      DEV: true,
+      // 是否运行在 server 上
+      SSR: false
+    }
+  }
+}
 ```
 
-10. 环境变量与模式
-
-10.1 环境变量
-
-Vite 在一个特殊的 import.meta.env 对象上暴露环境变量。这里有一些在所有情况下都可以使用的内建变量：
-
-import.meta.env.MODE: {string} 应用运行的模式。
-import.meta.env.BASE_URL: {string} 部署应用时的基本 URL。他由 base 配置项决定。
-import.meta.env.PROD: {boolean} 应用是否运行在生产环境（使用 NODE_ENV='production' 运行开发服务器或构建应用时使用 NODE_ENV='production' ）。
-import.meta.env.DEV: {boolean} 应用是否运行在开发环境 (永远与 import.meta.env.PROD 相反)。
-import.meta.env.SSR: {boolean} 应用是否运行在 server 上。
-
-10.2 .env 文件
+9.2 .env 文件
 
 Vite 使用 dotenv 从你的 环境目录 中的下列文件加载额外的环境变量：
 
