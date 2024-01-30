@@ -263,12 +263,9 @@ export default defineConfig({
 
 打包运行 vite build 命令。将 <root>/index.html 作为构建入口点，生成静态部署的应用包。
 
-8.  部署静态站点
+8. 部署静态站点
 
-默认打包文件夹为 dist，可以通过 build.outDir 修改。vite preview 只用作预览本地构建，不应作为生产服务器。
-
-你正在使用 NPM；或者 Yarn 等其他可以运行下面的脚本指令的包管理工具。
-Vite 已作为一个本地开发依赖（dev dependency）安装在你的项目中，并且你已经配置好了如下的 npm scripts：
+默认打包文件 dist，可通过 build.outDir 修改。vite preview 只作预览本地构建，不应作为生产服务器。Vite 构建的项目已经配置好了 npm scripts：
 
 ```json
 {
@@ -279,40 +276,19 @@ Vite 已作为一个本地开发依赖（dev dependency）安装在你的项目�
 }
 ```
 
-值得注意的是
+8.1 构建应用
 
-注意：本篇指南提供了部署 Vite 静态站点的说明。Vite 也对服务端渲染（SSR）有了实验性的支持。SSR 是指支持在 Node 中运行相应应用的前端框架，预渲染成 HTML，最后在客户端激活（hydrate）。查看 SSR 指南 了解更多细节。另一方面，如果你在寻找与传统服务端框架集成的方式，那么请查看 后端集成 章节。
-
-9.1 构建应用
-
-你可以运行 npm run build 命令来执行应用的构建：
+运行 npm run build 打包，默认打包到dist文件夹，可以将dist文件夹部署到你喜欢的平台。构建完成后通过npm run preview在本地启动一个静态wbe服务器，将 dist 文件夹运行在 http://localhost:4173，这样可以在本地查看构建产物是否正常运行。可以通过 --port 配置端口。
 
 ```sh
+# 打包
 npm run build
-```
 
-默认情况下，构建会输出到 dist 文件夹中。你可以部署这个 dist 文件夹到任何你喜欢的平台。
-
-当你构建完成应用后，你可以通过运行 npm run preview 命令，在本地测试该应用：
-
-```sh
-npm run build
+# 预览
 npm run preview
+# or
+npm run preview --port 8080
 ```
-
-vite preview 命令会在本地启动一个静态 Web 服务器，将 dist 文件夹运行在 http://localhost:4173。这样在本地环境下查看该构建产物是否正常可用就方便多了。
-
-你可以通过 --port 参数来配置服务的运行端口：
-
-```sh
-{
-  "scripts": {
-    "preview": "vite preview --port 8080"
-  }
-}
-```
-
-现在 preview 命令会将服务器运行在 http://localhost:8080。
 
 9.2 GitHub Pages
 
