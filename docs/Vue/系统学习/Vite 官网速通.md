@@ -490,13 +490,6 @@ export default defineConfig({
 });
 ```
 
-NOTE：对于使用 TypeScript 的开发者来说，请确保在 env.d.ts 或 vite-env.d.ts 文件中添加类型声明，以获得类型检查以及代码提示。
-
-```ts
-// vite-env.d.ts
-declare const __APP_VERSION__: string;
-```
-
 2.5 plugins
 
 类型：(Plugin | Plugin[] | Promise<Plugin | Plugin[]>)[]
