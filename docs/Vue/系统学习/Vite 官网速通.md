@@ -461,7 +461,7 @@ export default defineConfig(({ command, mode }) => {
 
 类型：string，默认：process.cwd();
 
-项目根目录（index.html 文件所在的位置）。
+打包入口 index.html 文件位置。默认在上项目根目录（index.html 文件所在的位置）。
 
 2.2 base
 
