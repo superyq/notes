@@ -7,6 +7,8 @@
 ```sh
 # 安装
 npm install -g pnpm
+# 更新
+npm update -g pnpm
 
 # 卸载
 npm rm -g pnpm

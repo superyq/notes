@@ -524,7 +524,7 @@ export default defineConfig({
 
 类型：string[]
 
-解决程序包中 情景导出 时的其他允许条件。
+解决程序包中 情景导出时的其他允许条件。
 
 ```json
 {
@@ -662,7 +662,7 @@ export default defineConfig({
 
 类型：string | boolean，默认：'localhost'
 
-指定服务器应该监听哪个 IP 地址。
+指定服务器应该监听哪个 IP 地址。如果将此设置为 0.0.0.0 或者 true 将监听所有地址，包括局域网和公网地址。也可以通过 --host 0.0.0.0 或 --host 来设置。
 
 3.2 server.port
 
@@ -680,7 +680,7 @@ export default defineConfig({
 
 类型：https.ServerOptions
 
-启用 TLS + HTTP/2。
+启用 TLS + HTTP/2。当 server.proxy 选项也被使用时，将会仅使用 TLS。
 
 3.5 server.open
 
@@ -692,13 +692,13 @@ export default defineConfig({
 
 类型：Record<string, string | ProxyOptions>
 
-为开发服务器配置自定义代理规则。
+为开发服务器配置自定义代理规则。changeOrigin：true 时浏览器会将请求设置为 targte 的值。
 
 ```js
 export default defineConfig({
   server: {
     proxy: {
-      // 字符串简写写法：http://localhost:5173/foo -> http://localhost:4567/foo
+      // 字符串写法：http://localhost:5173/foo -> http://localhost:4567/foo
       "/foo": "http://localhost:4567",
       // 带选项写法：http://localhost:5173/api/bar -> http://jsonplaceholder.typicode.com/bar
       "/api": {
@@ -867,9 +867,204 @@ export default defineConfig({
 
 类型：string | string[]，默认：与 build.target 一致
 
-此选项允许用户为 CSS 的压缩设置一个不同的浏览器 target，此处的 target 并非是用于 JavaScript 转写目标。
+此选项允许用户为 CSS 的压缩设置一个不同的浏览器 target。
+
+4.8 build.cssMinify
+
+类型：string | string[]，默认：与 build.target 一致
+
+允许用户覆盖 CSS 最小化压缩的配置
+
+4.9 build.sourcemap
+
+类型：boolean | 'inline' | 'hidden'，默认：false
+
+构建后是否生成 source map 文件。
+
+4.10 build.rollupOptions
+
+类型：RollupOptions
+
+自定义底层的 Rollup 打包配置。
+
+4.11 build.commonjsOptions
+
+类型：RollupCommonJSOptions
+
+传递给 @rollup/plugin-commonjs 插件的选项。
+
+4.12 build.dynamicImportVarsOptions
+
+类型：RollupDynamicImportVarsOptions
+
+传递给 @rollup/plugin-dynamic-import-vars 的选项。
+
+4.13 build.lib
+
+类型：{ entry: string | string[] | { [entryAlias: string]: string }, name?: string, formats?: ('es' | 'cjs' | 'umd' | 'iife')[], fileName?: string | ((format: ModuleFormat, entryName: string) => string) }
+
+构建为库。
+
+4.14 build.manifest
+
+类型：boolean | string，默认：false
+
+可以为一些服务器框架渲染时提供正确的资源引入链接。
+
+4.15 build.ssrManifest
+
+类型：boolean | string，默认值： false
+
+为 true 时，构建也将生成 SSR 的 manifest 文件。
+
+4.16 build.ssr
+
+类型：boolean | string，默认值： false
+
+生成面向 SSR 的构建。
+
+4.17 build.ssrEmitAssets
+
+类型：boolean，默认：false
+
+4.18 build.minify
+
+类型：boolean | 'terser' | 'esbuild'，默认：'esbuild'
+
+用来指定使用哪种混淆器。
+
+4.19 build.terserOptions
+
+类型：TerserOptions
+
+指定最大的工作线程数。
+
+4.20 build.write
+
+类型：boolean，默认：true
+
+设置为 false 来禁用将构建后的文件写入磁盘。
+
+4.21 build.emptyOutDir
+
+类型：boolean，默认：若 outDir 在 root 目录下，则为 true
+
+构建时清空该目录。
+
+4.22 build.copyPublicDir
+
+类型：boolean，默认：true
+
+默认情况下，Vite 会在构建阶段将 publicDir 目录中的所有文件复制到 outDir 目录中。可以通过设置该选项为 false 来禁用该行为。
+
+4.23 build.reportCompressedSize
+
+类型：boolean，默认：true
+
+启用/禁用 gzip 压缩大小报告。
+
+4.23 build.chunkSizeWarningLimit
+
+类型：number，默认：500
+
+规定触发警告的 chunk 大小（以 kB 为单位）。
+
+4.24 build.watch
+
+类型：WatcherOptions| null，默认：null
+
+设置为 {} 则会启用 rollup 的监听器。
 
 5. 预览选择
+
+5.1 preview.host
+
+类型：string | boolean，默认：server.host
+
+为开发服务器指定 ip 地址。
+
+5.2 preview.port
+
+类型：number，默认：4173
+
+指定开发服务器端口。
+
+5.3 preview.strictPort
+
+类型：boolean，默认：server.strictPort
+
+设置为 true 时，如果端口已被使用，则直接退出
+
+5.4 preview.https
+
+类型：boolean | https.ServerOptions，默认：server.https
+
+启用 TLS + HTTP/2。
+
+5.5 preview.open
+
+类型：boolean | string，默认：server.open
+
+开发服务器启动时，自动在浏览器中打开应用程序。
+
+5.6 preview.proxy
+
+类型：Record<string, string | ProxyOptions>，默认：server.proxy
+
+配置自定义代理规则。
+
+5.7 preview.cors
+
+类型：boolean | CorsOptions，默认：server.cors
+
+配置 CORS。
+
+5.8 preview.headers
+
+类型：OutgoingHttpHeaders
+
+指明服务器返回的响应头。
+
 6. 依赖优化选择
-7. SSR 选择
-8. Worker 选择
+
+6.1 optimizeDeps.entries
+
+类型： string | string[]
+
+默认情况下，Vite 会抓取你的 index.html 来检测需要预构建的依赖项。
+
+6.2 optimizeDeps.exclude
+
+类型： string[]
+
+在预构建中强制排除的依赖项。
+
+6.3 optimizeDeps.include
+
+类型： string[]
+
+默认情况下，不在 node_modules 中的，链接的包不会被预构建。使用此选项可强制预构建链接的包。
+
+6.4 optimizeDeps.esbuildOptions
+
+类型： EsbuildBuildOptions
+
+在依赖扫描和优化过程中传递给 esbuild 的选项。
+
+6.5 optimizeDeps.force
+
+类型： boolean
+
+设置为 true 可以强制依赖预构建。
+
+6.6 optimizeDeps.disabled
+
+类型： boolean | 'build' | 'dev'，默认： 'build'
+
+禁用依赖优化，值为 true 将在构建和开发期间均禁用优化器。
+
+6.7 optimizeDeps.needsInterop
+
+类型: string[]
+
+当导入这些依赖项时，会强制 ESM 转换。

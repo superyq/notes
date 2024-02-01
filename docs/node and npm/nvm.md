@@ -17,3 +17,9 @@ nvm install xx.xx.xx // 安装node版本
 nvm uninstall xx.xx.xx // 卸载node版本
 nvm use xx.xx.xx // 切换node版本
 ```
+
+4. 版本
+
+CURRENT：当前版本、LTS：稳定版本、OLD STABLE：旧的稳定版本、OLD UNSTABLE：旧的不稳定版本
+
+<img src="../../images/nvm/1.jpg">
