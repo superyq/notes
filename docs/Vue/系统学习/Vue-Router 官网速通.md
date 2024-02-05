@@ -889,14 +889,14 @@ URL /search?q=vue 将传递 {query: 'vue'} 作为 props 传给 SearchUser 组件
 hash 模式是用 createWebHashHistory() 创建的：
 
 ```js
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from "vue-router";
 
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     //...
   ],
-})
+});
 ```
 
 它在内部传递的实际 URL 之前使用了一个哈希字符（#）。由于这部分 URL 从未被发送到服务器，所以它不需要在服务器层面上进行任何特殊处理。不过，它在 SEO 中确实有不好的影响。如果你担心这个问题，可以使用 HTML5 模式。
@@ -906,13 +906,13 @@ const router = createRouter({
 Memory 模式不会假定自己处于浏览器环境，因此不会与 URL 交互也不会自动触发初始导航。这使得它非常适合 Node 环境和 SSR。它是用 createMemoryHistory() 创建的，并且需要你在调用 app.use(router) 之后手动 push 到初始导航。
 
 ```js
-import { createRouter, createMemoryHistory } from 'vue-router'
+import { createRouter, createMemoryHistory } from "vue-router";
 const router = createRouter({
   history: createMemoryHistory(),
   routes: [
     //...
   ],
-})
+});
 ```
 
 虽然不推荐，你仍可以在浏览器应用程序中使用此模式，但请注意它不会有历史记录，这意味着你无法后退或前进。
@@ -922,14 +922,14 @@ const router = createRouter({
 用 createWebHistory() 创建 HTML5 模式，推荐使用这个模式：
 
 ```js
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from "vue-router";
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     //...
   ],
-})
+});
 ```
 
 当使用这种历史模式时，URL 会看起来很 "正常"，例如 https://example.com/user/id。漂亮!
@@ -940,7 +940,7 @@ const router = createRouter({
 
 10.4 服务器配置示例
 
-注意：以下示例假定你正在从根目录提供服务。如果你部署到子目录，你应该使用Vue CLI 的 publicPath 配置和相关的路由器的 base 属性。你还需要调整下面的例子，以使用子目录而不是根目录（例如，将RewriteBase/ 替换为 RewriteBase/name-of-your-subfolder/）。
+注意：以下示例假定你正在从根目录提供服务。如果你部署到子目录，你应该使用 Vue CLI 的 publicPath 配置和相关的路由器的 base 属性。你还需要调整下面的例子，以使用子目录而不是根目录（例如，将 RewriteBase/ 替换为 RewriteBase/name-of-your-subfolder/）。
 
 10.4.1 Apache
 
@@ -972,27 +972,27 @@ location / {
 10.4.3 原生 Node.js
 
 ```js
-const http = require('http')
-const fs = require('fs')
-const httpPort = 80
+const http = require("http");
+const fs = require("fs");
+const httpPort = 80;
 
 http
   .createServer((req, res) => {
-    fs.readFile('index.html', 'utf-8', (err, content) => {
+    fs.readFile("index.html", "utf-8", (err, content) => {
       if (err) {
-        console.log('We cannot open "index.html" file.')
+        console.log('We cannot open "index.html" file.');
       }
 
       res.writeHead(200, {
-        'Content-Type': 'text/html; charset=utf-8',
-      })
+        "Content-Type": "text/html; charset=utf-8",
+      });
 
-      res.end(content)
-    })
+      res.end(content);
+    });
   })
   .listen(httpPort, () => {
-    console.log('Server listening on: http://localhost:%s', httpPort)
-  })
+    console.log("Server listening on: http://localhost:%s", httpPort);
+  });
 ```
 
 10.4.4 Express + Node.js
@@ -1059,7 +1059,7 @@ rewrite {
 
 10.4.9 Netlify
 
-创建一个 _redirects 文件，包含在你的部署文件中：
+创建一个 \_redirects 文件，包含在你的部署文件中：
 
 ```js
 /* /index.html 200
@@ -1071,7 +1071,7 @@ rewrite {
 
 10.4.10 Vercel
 
-在项目根目录创建一个vercel.json文件，内容如下：
+在项目根目录创建一个 vercel.json 文件，内容如下：
 
 ```json
 {
@@ -1086,8 +1086,8 @@ rewrite {
 ```js
 const router = createRouter({
   history: createWebHistory(),
-  routes: [{ path: '/:pathMatch(.*)', component: NotFoundComponent }],
-})
+  routes: [{ path: "/:pathMatch(.*)", component: NotFoundComponent }],
+});
 ```
 
 另外，如果你使用的是 Node.js 服务器，你可以通过在服务器端使用路由器来匹配传入的 URL，如果没有匹配到路由，则用 404 来响应，从而实现回退。查看 Vue 服务器端渲染文档了解更多信息。
@@ -1126,17 +1126,17 @@ false: 取消当前的导航。如果浏览器的 URL 改变了(可能是用户�
 一个路由地址: 通过一个路由地址重定向到一个不同的地址，如同调用 router.push()，且可以传入诸如 replace: true 或 name: 'home' 之类的选项。它会中断当前的导航，同时用相同的 from 创建一个新导航。
 
 ```js
- router.beforeEach(async (to, from) => {
-   if (
-     // 检查用户是否已登录
-     !isAuthenticated &&
-     // ❗️ 避免无限重定向
-     to.name !== 'Login'
-   ) {
-     // 将用户重定向到登录页面
-     return { name: 'Login' }
-   }
- })
+router.beforeEach(async (to, from) => {
+  if (
+    // 检查用户是否已登录
+    !isAuthenticated &&
+    // ❗️ 避免无限重定向
+    to.name !== "Login"
+  ) {
+    // 将用户重定向到登录页面
+    return { name: "Login" };
+  }
+});
 ```
 
 如果遇到了意料之外的情况，可能会抛出一个 Error。这会取消导航并且调用 router.onError() 注册过的回调。
@@ -1147,22 +1147,22 @@ false: 取消当前的导航。如果浏览器的 URL 改变了(可能是用户�
 ```js
 router.beforeEach(async (to, from) => {
   // canUserAccess() 返回 `true` 或 `false`
-  const canAccess = await canUserAccess(to)
-  if (!canAccess) return '/login'
-})
+  const canAccess = await canUserAccess(to);
+  if (!canAccess) return "/login";
+});
 ```
 
 1.1.1 可选的第三个参数 next
 
-在之前的 Vue Router 版本中，还可以使用 第三个参数 next 。这是一个常见的错误来源，我们经过 RFC 讨论将其移除。然而，它仍然是被支持的，这意味着你可以向任何导航守卫传递第三个参数。在这种情况下，确保 next 在任何给定的导航守卫中都被严格调用一次。它可以出现多于一次，但是只能在所有的逻辑路径都不重叠的情况下，否则钩子永远都不会被解析或报错。这里有一个在用户未能验证身份时重定向到/login的错误用例：
+在之前的 Vue Router 版本中，还可以使用 第三个参数 next 。这是一个常见的错误来源，我们经过 RFC 讨论将其移除。然而，它仍然是被支持的，这意味着你可以向任何导航守卫传递第三个参数。在这种情况下，确保 next 在任何给定的导航守卫中都被严格调用一次。它可以出现多于一次，但是只能在所有的逻辑路径都不重叠的情况下，否则钩子永远都不会被解析或报错。这里有一个在用户未能验证身份时重定向到/login 的错误用例：
 
 ```js
 // BAD
 router.beforeEach((to, from, next) => {
-  if (to.name !== 'Login' && !isAuthenticated) next({ name: 'Login' })
+  if (to.name !== "Login" && !isAuthenticated) next({ name: "Login" });
   // 如果用户未能验证身份，则 `next` 会被调用两次
-  next()
-})
+  next();
+});
 ```
 
 下面是正确的版本:
@@ -1170,9 +1170,9 @@ router.beforeEach((to, from, next) => {
 ```js
 // GOOD
 router.beforeEach((to, from, next) => {
-  if (to.name !== 'Login' && !isAuthenticated) next({ name: 'Login' })
-  else next()
-})
+  if (to.name !== "Login" && !isAuthenticated) next({ name: "Login" });
+  else next();
+});
 ```
 
 1.2 全局解析守卫
@@ -1180,21 +1180,21 @@ router.beforeEach((to, from, next) => {
 你可以用 router.beforeResolve 注册一个全局守卫。这和 router.beforeEach 类似，因为它在每次导航时都会触发，不同的是，解析守卫刚好会在导航被确认之前、所有组件内守卫和异步路由组件被解析之后调用。这里有一个例子，确保用户可以访问自定义 meta 属性 requiresCamera 的路由：
 
 ```js
-router.beforeResolve(async to => {
+router.beforeResolve(async (to) => {
   if (to.meta.requiresCamera) {
     try {
-      await askForCameraPermission()
+      await askForCameraPermission();
     } catch (error) {
       if (error instanceof NotAllowedError) {
         // ... 处理错误，然后取消导航
-        return false
+        return false;
       } else {
         // 意料之外的错误，取消导航并把错误传给全局处理器
-        throw error
+        throw error;
       }
     }
   }
-})
+});
 ```
 
 router.beforeResolve 是获取数据或执行任何其他操作（如果用户无法进入页面时你希望避免执行的操作）的理想位置。
@@ -1205,8 +1205,8 @@ router.beforeResolve 是获取数据或执行任何其他操作（如果用户�
 
 ```js
 router.afterEach((to, from) => {
-  sendToAnalytics(to.fullPath)
-})
+  sendToAnalytics(to.fullPath);
+});
 ```
 
 它们对于分析、更改页面标题、声明页面等辅助功能以及许多其他事情都很有用。
@@ -1215,8 +1215,8 @@ router.afterEach((to, from) => {
 
 ```js
 router.afterEach((to, from, failure) => {
-  if (!failure) sendToAnalytics(to.fullPath)
-})
+  if (!failure) sendToAnalytics(to.fullPath);
+});
 ```
 
 1.4 在守卫内的全局注入
@@ -1225,16 +1225,16 @@ router.afterEach((to, from, failure) => {
 
 ```ts
 // main.ts
-const app = createApp(App)
-app.provide('global', 'hello injections')
+const app = createApp(App);
+app.provide("global", "hello injections");
 
 // router.ts or main.ts
 router.beforeEach((to, from) => {
-  const global = inject('global') // 'hello injections'
+  const global = inject("global"); // 'hello injections'
   // a pinia store
-  const userStore = useAuthStore()
+  const userStore = useAuthStore();
   // ...
-})
+});
 ```
 
 1.5 路由独享的守卫
@@ -1244,14 +1244,14 @@ router.beforeEach((to, from) => {
 ```js
 const routes = [
   {
-    path: '/users/:id',
+    path: "/users/:id",
     component: UserDetails,
     beforeEnter: (to, from) => {
       // reject the navigation
-      return false
+      return false;
     },
   },
-]
+];
 ```
 
 beforeEnter 守卫 只在进入路由时触发，不会在 params、query 或 hash 改变时触发。例如，从 /users/2 进入到 /users/3 或者从 /users/2#info 进入到 /users/2#projects。它们只有在 从一个不同的 路由导航时，才会被触发。
@@ -1261,25 +1261,25 @@ beforeEnter 守卫 只在进入路由时触发，不会在 params、query 或 ha
 ```js
 function removeQueryParams(to) {
   if (Object.keys(to.query).length)
-    return { path: to.path, query: {}, hash: to.hash }
+    return { path: to.path, query: {}, hash: to.hash };
 }
 
 function removeHash(to) {
-  if (to.hash) return { path: to.path, query: to.query, hash: '' }
+  if (to.hash) return { path: to.path, query: to.query, hash: "" };
 }
 
 const routes = [
   {
-    path: '/users/:id',
+    path: "/users/:id",
     component: UserDetails,
     beforeEnter: [removeQueryParams, removeHash],
   },
   {
-    path: '/about',
+    path: "/about",
     component: UserDetails,
     beforeEnter: [removeQueryParams],
   },
-]
+];
 ```
 
 请注意，你也可以通过使用路径 meta 字段和全局导航守卫来实现类似的行为。
@@ -1314,7 +1314,7 @@ const UserDetails = {
     // 在导航离开渲染该组件的对应路由时调用
     // 与 `beforeRouteUpdate` 一样，它可以访问组件实例 `this`
   },
-}
+};
 ```
 
 beforeRouteEnter 守卫 不能 访问 this，因为守卫在导航确认前被调用，因此即将登场的新组件还没被创建。
@@ -1368,7 +1368,7 @@ beforeRouteLeave (to, from) {
 
 2. 路由元信息
 
-有时，你可能希望将任意信息附加到路由上，如过渡名称、谁可以访问路由等。这些事情可以通过接收属性对象的meta属性来实现，并且它可以在路由地址和导航守卫上都被访问到。定义路由的时候你可以这样配置 meta 字段：
+有时，你可能希望将任意信息附加到路由上，如过渡名称、谁可以访问路由等。这些事情可以通过接收属性对象的 meta 属性来实现，并且它可以在路由地址和导航守卫上都被访问到。定义路由的时候你可以这样配置 meta 字段：
 
 ```js
 const routes = [
@@ -1409,12 +1409,12 @@ router.beforeEach((to, from) => {
     // 此路由需要授权，请检查是否已登录
     // 如果没有，则重定向到登录页面
     return {
-      path: '/login',
+      path: "/login",
       // 保存我们所在的位置，以便以后再来
       query: { redirect: to.fullPath },
-    }
+    };
   }
-})
+});
 ```
 
 2.1 TypeScript
@@ -1425,17 +1425,17 @@ router.beforeEach((to, from) => {
 // 这段可以直接添加到你的任何 `.ts` 文件中，例如 `router.ts`
 // 也可以添加到一个 `.d.ts` 文件中。确保这个文件包含在
 // 项目的 `tsconfig.json` 中的 "file" 字段内。
-import 'vue-router'
+import "vue-router";
 
 // 为了确保这个文件被当作一个模块，添加至少一个 `export` 声明
-export {}
+export {};
 
-declare module 'vue-router' {
+declare module "vue-router" {
   interface RouteMeta {
     // 是可选的
-    isAdmin?: boolean
+    isAdmin?: boolean;
     // 每个路由都必须声明
-    requiresAuth: boolean
+    requiresAuth: boolean;
   }
 }
 ```
@@ -1478,36 +1478,36 @@ export default {
       loading: false,
       post: null,
       error: null,
-    }
+    };
   },
   created() {
     // watch 路由的参数，以便再次获取数据
     this.$watch(
       () => this.$route.params,
       () => {
-        this.fetchData()
+        this.fetchData();
       },
       // 组件创建完后获取数据，
       // 此时 data 已经被 observed 了
       { immediate: true }
-    )
+    );
   },
   methods: {
     fetchData() {
-      this.error = this.post = null
-      this.loading = true
+      this.error = this.post = null;
+      this.loading = true;
       // replace `getPost` with your data fetching util / API wrapper
       getPost(this.$route.params.id, (err, post) => {
-        this.loading = false
+        this.loading = false;
         if (err) {
-          this.error = err.toString()
+          this.error = err.toString();
         } else {
-          this.post = post
+          this.post = post;
         }
-      })
+      });
     },
   },
-}
+};
 ```
 
 3.2 在导航完成前获取数据
@@ -1520,39 +1520,39 @@ export default {
     return {
       post: null,
       error: null,
-    }
+    };
   },
   beforeRouteEnter(to, from, next) {
     getPost(to.params.id, (err, post) => {
       // `setData` 方法定义在下面的代码中
-      next(vm => vm.setData(err, post))
-    })
+      next((vm) => vm.setData(err, post));
+    });
   },
   // 路由改变前，组件就已经渲染完了
   // 逻辑稍稍不同
   async beforeRouteUpdate(to, from) {
-    this.post = null
+    this.post = null;
     try {
-      this.post = await getPost(to.params.id)
+      this.post = await getPost(to.params.id);
     } catch (error) {
-      this.error = error.toString()
+      this.error = error.toString();
     }
   },
   methods: {
     setData(error, post) {
       if (error) {
-        this.error = error
+        this.error = error;
       } else {
-        this.post = post
+        this.post = post;
       }
-    }
-  }
-}
+    },
+  },
+};
 ```
 
 在为后面的视图获取数据时，用户会停留在当前的界面，因此建议在数据获取期间，显示一些进度条或者别的指示。如果数据获取失败，同样有必要展示一些全局的错误提醒。
 
-4. 组合式API
+4. 组合式 API
 
 引入 setup 和 Vue 的组合式 API，开辟了新的可能性，但要想充分发挥 Vue Router 的潜力，我们需要使用一些新的函数来代替访问 this 和组件内导航守卫。
 
@@ -1561,46 +1561,46 @@ export default {
 因为我们在 setup 里面没有访问 this，所以我们不能再直接访问 this.$router 或 this.$route。作为替代，我们使用 useRouter 和 useRoute 函数：
 
 ```js
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter, useRoute } from "vue-router";
 
 export default {
   setup() {
-    const router = useRouter()
-    const route = useRoute()
+    const router = useRouter();
+    const route = useRoute();
 
     function pushWithQuery(query) {
       router.push({
-        name: 'search',
+        name: "search",
         query: {
           ...route.query,
           ...query,
         },
-      })
+      });
     }
   },
-}
+};
 ```
 
 route 对象是一个响应式对象，所以它的任何属性都可以被监听，但你应该避免监听整个 route 对象。在大多数情况下，你应该直接监听你期望改变的参数。
 
 ```js
-import { useRoute } from 'vue-router'
-import { ref, watch } from 'vue'
+import { useRoute } from "vue-router";
+import { ref, watch } from "vue";
 
 export default {
   setup() {
-    const route = useRoute()
-    const userData = ref()
+    const route = useRoute();
+    const userData = ref();
 
     // 当参数更改时获取用户信息
     watch(
       () => route.params.id,
-      async newId => {
-        userData.value = await fetchUser(newId)
+      async (newId) => {
+        userData.value = await fetchUser(newId);
       }
-    )
+    );
   },
-}
+};
 ```
 
 请注意，在模板中我们仍然可以访问 $router 和 $route，所以不需要在 setup 中返回 router 或 route。
@@ -1610,31 +1610,31 @@ export default {
 虽然你仍然可以通过 setup 函数来使用组件内的导航守卫，但 Vue Router 将更新和离开守卫作为 组合式 API 函数公开：
 
 ```js
-import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
-import { ref } from 'vue'
+import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
+import { ref } from "vue";
 
 export default {
   setup() {
     // 与 beforeRouteLeave 相同，无法访问 `this`
     onBeforeRouteLeave((to, from) => {
       const answer = window.confirm(
-        'Do you really want to leave? you have unsaved changes!'
-      )
+        "Do you really want to leave? you have unsaved changes!"
+      );
       // 取消导航并停留在同一页面上
-      if (!answer) return false
-    })
+      if (!answer) return false;
+    });
 
-    const userData = ref()
+    const userData = ref();
 
     // 与 beforeRouteUpdate 相同，无法访问 `this`
     onBeforeRouteUpdate(async (to, from) => {
       //仅当 id 更改时才获取用户，例如仅 query 或 hash 值已更改
       if (to.params.id !== from.params.id) {
-        userData.value = await fetchUser(to.params.id)
+        userData.value = await fetchUser(to.params.id);
       }
-    })
+    });
   },
-}
+};
 ```
 
 组合式 API 守卫也可以用在任何由 <router-view> 渲染的组件中，它们不必像组件内守卫那样直接用在路由组件上。
@@ -1644,11 +1644,11 @@ export default {
 Vue Router 将 RouterLink 的内部行为作为一个组合式函数 (composable) 公开。它接收一个类似 RouterLink 所有 prop 的响应式对象，并暴露底层属性来构建你自己的 RouterLink 组件或生成自定义链接：
 
 ```js
-import { RouterLink, useLink } from 'vue-router'
-import { computed } from 'vue'
+import { RouterLink, useLink } from "vue-router";
+import { computed } from "vue";
 
 export default {
-  name: 'AppLink',
+  name: "AppLink",
 
   props: {
     // 如果使用 TypeScript，请添加 @ts-ignore
@@ -1667,16 +1667,16 @@ export default {
       // 布尔类型的 ref 标识链接是否严格匹配当前路由
       isExactActive,
       // 导航至该链接的函数
-      navigate
-      } = useLink(props)
+      navigate,
+    } = useLink(props);
 
     const isExternalLink = computed(
-      () => typeof props.to === 'string' && props.to.startsWith('http')
-    )
+      () => typeof props.to === "string" && props.to.startsWith("http")
+    );
 
-    return { isExternalLink, href, navigate, isActive }
+    return { isExternalLink, href, navigate, isActive };
   },
-}
+};
 ```
 
 注意在 RouterLink 的 v-slot 中可以访问与 useLink 组合式函数相同的属性。
@@ -1766,23 +1766,23 @@ RotuerView 组件暴露了一个插槽，可以用来渲染路由组件：
 ```
 
 6.1
- 单个路由的过渡
+单个路由的过渡
 
 上面的用法会对所有的路由使用相同的过渡。如果你想让每个路由的组件有不同的过渡，你可以将元信息和动态的 name 结合在一起，放在<transition> 上：
 
 ```js
 const routes = [
   {
-    path: '/custom-transition',
+    path: "/custom-transition",
     component: PanelLeft,
-    meta: { transition: 'slide-left' },
+    meta: { transition: "slide-left" },
   },
   {
-    path: '/other-transition',
+    path: "/other-transition",
     component: PanelRight,
-    meta: { transition: 'slide-right' },
+    meta: { transition: "slide-right" },
   },
-]
+];
 ```
 
 ```js
@@ -1811,10 +1811,10 @@ const routes = [
 
 ```js
 router.afterEach((to, from) => {
-  const toDepth = to.path.split('/').length
-  const fromDepth = from.path.split('/').length
-  to.meta.transition = toDepth < fromDepth ? 'slide-right' : 'slide-left'
-})
+  const toDepth = to.path.split("/").length;
+  const fromDepth = from.path.split("/").length;
+  to.meta.transition = toDepth < fromDepth ? "slide-right" : "slide-left";
+});
 ```
 
 6.3 强制在复用的视图之间进行过渡
@@ -1847,7 +1847,7 @@ const router = createRouter({
 })
 ```
 
-scrollBehavior 函数接收 to和 from 路由对象，如 Navigation Guards。第三个参数 savedPosition，只有当这是一个 popstate 导航时才可用（由浏览器的后退/前进按钮触发）
+scrollBehavior 函数接收 to 和 from 路由对象，如 Navigation Guards。第三个参数 savedPosition，只有当这是一个 popstate 导航时才可用（由浏览器的后退/前进按钮触发）
 
 该函数可以返回一个 ScrollToOptions 位置对象:
 
@@ -1855,9 +1855,9 @@ scrollBehavior 函数接收 to和 from 路由对象，如 Navigation Guards。�
 const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     // 始终滚动到顶部
-    return { top: 0 }
+    return { top: 0 };
   },
-})
+});
 ```
 
 你也可以通过 el 传递一个 CSS 选择器或一个 DOM 元素。在这种情况下，top 和 left 将被视为该元素的相对偏移量。
@@ -1869,12 +1869,12 @@ const router = createRouter({
     return {
       // 也可以这么写
       // el: document.getElementById('main'),
-      el: '#main',
+      el: "#main",
       // 在元素上 10 像素
       top: 10,
-    }
+    };
   },
-})
+});
 ```
 
 如果返回一个 falsy 的值，或者是一个空对象，那么不会发生滚动。
@@ -1885,12 +1885,12 @@ const router = createRouter({
 const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
-      return savedPosition
+      return savedPosition;
     } else {
-      return { top: 0 }
+      return { top: 0 };
     }
   },
-})
+});
 ```
 
 如果你要模拟 “滚动到锚点” 的行为：
@@ -1901,10 +1901,10 @@ const router = createRouter({
     if (to.hash) {
       return {
         el: to.hash,
-      }
+      };
     }
   },
-})
+});
 ```
 
 如果你的浏览器支持滚动行为，你可以让它变得更流畅：
@@ -1915,11 +1915,11 @@ const router = createRouter({
     if (to.hash) {
       return {
         el: to.hash,
-        behavior: 'smooth',
-      }
+        behavior: "smooth",
+      };
     }
-  }
-})
+  },
+});
 ```
 
 7.1 延迟滚动
@@ -1931,11 +1931,11 @@ const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        resolve({ left: 0, top: 0 })
-      }, 500)
-    })
+        resolve({ left: 0, top: 0 });
+      }, 500);
+    });
   },
-})
+});
 ```
 
 我们可以将其与页面级过渡组件的事件挂钩，以使滚动行为与你的页面过渡很好地结合起来，但由于使用场景可能存在的差异和复杂性，我们只是提供了这个基础来实现特定的用户场景。
@@ -1968,7 +1968,7 @@ component (和 components) 配置接收一个返回 Promise 组件的函数，Vu
 const UserDetails = () =>
   Promise.resolve({
     /* 组件定义 */
-  })
+  });
 ```
 
 一般来说，对所有的路由都使用动态导入是个好主意。
@@ -1987,18 +1987,18 @@ const UserDetails = () =>
 
 ```js
 const UserDetails = () =>
-  import(/* webpackChunkName: "group-user" */ './UserDetails.vue')
+  import(/* webpackChunkName: "group-user" */ "./UserDetails.vue");
 const UserDashboard = () =>
-  import(/* webpackChunkName: "group-user" */ './UserDashboard.vue')
+  import(/* webpackChunkName: "group-user" */ "./UserDashboard.vue");
 const UserProfileEdit = () =>
-  import(/* webpackChunkName: "group-user" */ './UserProfileEdit.vue')
+  import(/* webpackChunkName: "group-user" */ "./UserProfileEdit.vue");
 ```
 
 webpack 会将任何一个异步模块与相同的块名称组合到相同的异步块中。
 
 8.1.2 使用 Vite
 
-在Vite中，你可以在rollupOptions下定义分块：
+在 Vite 中，你可以在 rollupOptions 下定义分块：
 
 ```js
 // vite.config.js
@@ -2008,16 +2008,16 @@ export default defineConfig({
       // https://rollupjs.org/guide/en/#outputmanualchunks
       output: {
         manualChunks: {
-          'group-user': [
-            './src/UserDetails',
-            './src/UserDashboard',
-            './src/UserProfileEdit',
+          "group-user": [
+            "./src/UserDetails",
+            "./src/UserDashboard",
+            "./src/UserProfileEdit",
           ],
         },
       },
     },
   },
-})
+});
 ```
 
 9. 扩展 RouterLink
@@ -2049,34 +2049,34 @@ RouterLink 组件提供了足够的 props 来满足大多数基本应用程序�
 </template>
 
 <script>
-import { RouterLink } from 'vue-router'
+  import { RouterLink } from "vue-router";
 
-export default {
-  name: 'AppLink',
-  inheritAttrs: false,
+  export default {
+    name: "AppLink",
+    inheritAttrs: false,
 
-  props: {
-    // 如果使用 TypeScript，请添加 @ts-ignore
-    ...RouterLink.props,
-    inactiveClass: String,
-  },
-
-  computed: {
-    isExternalLink() {
-      return typeof this.to === 'string' && this.to.startsWith('http')
+    props: {
+      // 如果使用 TypeScript，请添加 @ts-ignore
+      ...RouterLink.props,
+      inactiveClass: String,
     },
-  },
-}
+
+    computed: {
+      isExternalLink() {
+        return typeof this.to === "string" && this.to.startsWith("http");
+      },
+    },
+  };
 </script>
 ```
 
 如果你喜欢使用渲染函数或创建 computed 属性，你可以使用 Composition API 中的 useLink ：
 
 ```js
-import { RouterLink, useLink } from 'vue-router'
+import { RouterLink, useLink } from "vue-router";
 
 export default {
-  name: 'AppLink',
+  name: "AppLink",
 
   props: {
     // 如果使用 TypeScript，请添加 @ts-ignore
@@ -2086,13 +2086,13 @@ export default {
 
   setup(props) {
     // `props` 包含 `to` 和任何其他可以传递给 <router-link> 的 prop
-    const { navigate, href, route, isActive, isExactActive } = useLink(props)
+    const { navigate, href, route, isActive, isExactActive } = useLink(props);
 
     // profit!
 
-    return { isExternalLink }
+    return { isExternalLink };
   },
-}
+};
 ```
 
 在实践中，你可能希望将你的 AppLink 组件用于应用程序的不同部分。例如，使用 Tailwind CSS，你可以用所有的类创建一个 NavLink.vue 组件：
@@ -2110,4 +2110,397 @@ export default {
 </template>
 ```
 
+10. 导航故障
 
+当使用 router-link 组件时，Vue Router 会自动调用 router.push 来触发一次导航。虽然大多数链接的预期行为是将用户导航到一个新页面，但也有少数情况下用户将留在同一页面上：
+
+用户已经位于他们正在尝试导航到的页面
+一个导航守卫通过调用 return false 中断了这次导航
+当前的导航守卫还没有完成时，一个新的导航守卫会出现了
+一个导航守卫通过返回一个新的位置，重定向到其他地方 (例如，return '/login')
+一个导航守卫抛出了一个 Error
+
+如果我们想在一个导航完成后做一些事情，我们需要一个在调用 router.push 后进行等待的方法。想象一下，我们有一个移动手机菜单，它允许我们进入不同的页面，而我们只想在导航到新页面后隐藏菜单，我们可能想这样做：
+
+```js
+router.push("/my-profile");
+this.isMenuOpen = false;
+```
+
+但是这样做会马上关闭菜单，因为 导航是异步的，我们需要 await router.push 返回的 promise ：
+
+```js
+await router.push("/my-profile");
+this.isMenuOpen = false;
+```
+
+现在，一旦导航完成，菜单就会关闭，但如果导航被阻止，它也会关闭。我们需要一种方法来检测我们是否真的改变了页面。
+
+10.1 检测导航故障
+
+如果导航被阻止，导致用户停留在同一个页面上，由 router.push 返回的 Promise 的解析值将是 Navigation Failure。否则，它将是一个 falsy 值(通常是 undefined)。这样我们就可以区分我们导航是否离开了当前位置：
+
+```js
+const navigationResult = await router.push("/my-profile");
+
+if (navigationResult) {
+  // 导航被阻止
+} else {
+  // 导航成功 (包括重新导航的情况)
+  this.isMenuOpen = false;
+}
+```
+
+Navigation Failure 是带有一些额外属性的 Error 实例，这些属性为我们提供了足够的信息，让我们知道哪些导航被阻止了以及为什么被阻止了。要检查导航结果的性质，请使用 isNavigationFailure 函数：
+
+```js
+import { NavigationFailureType, isNavigationFailure } from "vue-router";
+
+// 试图离开未保存的编辑文本界面
+const failure = await router.push("/articles/2");
+
+if (isNavigationFailure(failure, NavigationFailureType.aborted)) {
+  // 给用户显示一个小通知
+  showToast("You have unsaved changes, discard and leave anyway?");
+}
+```
+
+TIP:如果你忽略第二个参数： isNavigationFailure(failure)，那么就只会检查这个 failure 是不是一个 Navigation Failure。
+
+10.2 全局导航故障
+
+你可以用 router.afterEach() 导航守卫检测全局导航故障：
+
+```js
+router.afterEach((to, from, failure) => {
+  if (failure) {
+    sendToAnalytics(to, from, failure);
+  }
+});
+```
+
+10.3 鉴别导航故障
+
+正如我们在一开始所说的，有不同的情况会导致导航的中止，所有这些情况都会导致不同的 Navigation Failure。它们可以用 isNavigationFailure 和 NavigationFailureType 来区分。总共有三种不同的类型：
+
+aborted：在导航守卫中返回 false 中断了本次导航。
+cancelled： 在当前导航完成之前又有了一个新的导航。比如，在等待导航守卫的过程中又调用了 router.push。
+duplicated：导航被阻止，因为我们已经在目标位置了。
+
+10.4 导航故障的属性
+
+所有的导航失败都会暴露 to 和 from 属性，以反映失败导航的当前位置和目标位置：
+
+```js
+// 正在尝试访问 admin 页面
+router.push("/admin").then((failure) => {
+  if (isNavigationFailure(failure, NavigationFailureType.aborted)) {
+    failure.to.path; // '/admin'
+    failure.from.path; // '/'
+  }
+});
+```
+
+在所有情况下，to 和 from 都是规范化的路由地址。
+
+10.5 检测重定向
+
+当在导航守卫中返回一个新的位置时，我们会触发一个新的导航，覆盖正在进行的导航。与其他返回值不同的是，重定向不会阻止导航，而是创建一个新的导航。因此，通过读取路由地址中的 redirectedFrom 属性，对其进行不同的检查：
+
+```js
+await router.push("/my-profile");
+if (router.currentRoute.value.redirectedFrom) {
+  // redirectedFrom 是解析出的路由地址，就像导航守卫中的 to和 from
+}
+```
+
+11. 动态路由
+
+对路由的添加通常是通过 routes 选项来完成的，但是在某些情况下，你可能想在应用程序已经运行的时候添加或删除路由。具有可扩展接口(如 Vue CLI UI )这样的应用程序可以使用它来扩展应用程序。
+
+11.1 添加路由
+
+动态路由主要通过两个函数实现。router.addRoute() 和 router.removeRoute()。它们只注册一个新的路由，也就是说，如果新增加的路由与当前位置相匹配，就需要你用 router.push() 或 router.replace() 来手动导航，才能显示该新路由。我们来看一个例子：
+
+想象一下，只有一个路由的以下路由：
+
+```js
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [{ path: "/:articleName", component: Article }],
+});
+```
+
+进入任何页面，/about，/store，或者 /3-tricks-to-improve-your-routing-code 最终都会呈现 Article 组件。如果我们在 /about 上添加一个新的路由：
+
+```js
+router.addRoute({ path: "/about", component: About });
+```
+
+页面仍然会显示 Article 组件，我们需要手动调用 router.replace() 来改变当前的位置，并覆盖我们原来的位置（而不是添加一个新的路由，最后在我们的历史中两次出现在同一个位置）：
+
+```js
+router.addRoute({ path: "/about", component: About });
+// 我们也可以使用 this.$route 或 route = useRoute() （在 setup 中）
+router.replace(router.currentRoute.value.fullPath);
+```
+
+记住，如果你需要等待新的路由显示，可以使用 await router.replace()。
+
+11.2 在导航守卫中添加路由
+
+如果你决定在导航守卫内部添加或删除路由，你不应该调用 router.replace()，而是通过返回新的位置来触发重定向：
+
+```js
+router.beforeEach((to) => {
+  if (!hasNecessaryRoute(to)) {
+    router.addRoute(generateRoute(to));
+    // 触发重定向
+    return to.fullPath;
+  }
+});
+```
+
+上面的例子有两个假设：第一，新添加的路由记录将与 to 位置相匹配，实际上导致与我们试图访问的位置不同。第二，hasNecessaryRoute() 在添加新的路由后返回 false，以避免无限重定向。
+
+因为是在重定向中，所以我们是在替换将要跳转的导航，实际上行为就像之前的例子一样。而在实际场景中，添加路由的行为更有可能发生在导航守卫之外，例如，当一个视图组件挂载时，它会注册新的路由。
+
+11.3 删除路由
+
+有几个不同的方法来删除现有的路由：
+
+| 通过添加一个名称冲突的路由。如果添加与现有途径名称相同的途径，会先删除路由，再添加路由：
+
+```js
+router.addRoute({ path: "/about", name: "about", component: About });
+// 这将会删除之前已经添加的路由，因为他们具有相同的名字且名字必须是唯一的
+router.addRoute({ path: "/other", name: "about", component: Other });
+```
+
+| 通过调用 router.addRoute() 返回的回调：
+
+```js
+const removeRoute = router.addRoute(routeRecord);
+removeRoute(); // 删除路由如果存在的话
+```
+
+当路由没有名称时，这很有用。
+
+| 通过使用 router.removeRoute() 按名称删除路由：
+
+```js
+router.addRoute({ path: "/about", name: "about", component: About });
+// 删除路由
+router.removeRoute("about");
+```
+
+需要注意的是，如果你想使用这个功能，但又想避免名字的冲突，可以在路由中使用 Symbol 作为名字。
+
+当路由被删除时，所有的别名和子路由也会被同时删除
+
+11.4 添加嵌套路由
+
+要将嵌套路由添加到现有的路由中，可以将路由的 name 作为第一个参数传递给 router.addRoute()，这将有效地添加路由，就像通过 children 添加的一样：
+
+```js
+router.addRoute({ name: "admin", path: "/admin", component: Admin });
+router.addRoute("admin", { path: "settings", component: AdminSettings });
+// 等价于
+router.addRoute({
+  name: "admin",
+  path: "/admin",
+  component: Admin,
+  children: [{ path: "settings", component: AdminSettings }],
+});
+```
+
+11.5 查看现有路由
+
+Vue Router 提供了两个功能来查看现有的路由：
+
+| router.hasRoute()：检查路由是否存在。
+| router.getRoutes()：获取一个包含所有路由记录的数组。
+
+四：从 Vue2 迁移
+
+在 Vue Router API 从 v3（Vue2）到 v4（Vue3）的重写过程中，大部分的 Vue Router API 都没有变化，但是在迁移你的程序时，你可能会遇到一些破坏性的变化。本指南将帮助你了解为什么会发生这些变化，以及如何调整你的程序，使其与 Vue Router4 兼容。
+
+1. 破坏性变化
+
+变化的顺序是按其用途排列的。因此，建议按照这个清单的顺序进行。
+
+1.1 new Router 变成 createRouter
+
+Vue Router 不再是一个类，而是一组函数。现在你不用再写 new Router()，而是要调用 createRouter:
+
+```js
+// 以前是
+// import Router from 'vue-router'
+import { createRouter } from "vue-router";
+
+const router = createRouter({
+  // ...
+});
+```
+
+1.2 新的 history 配置取代 mode
+
+mode: 'history' 配置已经被一个更灵活的 history 配置所取代。根据你使用的模式，你必须用适当的函数替换它：
+
+"history": createWebHistory()
+"hash": createWebHashHistory()
+"abstract": createMemoryHistory()
+
+下面是一个完整的代码段：
+
+```js
+import { createRouter, createWebHistory } from "vue-router";
+// 还有 createWebHashHistory 和 createMemoryHistory
+
+createRouter({
+  history: createWebHistory(),
+  routes: [],
+});
+```
+
+在 SSR 上使用时，你需要手动传递相应的 history：
+
+```js
+// router.js
+let history = isServer ? createMemoryHistory() : createWebHistory();
+let router = createRouter({ routes, history });
+// 在你的 server-entry.js 中的某个地方
+router.push(req.url); // 请求 url
+router.isReady().then(() => {
+  // 处理请求
+});
+```
+
+原因：为未使用的 history 启用摇树，以及为高级用例（如原生解决方案）实现自定义 history。
+
+1.3 移动了 base 配置
+
+现在，base 配置被作为 createWebHistory (其他 history 也一样)的第一个参数传递：
+
+```js
+import { createRouter, createWebHistory } from "vue-router";
+createRouter({
+  history: createWebHistory("/base-directory/"),
+  routes: [],
+});
+```
+
+11.4 删除了 fallback 属性
+
+创建路由时不再支持 fallback 属性：
+
+```js
+-new VueRouter({
++createRouter({
+-  fallback: false,
+// other options...
+})
+```
+
+原因: Vue 支持的所有浏览器都支持 HTML5 History API，因此我们不再需要使用 location.hash，而可以直接使用 history.pushState()。
+
+11.5 删除了 \*（星标或通配符）路由
+
+现在必须使用自定义的 regex 参数来定义所有路由(_、/_)：
+
+```js
+const routes = [
+  // pathMatch 是参数的名称，例如，跳转到 /not/found 会得到
+  // { params: { pathMatch: ['not', 'found'] } }
+  // 这要归功于最后一个 *，意思是重复的参数，如果你
+  // 打算直接使用未匹配的路径名称导航到该路径，这是必要的
+  { path: "/:pathMatch(.*)*", name: "not-found", component: NotFound },
+  // 如果你省略了最后的 `*`，在解析或跳转时，参数中的 `/` 字符将被编码
+  { path: "/:pathMatch(.*)", name: "bad-not-found", component: NotFound },
+];
+// 如果使用命名路由，不好的例子：
+router.resolve({
+  name: "bad-not-found",
+  params: { pathMatch: "not/found" },
+}).href; // '/not%2Ffound'
+// 好的例子:
+router.resolve({
+  name: "not-found",
+  params: { pathMatch: ["not", "found"] },
+}).href; // '/not/found'
+```
+
+11.6 将 onReady 改为 isReady
+
+现有的 router.onReady() 函数已被 router.isReady() 取代，该函数不接受任何参数并返回一个 Promise：
+
+```js
+// 将
+router.onReady(onSuccess, onError);
+// 替换成
+router.isReady().then(onSuccess).catch(onError);
+// 或者使用 await:
+try {
+  await router.isReady();
+  // 成功
+} catch (err) {
+  // 报错
+}
+```
+
+11.7 scrollBehavior 的变化
+
+scrollBehavior 中返回的对象与 ScrollToOptions 类似：x 改名为 left，y 改名为 top。
+
+原因：使该对象类似于 ScrollToOptions，以使其感觉更像原生 JS API，并有可能启用将来的新配置。
+
+11.8 <router-view>、<keep-alive> 和 <transition>
+
+transition 和 keep-alive 现在必须通过 v-slot API 在 RouterView 内部使用：
+
+```js
+<router-view v-slot="{ Component }">
+  <transition>
+    <keep-alive>
+      <component :is="Component" />
+    </keep-alive>
+  </transition>
+</router-view>
+```
+
+11.9 删除 <router-link> 中的 append 属性
+
+<router-link> 中的 append 属性已被删除。你可以手动将值设置到现有的 path 中：
+
+```js
+// 将
+<router-link to="child-route" append>to relative child</router-link>
+// 替换成
+<router-link :to="append($route.path, 'child-route')">
+  to relative child
+</router-link>
+```
+
+你必须在 App 实例上定义一个全局的 append 函数：
+
+```js
+app.config.globalProperties.append = (path, pathToAppend) =>
+  path + (path.endsWith("/") ? "" : "/") + pathToAppend;
+```
+
+原因：append 使用频率不高，用户可以很容易地实现。
+
+11.10 删除 <router-link> 中的 event 和 tag 属性
+
+<router-link> 中的 event 和 tag 属性都已被删除。你可以使用 v-slot API 来完全定制 <router-link>：
+
+```js
+// 将
+<router-link to="/about" tag="span" event="dblclick">About Us</router-link>
+// 替换成
+<router-link to="/about" custom v-slot="{ navigate }">
+  <span @click="navigate" @keypress.enter="navigate" role="link">About Us</span>
+</router-link>
+```
+
+11.11 删除 <router-link> 中的 exact 属性
