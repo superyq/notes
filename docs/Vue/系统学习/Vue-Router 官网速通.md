@@ -879,3 +879,1235 @@ URL /search?q=vue 将传递 {query: 'vue'} 作为 props 传给 SearchUser 组件
    />
 </RouterView>
 ```
+
+10. 不同的历史模式
+
+在创建路由器实例时，history 配置允许我们在不同的历史模式中进行选择。
+
+10.1 Hash 模式
+
+hash 模式是用 createWebHashHistory() 创建的：
+
+```js
+import { createRouter, createWebHashHistory } from 'vue-router'
+
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes: [
+    //...
+  ],
+})
+```
+
+它在内部传递的实际 URL 之前使用了一个哈希字符（#）。由于这部分 URL 从未被发送到服务器，所以它不需要在服务器层面上进行任何特殊处理。不过，它在 SEO 中确实有不好的影响。如果你担心这个问题，可以使用 HTML5 模式。
+
+10.2 Memory 模式
+
+Memory 模式不会假定自己处于浏览器环境，因此不会与 URL 交互也不会自动触发初始导航。这使得它非常适合 Node 环境和 SSR。它是用 createMemoryHistory() 创建的，并且需要你在调用 app.use(router) 之后手动 push 到初始导航。
+
+```js
+import { createRouter, createMemoryHistory } from 'vue-router'
+const router = createRouter({
+  history: createMemoryHistory(),
+  routes: [
+    //...
+  ],
+})
+```
+
+虽然不推荐，你仍可以在浏览器应用程序中使用此模式，但请注意它不会有历史记录，这意味着你无法后退或前进。
+
+10.3 HTML5 模式
+
+用 createWebHistory() 创建 HTML5 模式，推荐使用这个模式：
+
+```js
+import { createRouter, createWebHistory } from 'vue-router'
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    //...
+  ],
+})
+```
+
+当使用这种历史模式时，URL 会看起来很 "正常"，例如 https://example.com/user/id。漂亮!
+
+不过，问题来了。由于我们的应用是一个单页的客户端应用，如果没有适当的服务器配置，用户在浏览器中直接访问 https://example.com/user/id，就会得到一个 404 错误。这就尴尬了。
+
+不用担心：要解决这个问题，你需要做的就是在你的服务器上添加一个简单的回退路由。如果 URL 不匹配任何静态资源，它应提供与你的应用程序中的 index.html 相同的页面。漂亮依旧!
+
+10.4 服务器配置示例
+
+注意：以下示例假定你正在从根目录提供服务。如果你部署到子目录，你应该使用Vue CLI 的 publicPath 配置和相关的路由器的 base 属性。你还需要调整下面的例子，以使用子目录而不是根目录（例如，将RewriteBase/ 替换为 RewriteBase/name-of-your-subfolder/）。
+
+10.4.1 Apache
+
+```
+<IfModule mod_negotiation.c>
+  Options -MultiViews
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+```
+
+也可以使用 FallbackResource 代替 mod_rewrite。
+
+10.4.2 nginx
+
+```
+location / {
+  try_files $uri $uri/ /index.html;
+}
+```
+
+10.4.3 原生 Node.js
+
+```js
+const http = require('http')
+const fs = require('fs')
+const httpPort = 80
+
+http
+  .createServer((req, res) => {
+    fs.readFile('index.html', 'utf-8', (err, content) => {
+      if (err) {
+        console.log('We cannot open "index.html" file.')
+      }
+
+      res.writeHead(200, {
+        'Content-Type': 'text/html; charset=utf-8',
+      })
+
+      res.end(content)
+    })
+  })
+  .listen(httpPort, () => {
+    console.log('Server listening on: http://localhost:%s', httpPort)
+  })
+```
+
+10.4.4 Express + Node.js
+
+对于 Node.js/Express，可以考虑使用 connect-history-api-fallback 中间件。
+
+10.4.5 Internet Information Services (IIS)
+
+安装 IIS UrlRewrite
+在网站的根目录下创建一个 web.config 文件，内容如下：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <system.webServer>
+    <rewrite>
+      <rules>
+        <rule name="Handle History Mode and custom 404/500" stopProcessing="true">
+          <match url="(.*)" />
+          <conditions logicalGrouping="MatchAll">
+            <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+            <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+          </conditions>
+          <action type="Rewrite" url="/" />
+        </rule>
+      </rules>
+    </rewrite>
+  </system.webServer>
+</configuration>
+```
+
+10.4.6 Caddy v2
+
+```
+try_files {path} /
+```
+
+10.4.7 Caddy v1
+
+```
+rewrite {
+    regexp .*
+    to {path} /
+}
+```
+
+10.4.8 Firebase hosting
+
+将此添加到你的 firebase.json 中：
+
+```json
+{
+  "hosting": {
+    "public": "dist",
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
+```
+
+10.4.9 Netlify
+
+创建一个 _redirects 文件，包含在你的部署文件中：
+
+```js
+/* /index.html 200
+```
+
+在 vue-cli、nuxt 和 vite 项目中，这个文件通常放在名为 static 或 public 的目录下。
+
+你可以在 Netlify 文档中找到更多关于语法的信息。你也可以创建一个 netlify.toml 来结合其他 Netlify 功能的重定向。
+
+10.4.10 Vercel
+
+在项目根目录创建一个vercel.json文件，内容如下：
+
+```json
+{
+  "rewrites": [{ "source": "/:path*", "destination": "/index.html" }]
+}
+```
+
+10.5 附加说明
+
+这有一个注意事项。你的服务器将不再报告 404 错误，因为现在所有未找到的路径都会显示你的 index.html 文件。为了解决这个问题，你应该在你的 Vue 应用程序中实现一个万能的路由来显示 404 页面。
+
+```js
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [{ path: '/:pathMatch(.*)', component: NotFoundComponent }],
+})
+```
+
+另外，如果你使用的是 Node.js 服务器，你可以通过在服务器端使用路由器来匹配传入的 URL，如果没有匹配到路由，则用 404 来响应，从而实现回退。查看 Vue 服务器端渲染文档了解更多信息。
+
+三. 进阶
+
+1. 导航守卫
+
+正如其名，vue-router 提供的导航守卫主要用来通过跳转或取消的方式守卫导航。这里有很多方式植入路由导航中：全局的，单个路由独享的，或者组件级的。
+
+1.1 全局前置守卫
+
+你可以使用 router.beforeEach 注册一个全局前置守卫：
+
+```js
+const router = createRouter({ ... })
+
+router.beforeEach((to, from) => {
+  // ...
+  // 返回 false 以取消导航
+  return false
+})
+```
+
+当一个导航触发时，全局前置守卫按照创建顺序调用。守卫是异步解析执行，此时导航在所有守卫 resolve 完之前一直处于等待中。
+
+每个守卫方法接收两个参数：
+
+to: 即将要进入的目标 用一种标准化的方式
+from: 当前导航正要离开的路由 用一种标准化的方式
+
+可以返回的值如下:
+
+false: 取消当前的导航。如果浏览器的 URL 改变了(可能是用户手动或者浏览器后退按钮)，那么 URL 地址会重置到 from 路由对应的地址。
+
+一个路由地址: 通过一个路由地址重定向到一个不同的地址，如同调用 router.push()，且可以传入诸如 replace: true 或 name: 'home' 之类的选项。它会中断当前的导航，同时用相同的 from 创建一个新导航。
+
+```js
+ router.beforeEach(async (to, from) => {
+   if (
+     // 检查用户是否已登录
+     !isAuthenticated &&
+     // ❗️ 避免无限重定向
+     to.name !== 'Login'
+   ) {
+     // 将用户重定向到登录页面
+     return { name: 'Login' }
+   }
+ })
+```
+
+如果遇到了意料之外的情况，可能会抛出一个 Error。这会取消导航并且调用 router.onError() 注册过的回调。
+
+如果什么都没有，undefined 或返回 true，则导航是有效的，并调用下一个导航守卫
+以上所有都同 async 函数 和 Promise 工作方式一样：
+
+```js
+router.beforeEach(async (to, from) => {
+  // canUserAccess() 返回 `true` 或 `false`
+  const canAccess = await canUserAccess(to)
+  if (!canAccess) return '/login'
+})
+```
+
+1.1.1 可选的第三个参数 next
+
+在之前的 Vue Router 版本中，还可以使用 第三个参数 next 。这是一个常见的错误来源，我们经过 RFC 讨论将其移除。然而，它仍然是被支持的，这意味着你可以向任何导航守卫传递第三个参数。在这种情况下，确保 next 在任何给定的导航守卫中都被严格调用一次。它可以出现多于一次，但是只能在所有的逻辑路径都不重叠的情况下，否则钩子永远都不会被解析或报错。这里有一个在用户未能验证身份时重定向到/login的错误用例：
+
+```js
+// BAD
+router.beforeEach((to, from, next) => {
+  if (to.name !== 'Login' && !isAuthenticated) next({ name: 'Login' })
+  // 如果用户未能验证身份，则 `next` 会被调用两次
+  next()
+})
+```
+
+下面是正确的版本:
+
+```js
+// GOOD
+router.beforeEach((to, from, next) => {
+  if (to.name !== 'Login' && !isAuthenticated) next({ name: 'Login' })
+  else next()
+})
+```
+
+1.2 全局解析守卫
+
+你可以用 router.beforeResolve 注册一个全局守卫。这和 router.beforeEach 类似，因为它在每次导航时都会触发，不同的是，解析守卫刚好会在导航被确认之前、所有组件内守卫和异步路由组件被解析之后调用。这里有一个例子，确保用户可以访问自定义 meta 属性 requiresCamera 的路由：
+
+```js
+router.beforeResolve(async to => {
+  if (to.meta.requiresCamera) {
+    try {
+      await askForCameraPermission()
+    } catch (error) {
+      if (error instanceof NotAllowedError) {
+        // ... 处理错误，然后取消导航
+        return false
+      } else {
+        // 意料之外的错误，取消导航并把错误传给全局处理器
+        throw error
+      }
+    }
+  }
+})
+```
+
+router.beforeResolve 是获取数据或执行任何其他操作（如果用户无法进入页面时你希望避免执行的操作）的理想位置。
+
+1.3 全局后置钩子
+
+你也可以注册全局后置钩子，然而和守卫不同的是，这些钩子不会接受 next 函数也不会改变导航本身：
+
+```js
+router.afterEach((to, from) => {
+  sendToAnalytics(to.fullPath)
+})
+```
+
+它们对于分析、更改页面标题、声明页面等辅助功能以及许多其他事情都很有用。
+
+它们也反映了 navigation failures 作为第三个参数：
+
+```js
+router.afterEach((to, from, failure) => {
+  if (!failure) sendToAnalytics(to.fullPath)
+})
+```
+
+1.4 在守卫内的全局注入
+
+从 Vue 3.3 开始，你可以在导航守卫内使用 inject() 方法。这在注入像 pinia stores 这样的全局属性时很有用。在 app.provide() 中提供的所有内容都可以在 router.beforeEach()、router.beforeResolve()、router.afterEach() 内获取到：
+
+```ts
+// main.ts
+const app = createApp(App)
+app.provide('global', 'hello injections')
+
+// router.ts or main.ts
+router.beforeEach((to, from) => {
+  const global = inject('global') // 'hello injections'
+  // a pinia store
+  const userStore = useAuthStore()
+  // ...
+})
+```
+
+1.5 路由独享的守卫
+
+你可以直接在路由配置上定义 beforeEnter 守卫：
+
+```js
+const routes = [
+  {
+    path: '/users/:id',
+    component: UserDetails,
+    beforeEnter: (to, from) => {
+      // reject the navigation
+      return false
+    },
+  },
+]
+```
+
+beforeEnter 守卫 只在进入路由时触发，不会在 params、query 或 hash 改变时触发。例如，从 /users/2 进入到 /users/3 或者从 /users/2#info 进入到 /users/2#projects。它们只有在 从一个不同的 路由导航时，才会被触发。
+
+你也可以将一个函数数组传递给 beforeEnter，这在为不同的路由重用守卫时很有用：
+
+```js
+function removeQueryParams(to) {
+  if (Object.keys(to.query).length)
+    return { path: to.path, query: {}, hash: to.hash }
+}
+
+function removeHash(to) {
+  if (to.hash) return { path: to.path, query: to.query, hash: '' }
+}
+
+const routes = [
+  {
+    path: '/users/:id',
+    component: UserDetails,
+    beforeEnter: [removeQueryParams, removeHash],
+  },
+  {
+    path: '/about',
+    component: UserDetails,
+    beforeEnter: [removeQueryParams],
+  },
+]
+```
+
+请注意，你也可以通过使用路径 meta 字段和全局导航守卫来实现类似的行为。
+
+1.6 组件内的守卫
+
+最后，你可以在路由组件内直接定义路由导航守卫(传递给路由配置的)
+
+1.6.1 可用的配置 API
+
+你可以为路由组件添加以下配置：
+
+beforeRouteEnter
+beforeRouteUpdate
+beforeRouteLeave
+
+```js
+const UserDetails = {
+  template: `...`,
+  beforeRouteEnter(to, from) {
+    // 在渲染该组件的对应路由被验证前调用
+    // 不能获取组件实例 `this` ！
+    // 因为当守卫执行时，组件实例还没被创建！
+  },
+  beforeRouteUpdate(to, from) {
+    // 在当前路由改变，但是该组件被复用时调用
+    // 举例来说，对于一个带有动态参数的路径 `/users/:id`，在 `/users/1` 和 `/users/2` 之间跳转的时候，
+    // 由于会渲染同样的 `UserDetails` 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
+    // 因为在这种情况发生的时候，组件已经挂载好了，导航守卫可以访问组件实例 `this`
+  },
+  beforeRouteLeave(to, from) {
+    // 在导航离开渲染该组件的对应路由时调用
+    // 与 `beforeRouteUpdate` 一样，它可以访问组件实例 `this`
+  },
+}
+```
+
+beforeRouteEnter 守卫 不能 访问 this，因为守卫在导航确认前被调用，因此即将登场的新组件还没被创建。
+
+不过，你可以通过传一个回调给 next 来访问组件实例。在导航被确认的时候执行回调，并且把组件实例作为回调方法的参数：
+
+```js
+beforeRouteEnter (to, from, next) {
+  next(vm => {
+    // 通过 `vm` 访问组件实例
+  })
+}
+```
+
+注意 beforeRouteEnter 是支持给 next 传递回调的唯一守卫。对于 beforeRouteUpdate 和 beforeRouteLeave 来说，this 已经可用了，所以不支持 传递回调，因为没有必要了：
+
+```js
+beforeRouteUpdate (to, from) {
+  // just use `this`
+  this.name = to.params.name
+}
+```
+
+这个 离开守卫 通常用来预防用户在还未保存修改前突然离开。该导航可以通过返回 false 来取消。
+
+```js
+beforeRouteLeave (to, from) {
+  const answer = window.confirm('Do you really want to leave? you have unsaved changes!')
+  if (!answer) return false
+}
+```
+
+1.6.2 使用组合 API
+
+如果你正在使用组合 API 和 setup 函数来编写组件，你可以通过 onBeforeRouteUpdate 和 onBeforeRouteLeave 分别添加 update 和 leave 守卫。
+
+1.7 完整的导航解析流程
+
+导航被触发。
+在失活的组件里调用 beforeRouteLeave 守卫。
+调用全局的 beforeEach 守卫。
+在重用的组件里调用 beforeRouteUpdate 守卫(2.2+)。
+在路由配置里调用 beforeEnter。
+解析异步路由组件。
+在被激活的组件里调用 beforeRouteEnter。
+调用全局的 beforeResolve 守卫(2.5+)。
+导航被确认。
+调用全局的 afterEach 钩子。
+触发 DOM 更新。
+调用 beforeRouteEnter 守卫中传给 next 的回调函数，创建好的组件实例会作为回调函数的参数传入
+
+2. 路由元信息
+
+有时，你可能希望将任意信息附加到路由上，如过渡名称、谁可以访问路由等。这些事情可以通过接收属性对象的meta属性来实现，并且它可以在路由地址和导航守卫上都被访问到。定义路由的时候你可以这样配置 meta 字段：
+
+```js
+const routes = [
+  {
+    path: '/posts',
+    component: PostsLayout,
+    children: [
+      {
+        path: 'new',
+        component: PostsNew,
+        // 只有经过身份验证的用户才能创建帖子
+        meta: { requiresAuth: true },
+      },
+      {
+        path: ':id',
+        component: PostsDetail
+        // 任何人都可以阅读文章
+        meta: { requiresAuth: false },
+      }
+    ]
+  }
+]
+```
+
+那么如何访问这个 meta 字段呢？
+
+首先，我们称呼 routes 配置中的每个路由对象为 路由记录。路由记录可以是嵌套的，因此，当一个路由匹配成功后，它可能匹配多个路由记录。
+
+例如，根据上面的路由配置，/posts/new 这个 URL 将会匹配父路由记录 (path: '/posts') 以及子路由记录 (path: 'new')。
+
+一个路由匹配到的所有路由记录会暴露为 $route 对象(还有在导航守卫中的路由对象)的$route.matched 数组。我们需要遍历这个数组来检查路由记录中的 meta 字段，但是 Vue Router 还为你提供了一个 $route.meta 方法，它是一个非递归合并所有 meta 字段（从父字段到子字段）的方法。这意味着你可以简单地写
+
+```js
+router.beforeEach((to, from) => {
+  // 而不是去检查每条路由记录
+  // to.matched.some(record => record.meta.requiresAuth)
+  if (to.meta.requiresAuth && !auth.isLoggedIn()) {
+    // 此路由需要授权，请检查是否已登录
+    // 如果没有，则重定向到登录页面
+    return {
+      path: '/login',
+      // 保存我们所在的位置，以便以后再来
+      query: { redirect: to.fullPath },
+    }
+  }
+})
+```
+
+2.1 TypeScript
+
+也可以继承来自 vue-router 中的 RouteMeta 来为 meta 字段添加类型：
+
+```ts
+// 这段可以直接添加到你的任何 `.ts` 文件中，例如 `router.ts`
+// 也可以添加到一个 `.d.ts` 文件中。确保这个文件包含在
+// 项目的 `tsconfig.json` 中的 "file" 字段内。
+import 'vue-router'
+
+// 为了确保这个文件被当作一个模块，添加至少一个 `export` 声明
+export {}
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    // 是可选的
+    isAdmin?: boolean
+    // 每个路由都必须声明
+    requiresAuth: boolean
+  }
+}
+```
+
+3. 数据获取
+
+有时候，进入某个路由后，需要从服务器获取数据。例如，在渲染用户信息时，你需要从服务器获取用户的数据。我们可以通过两种方式来实现：
+
+导航完成之后获取：先完成导航，然后在接下来的组件生命周期钩子中获取数据。在数据获取期间显示“加载中”之类的指示。
+
+导航完成之前获取：导航完成前，在路由进入的守卫中获取数据，在数据获取成功后执行导航。
+
+从技术角度讲，两种方式都不错 —— 就看你想要的用户体验是哪种。
+
+3.1 导航完成后获取数据
+
+当你使用这种方式时，我们会马上导航和渲染组件，然后在组件的 created 钩子中获取数据。这让我们有机会在数据获取期间展示一个 loading 状态，还可以在不同视图间展示不同的 loading 状态。
+
+假设我们有一个 Post 组件，需要基于 $route.params.id 获取文章数据：
+
+```html
+<template>
+  <div class="post">
+    <div v-if="loading" class="loading">Loading...</div>
+
+    <div v-if="error" class="error">{{ error }}</div>
+
+    <div v-if="post" class="content">
+      <h2>{{ post.title }}</h2>
+      <p>{{ post.body }}</p>
+    </div>
+  </div>
+</template>
+```
+
+```js
+export default {
+  data() {
+    return {
+      loading: false,
+      post: null,
+      error: null,
+    }
+  },
+  created() {
+    // watch 路由的参数，以便再次获取数据
+    this.$watch(
+      () => this.$route.params,
+      () => {
+        this.fetchData()
+      },
+      // 组件创建完后获取数据，
+      // 此时 data 已经被 observed 了
+      { immediate: true }
+    )
+  },
+  methods: {
+    fetchData() {
+      this.error = this.post = null
+      this.loading = true
+      // replace `getPost` with your data fetching util / API wrapper
+      getPost(this.$route.params.id, (err, post) => {
+        this.loading = false
+        if (err) {
+          this.error = err.toString()
+        } else {
+          this.post = post
+        }
+      })
+    },
+  },
+}
+```
+
+3.2 在导航完成前获取数据
+
+通过这种方式，我们在导航转入新的路由前获取数据。我们可以在接下来的组件的 beforeRouteEnter 守卫中获取数据，当数据获取成功后只调用 next 方法：
+
+```js
+export default {
+  data() {
+    return {
+      post: null,
+      error: null,
+    }
+  },
+  beforeRouteEnter(to, from, next) {
+    getPost(to.params.id, (err, post) => {
+      // `setData` 方法定义在下面的代码中
+      next(vm => vm.setData(err, post))
+    })
+  },
+  // 路由改变前，组件就已经渲染完了
+  // 逻辑稍稍不同
+  async beforeRouteUpdate(to, from) {
+    this.post = null
+    try {
+      this.post = await getPost(to.params.id)
+    } catch (error) {
+      this.error = error.toString()
+    }
+  },
+  methods: {
+    setData(error, post) {
+      if (error) {
+        this.error = error
+      } else {
+        this.post = post
+      }
+    }
+  }
+}
+```
+
+在为后面的视图获取数据时，用户会停留在当前的界面，因此建议在数据获取期间，显示一些进度条或者别的指示。如果数据获取失败，同样有必要展示一些全局的错误提醒。
+
+4. 组合式API
+
+引入 setup 和 Vue 的组合式 API，开辟了新的可能性，但要想充分发挥 Vue Router 的潜力，我们需要使用一些新的函数来代替访问 this 和组件内导航守卫。
+
+4.1 在 setup 中访问路由和当前路由
+
+因为我们在 setup 里面没有访问 this，所以我们不能再直接访问 this.$router 或 this.$route。作为替代，我们使用 useRouter 和 useRoute 函数：
+
+```js
+import { useRouter, useRoute } from 'vue-router'
+
+export default {
+  setup() {
+    const router = useRouter()
+    const route = useRoute()
+
+    function pushWithQuery(query) {
+      router.push({
+        name: 'search',
+        query: {
+          ...route.query,
+          ...query,
+        },
+      })
+    }
+  },
+}
+```
+
+route 对象是一个响应式对象，所以它的任何属性都可以被监听，但你应该避免监听整个 route 对象。在大多数情况下，你应该直接监听你期望改变的参数。
+
+```js
+import { useRoute } from 'vue-router'
+import { ref, watch } from 'vue'
+
+export default {
+  setup() {
+    const route = useRoute()
+    const userData = ref()
+
+    // 当参数更改时获取用户信息
+    watch(
+      () => route.params.id,
+      async newId => {
+        userData.value = await fetchUser(newId)
+      }
+    )
+  },
+}
+```
+
+请注意，在模板中我们仍然可以访问 $router 和 $route，所以不需要在 setup 中返回 router 或 route。
+
+4.2 导航守卫
+
+虽然你仍然可以通过 setup 函数来使用组件内的导航守卫，但 Vue Router 将更新和离开守卫作为 组合式 API 函数公开：
+
+```js
+import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
+import { ref } from 'vue'
+
+export default {
+  setup() {
+    // 与 beforeRouteLeave 相同，无法访问 `this`
+    onBeforeRouteLeave((to, from) => {
+      const answer = window.confirm(
+        'Do you really want to leave? you have unsaved changes!'
+      )
+      // 取消导航并停留在同一页面上
+      if (!answer) return false
+    })
+
+    const userData = ref()
+
+    // 与 beforeRouteUpdate 相同，无法访问 `this`
+    onBeforeRouteUpdate(async (to, from) => {
+      //仅当 id 更改时才获取用户，例如仅 query 或 hash 值已更改
+      if (to.params.id !== from.params.id) {
+        userData.value = await fetchUser(to.params.id)
+      }
+    })
+  },
+}
+```
+
+组合式 API 守卫也可以用在任何由 <router-view> 渲染的组件中，它们不必像组件内守卫那样直接用在路由组件上。
+
+4.3 useLink
+
+Vue Router 将 RouterLink 的内部行为作为一个组合式函数 (composable) 公开。它接收一个类似 RouterLink 所有 prop 的响应式对象，并暴露底层属性来构建你自己的 RouterLink 组件或生成自定义链接：
+
+```js
+import { RouterLink, useLink } from 'vue-router'
+import { computed } from 'vue'
+
+export default {
+  name: 'AppLink',
+
+  props: {
+    // 如果使用 TypeScript，请添加 @ts-ignore
+    ...RouterLink.props,
+    inactiveClass: String,
+  },
+
+  setup(props) {
+    const {
+      // 解析出来的路由对象
+      route,
+      // 用在链接里的 href
+      href,
+      // 布尔类型的 ref 标识链接是否匹配当前路由
+      isActive,
+      // 布尔类型的 ref 标识链接是否严格匹配当前路由
+      isExactActive,
+      // 导航至该链接的函数
+      navigate
+      } = useLink(props)
+
+    const isExternalLink = computed(
+      () => typeof props.to === 'string' && props.to.startsWith('http')
+    )
+
+    return { isExternalLink, href, navigate, isActive }
+  },
+}
+```
+
+注意在 RouterLink 的 v-slot 中可以访问与 useLink 组合式函数相同的属性。
+
+5. RouterView 插槽
+
+RotuerView 组件暴露了一个插槽，可以用来渲染路由组件：
+
+```vue
+<router-view v-slot="{ Component }">
+  <component :is="Component" />
+</router-view>
+```
+
+上面的代码等价于不带插槽的 <router-view />，但是当我们想要获得其他功能时，插槽提供了额外的扩展性。
+
+5.1 KeepAlive & Transition
+
+当在处理 KeepAlive 组件时，我们通常想要保持路由组件活跃，而不是 RouterView 本身。为了实现这个目的，我们可以将 KeepAlive 组件放置在插槽内：
+
+```html
+<router-view v-slot="{ Component }">
+  <keep-alive>
+    <component :is="Component" />
+  </keep-alive>
+</router-view>
+```
+
+类似地，插槽允许我们使用一个 Transition 组件来实现在路由组件之间切换时实现过渡效果：
+
+```html
+<router-view v-slot="{ Component }">
+  <transition>
+    <component :is="Component" />
+  </transition>
+</router-view>
+```
+
+我们也可以在 Transition 组件内使用 KeepAlive 组件：
+
+```html
+<router-view v-slot="{ Component }">
+  <transition>
+    <keep-alive>
+      <component :is="Component" />
+    </keep-alive>
+  </transition>
+</router-view>
+```
+
+5.2 传递 props 和插槽
+
+我们可以利用其插槽给路由组件传递 props 或插槽：
+
+```html
+<router-view v-slot="{ Component }">
+  <component :is="Component" some-prop="a value">
+    <p>Some slotted content</p>
+  </component>
+</router-view>
+```
+
+实践中通常不会这么做，因为这样会导致所有路由组件都使用相同的 props 和插槽。
+
+5.3 模板引用
+
+使用插槽可以让我们直接将模板引用放置在路由组件上：
+
+```html
+<router-view v-slot="{ Component }">
+  <component :is="Component" ref="mainContent" />
+</router-view>
+```
+
+而如果我们将引用放在 <router-view> 上，那引用将会被 RouterView 的实例填充，而不是路由组件本身。
+
+6 过渡动效
+
+想要在你的路径组件上使用转场，并对导航进行动画处理，你需要使用 <RouterView> 插槽：
+
+```js
+<router-view v-slot="{ Component }">
+  <transition name="fade">
+    <component :is="Component" />
+  </transition>
+</router-view>
+```
+
+6.1
+ 单个路由的过渡
+
+上面的用法会对所有的路由使用相同的过渡。如果你想让每个路由的组件有不同的过渡，你可以将元信息和动态的 name 结合在一起，放在<transition> 上：
+
+```js
+const routes = [
+  {
+    path: '/custom-transition',
+    component: PanelLeft,
+    meta: { transition: 'slide-left' },
+  },
+  {
+    path: '/other-transition',
+    component: PanelRight,
+    meta: { transition: 'slide-right' },
+  },
+]
+```
+
+```js
+<router-view v-slot="{ Component, route }">
+  <!-- 使用任何自定义过渡和回退到 `fade` -->
+  <transition :name="route.meta.transition || 'fade'">
+    <component :is="Component" />
+  </transition>
+</router-view>
+```
+
+6.2 基于路由的动态过渡
+
+也可以根据目标路由和当前路由之间的关系，动态地确定使用的过渡。使用和刚才非常相似的片段：
+
+```js
+<!-- 使用动态过渡名称 -->
+<router-view v-slot="{ Component, route }">
+  <transition :name="route.meta.transition">
+    <component :is="Component" />
+  </transition>
+</router-view>
+```
+
+我们可以添加一个 after navigation hook，根据路径的深度动态添加信息到 meta 字段。
+
+```js
+router.afterEach((to, from) => {
+  const toDepth = to.path.split('/').length
+  const fromDepth = from.path.split('/').length
+  to.meta.transition = toDepth < fromDepth ? 'slide-right' : 'slide-left'
+})
+```
+
+6.3 强制在复用的视图之间进行过渡
+
+Vue 可能会自动复用看起来相似的组件，从而忽略了任何过渡。幸运的是，可以添加一个 key 属性来强制过渡。这也允许你在相同路由上使用不同的参数触发过渡：
+
+```js
+<router-view v-slot="{ Component, route }">
+  <transition name="fade">
+    <component :is="Component" :key="route.path" />
+  </transition>
+</router-view>
+```
+
+7. 滚动行为
+
+使用前端路由，当切换到新路由时，想要页面滚到顶部，或者是保持原先的滚动位置，就像重新加载页面那样。 vue-router 能做到，而且更好，它让你可以自定义路由切换时页面如何滚动。
+
+注意: 这个功能只在支持 history.pushState 的浏览器中可用。
+
+当创建一个 Router 实例，你可以提供一个 scrollBehavior 方法：
+
+```js
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes: [...],
+  scrollBehavior (to, from, savedPosition) {
+    // return 期望滚动到哪个的位置
+  }
+})
+```
+
+scrollBehavior 函数接收 to和 from 路由对象，如 Navigation Guards。第三个参数 savedPosition，只有当这是一个 popstate 导航时才可用（由浏览器的后退/前进按钮触发）
+
+该函数可以返回一个 ScrollToOptions 位置对象:
+
+```js
+const router = createRouter({
+  scrollBehavior(to, from, savedPosition) {
+    // 始终滚动到顶部
+    return { top: 0 }
+  },
+})
+```
+
+你也可以通过 el 传递一个 CSS 选择器或一个 DOM 元素。在这种情况下，top 和 left 将被视为该元素的相对偏移量。
+
+```js
+const router = createRouter({
+  scrollBehavior(to, from, savedPosition) {
+    // 始终在元素 #main 上方滚动 10px
+    return {
+      // 也可以这么写
+      // el: document.getElementById('main'),
+      el: '#main',
+      // 在元素上 10 像素
+      top: 10,
+    }
+  },
+})
+```
+
+如果返回一个 falsy 的值，或者是一个空对象，那么不会发生滚动。
+
+返回 savedPosition，在按下 后退/前进 按钮时，就会像浏览器的原生表现那样：
+
+```js
+const router = createRouter({
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { top: 0 }
+    }
+  },
+})
+```
+
+如果你要模拟 “滚动到锚点” 的行为：
+
+```js
+const router = createRouter({
+  scrollBehavior(to, from, savedPosition) {
+    if (to.hash) {
+      return {
+        el: to.hash,
+      }
+    }
+  },
+})
+```
+
+如果你的浏览器支持滚动行为，你可以让它变得更流畅：
+
+```js
+const router = createRouter({
+  scrollBehavior(to, from, savedPosition) {
+    if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: 'smooth',
+      }
+    }
+  }
+})
+```
+
+7.1 延迟滚动
+
+有时候，我们需要在页面中滚动之前稍作等待。例如，当处理过渡时，我们希望等待过渡结束后再滚动。要做到这一点，你可以返回一个 Promise，它可以返回所需的位置描述符。下面是一个例子，我们在滚动前等待 500ms：
+
+```js
+const router = createRouter({
+  scrollBehavior(to, from, savedPosition) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve({ left: 0, top: 0 })
+      }, 500)
+    })
+  },
+})
+```
+
+我们可以将其与页面级过渡组件的事件挂钩，以使滚动行为与你的页面过渡很好地结合起来，但由于使用场景可能存在的差异和复杂性，我们只是提供了这个基础来实现特定的用户场景。
+
+8. 路由懒加载
+
+当打包构建应用时，JavaScript 包会变得非常大，影响页面加载。如果我们能把不同路由对应的组件分割成不同的代码块，然后当路由被访问的时候才加载对应组件，这样就会更加高效。
+
+Vue Router 支持开箱即用的动态导入，这意味着你可以用动态导入代替静态导入：
+
+```js
+// 将
+// import UserDetails from './views/UserDetails.vue'
+// 替换成
+const UserDetails = () => import('./views/UserDetails.vue')
+
+const router = createRouter({
+  // ...
+  routes: [
+    { path: '/users/:id', component: UserDetails }
+    // 或在路由定义里直接使用它
+    { path: '/users/:id', component: () => import('./views/UserDetails.vue') },
+  ],
+})
+```
+
+component (和 components) 配置接收一个返回 Promise 组件的函数，Vue Router 只会在第一次进入页面时才会获取这个函数，然后使用缓存数据。这意味着你也可以使用更复杂的函数，只要它们返回一个 Promise ：
+
+```js
+const UserDetails = () =>
+  Promise.resolve({
+    /* 组件定义 */
+  })
+```
+
+一般来说，对所有的路由都使用动态导入是个好主意。
+
+注意：不要在路由中使用异步组件。异步组件仍然可以在路由组件中使用，但路由组件本身就是动态导入的。
+
+如果你使用的是 webpack 之类的打包器，它将自动从代码分割中受益。
+
+如果你使用的是 Babel，你将需要添加 syntax-dynamic-import 插件，才能使 Babel 正确地解析语法。
+
+8.1 把组件按组分块
+
+8.1.1 使用 webpack
+
+有时候我们想把某个路由下的所有组件都打包在同个异步块 (chunk) 中。只需要使用命名 chunk，一个特殊的注释语法来提供 chunk name (需要 Webpack > 2.4)：
+
+```js
+const UserDetails = () =>
+  import(/* webpackChunkName: "group-user" */ './UserDetails.vue')
+const UserDashboard = () =>
+  import(/* webpackChunkName: "group-user" */ './UserDashboard.vue')
+const UserProfileEdit = () =>
+  import(/* webpackChunkName: "group-user" */ './UserProfileEdit.vue')
+```
+
+webpack 会将任何一个异步模块与相同的块名称组合到相同的异步块中。
+
+8.1.2 使用 Vite
+
+在Vite中，你可以在rollupOptions下定义分块：
+
+```js
+// vite.config.js
+export default defineConfig({
+  build: {
+    rollupOptions: {
+      // https://rollupjs.org/guide/en/#outputmanualchunks
+      output: {
+        manualChunks: {
+          'group-user': [
+            './src/UserDetails',
+            './src/UserDashboard',
+            './src/UserProfileEdit',
+          ],
+        },
+      },
+    },
+  },
+})
+```
+
+9. 扩展 RouterLink
+
+RouterLink 组件提供了足够的 props 来满足大多数基本应用程序的需求，但它并未尝试涵盖所有可能的用例，在某些高级情况下，你可能会发现自己使用了 v-slot。在大多数中型到大型应用程序中，值得创建一个（如果不是多个）自定义 RouterLink 组件，以在整个应用程序中重用它们。例如导航菜单中的链接，处理外部链接，添加 inactive-class 等。
+
+RouterLink 组件提供了足够的 props 来满足大多数基本应用程序的需求，但它并未尝试涵盖所有可能的用例，在某些高级情况下，你可能会发现自己使用了 v-slot。在大多数中型到大型应用程序中，值得创建一个（如果不是多个）自定义 RouterLink 组件，以在整个应用程序中重用它们。例如导航菜单中的链接，处理外部链接，添加 inactive-class 等。
+
+```html
+<template>
+  <a v-if="isExternalLink" v-bind="$attrs" :href="to" target="_blank">
+    <slot />
+  </a>
+  <router-link
+    v-else
+    v-bind="$props"
+    custom
+    v-slot="{ isActive, href, navigate }"
+  >
+    <a
+      v-bind="$attrs"
+      :href="href"
+      @click="navigate"
+      :class="isActive ? activeClass : inactiveClass"
+    >
+      <slot />
+    </a>
+  </router-link>
+</template>
+
+<script>
+import { RouterLink } from 'vue-router'
+
+export default {
+  name: 'AppLink',
+  inheritAttrs: false,
+
+  props: {
+    // 如果使用 TypeScript，请添加 @ts-ignore
+    ...RouterLink.props,
+    inactiveClass: String,
+  },
+
+  computed: {
+    isExternalLink() {
+      return typeof this.to === 'string' && this.to.startsWith('http')
+    },
+  },
+}
+</script>
+```
+
+如果你喜欢使用渲染函数或创建 computed 属性，你可以使用 Composition API 中的 useLink ：
+
+```js
+import { RouterLink, useLink } from 'vue-router'
+
+export default {
+  name: 'AppLink',
+
+  props: {
+    // 如果使用 TypeScript，请添加 @ts-ignore
+    ...RouterLink.props,
+    inactiveClass: String,
+  },
+
+  setup(props) {
+    // `props` 包含 `to` 和任何其他可以传递给 <router-link> 的 prop
+    const { navigate, href, route, isActive, isExactActive } = useLink(props)
+
+    // profit!
+
+    return { isExternalLink }
+  },
+}
+```
+
+在实践中，你可能希望将你的 AppLink 组件用于应用程序的不同部分。例如，使用 Tailwind CSS，你可以用所有的类创建一个 NavLink.vue 组件：
+
+```html
+<template>
+  <AppLink
+    v-bind="$attrs"
+    class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out"
+    active-class="border-indigo-500 text-gray-900 focus:border-indigo-700"
+    inactive-class="text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:text-gray-700 focus:border-gray-300"
+  >
+    <slot />
+  </AppLink>
+</template>
+```
+
+
