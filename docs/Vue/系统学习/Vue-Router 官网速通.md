@@ -223,7 +223,7 @@ const routes = [
 ];
 ```
 
-如果不想添加静态部分，也可以添加正则，orderId 总是一个数字， productName 可以是任何东西。以在括号中为参数指定正则，现在，/25 将匹配 /:orderId，其他情况匹配 /:productName。
+如果不想添加静态部分，也可以添加正则，orderId 总是一个数字，productName 可以是任何东西。以在括号中为参数指定正则，现在，/25 将匹配 /:orderId，其他情况匹配 /:productName。
 
 ```js
 const routes = [
@@ -238,7 +238,7 @@ TIP：确保转义反斜杠( \ )，就像对 \d (变成\\d)所做的那样，在
 
 3.2 可重复的参数
 
-匹配多个部分的路由，如 /first/second/third，应该用 *（0 个或多个）和 +（1 个或多个）将参数标记为可重复：
+匹配 /first/second/third 路由，应该用 \*（0 个或多个）和 +（1 个或多个）将参数标记为可重复：
 
 ```js
 const routes = [
@@ -249,7 +249,7 @@ const routes = [
 ];
 ```
 
-这将提供一个参数数组，而不是一个字符串，并且在使用命名路由时也需要你传递一个数组：
+提供了参数数组，而不是字符串，并且在使用命名路由时也需要你传递一个数组：
 
 ```js
 // 给定 { path: '/:chapters*', name: 'chapters' },
@@ -277,15 +277,15 @@ const routes = [
 
 3.3 Sensitive 与 strict 路由配置
 
-默认情况下，所有路由是不区分大小写的，并且能匹配带有或不带有尾部斜线的路由。例如，路由 /users 将匹配 /users、/users/、甚至 /Users/。这种行为可以通过 strict 和 sensitive 选项来修改，它们既可以应用在整个全局路由上，又可以应用于当前路由上：
+默认情况下，所有路由是不区分大小写和带尾部斜线的路由的。例如，路由 /users 将匹配 /users、/users/、/Users/。通过 strict 和 sensitive 选项来修改。
 
 ```js
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     // 将匹配 /users/posva 而非：
-    // - /users/posva/ 当 strict: true
-    // - /Users/posva 当 sensitive: true
+    // - /users/posva/ 当 strict: true，尾部不能有斜线
+    // - /Users/posva 当 sensitive: true，路由区分大小写
     { path: "/users/:id", sensitive: true },
     // 将匹配 /users, /Users, 以及 /users/42 而非 /users/ 或 /users/42/
     { path: "/users/:id?" },
@@ -296,7 +296,7 @@ const router = createRouter({
 
 3.4 可选参数
 
-你也可以通过使用 ? 修饰符(0 个或 1 个)将一个参数标记为可选：
+通过使用 ? 修饰符(0 个或 1 个)将一个参数标为可选：
 
 ```js
 const routes = [
@@ -307,43 +307,9 @@ const routes = [
 ];
 ```
 
-请注意，\* 在技术上也标志着一个参数是可选的，但 ? 参数不能重复。
+4. 嵌套路由
 
-1. 嵌套路由
-
-一些应用程序的 UI 由多层嵌套的组件组成。在这种情况下，URL 的片段通常对应于特定的嵌套组件结构，例如：
-
-```
-/user/johnny/profile                     /user/johnny/posts
-+------------------+                  +-----------------+
-| User             |                  | User            |
-| +--------------+ |                  | +-------------+ |
-| | Profile      | |  +------------>  | | Posts       | |
-| |              | |                  | |             | |
-| +--------------+ |                  | +-------------+ |
-+------------------+                  +-----------------+
-```
-
-通过 Vue Router，你可以使用嵌套路由配置来表达这种关系。
-
-接着上节创建的 app ：
-
-```html
-<div id="app">
-  <router-view></router-view>
-</div>
-```
-
-```js
-const User = {
-  template: "<div>User {{ $route.params.id }}</div>",
-};
-
-// 这些都会传递给 `createRouter`
-const routes = [{ path: "/user/:id", component: User }];
-```
-
-这里的 <router-view> 是一个顶层的 router-view。它渲染顶层路由匹配的组件。同样地，一个被渲染的组件也可以包含自己嵌套的 <router-view>。例如，如果我们在 User 组件的模板内添加一个 <router-view>：
+顶层的 router-view 渲染顶层路由匹配的组件。一个被渲染的组件也可以包含嵌套的 <router-view>。
 
 ```js
 const User = {
@@ -356,7 +322,7 @@ const User = {
 };
 ```
 
-要将组件渲染到这个嵌套的 router-view 中，我们需要在路由中配置 children：
+要将组件渲染到嵌套的 router-view 中，需要在路由中配置 children，以 / 开头的嵌套路径将被视为根路径。不必使用嵌套的 URL：
 
 ```js
 const routes = [
@@ -371,9 +337,9 @@ const routes = [
         component: UserProfile,
       },
       {
-        // 当 /user/:id/posts 匹配成功
+        // 当 /posts 匹配成功
         // UserPosts 将被渲染到 User 的 <router-view> 内部
-        path: "posts",
+        path: "/posts",
         component: UserPosts,
       },
     ],
@@ -381,11 +347,7 @@ const routes = [
 ];
 ```
 
-注意，以 / 开头的嵌套路径将被视为根路径。这允许你利用组件嵌套，而不必使用嵌套的 URL。
-
-如你所见，children 配置只是另一个路由数组，就像 routes 本身一样。因此，你可以根据自己的需要，不断地嵌套视图。
-
-此时，按照上面的配置，当你访问 /user/eduardo 时，在 User 的 router-view 里面什么都不会呈现，因为没有匹配到嵌套路由。也许你确实想在那里渲染一些东西。在这种情况下，你可以提供一个空的嵌套路径：
+按照上面配置，访问 /user/eduardo ，User 的 router-view 什么都不会呈现，因为没有匹配到嵌套路由。可以提供一个空的嵌套路径，来展示一些东西：
 
 ```js
 const routes = [
