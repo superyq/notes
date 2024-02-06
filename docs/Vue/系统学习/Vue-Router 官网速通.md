@@ -6,32 +6,11 @@
 
 1. 什么是 Vue Router
 
-Vue Router 是 Vue.js 的官方路由。它与 Vue.js 核心深度集成，让用 Vue.js 构建单页应用变得轻而易举。功能包括：
-
-嵌套路由映射
-动态路由选择
-模块化、基于组件的路由配置
-路由参数、查询、通配符
-展示由 Vue.js 的过渡系统提供的过渡效果
-细致的导航控制
-自动激活 CSS 类的链接
-HTML5 history 模式或 hash 模式
-可定制的滚动行为
-URL 的正确编码
+是 Vue.js 的官方路由。功能包括：1. 路由映射。2. 动态路由。3. 路由配置。4. 路由参数。5. 过渡效果。6. 导航控制。7. CSS 类链接。8. HTML5 模式。9. 滚动行为。10. URL 编码
 
 2. 安装
 
-2.1 直接下载 / CDN
-
-https://unpkg.com/vue-router@4
-
-Unpkg.com 提供了基于 npm 的 CDN 链接。上述链接将始终指向 npm 上的最新版本。 你也可以通过像 https://unpkg.com/vue-router@4.0.15/dist/vue-router.global.js 这样的 URL 来使用特定的版本或 Tag。
-
-这将把 Vue Router 暴露在一个全局的 VueRouter 对象上，例如 VueRouter.createRouter(...)。
-
-2.2 包管理器
-
-对于一个现有的使用 JavaScript 包管理器的项目，你可以从 npm registry 中安装 Vue Router：
+对于一个现有使用 JS 包管理的项目，添加 Vue Router 依赖：
 
 ```sh
 npm install vue-router@4
@@ -41,7 +20,7 @@ yarn add vue-router@4
 pnpm add vue-router@4
 ```
 
-如果你打算启动一个新项目，你可能会发现使用 create-vue 这个脚手架工具更容易，它能创建一个基于 Vite 的项目，并包含加入 Vue Router 的选项：
+通过 create-vue 脚手架创建一个基于 Vite 的新项目，加入 Vue Router 的选项：
 
 ```sh
 npm create vue@latest
@@ -51,80 +30,74 @@ yarn create vue
 pnpm create vue
 ```
 
-你需要回答一些关于你想创建的项目类型的问题。如果您选择安装 Vue Router，示例应用还将演示 Vue Router 的一些核心特性。使用包管理器的项目通常会使用 ES 模块来访问 Vue Router，例如 import { createRouter } from 'vue-router'。
-
 二：基础
 
 1. 入门
 
-用 Vue + Vue Router 创建单页应用非常简单：通过 Vue.js，我们已经用组件组成了我们的应用。当加入 Vue Router 时，我们需要做的就是将我们的组件映射到路由上，让 Vue Router 知道在哪里渲染它们。下面是一个基本的例子：
+将组件映射到路由上，让 Vue Router 知道在哪里渲染它们。
 
-1.1 HTML
+使用 router-link 未直接使用 a 标签来创建链接。好处：1. 在不重新加载页面的情况下更改 URL。2. 处理 URL 的生成以及编码。
+
+router-view 显示与 URL 对应的组件。可以放在任何地方，以适应布局。
 
 ```html
-<script src="https://unpkg.com/vue@3"></script>
-<script src="https://unpkg.com/vue-router@4"></script>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://unpkg.com/vue-router@4"></script>
 
-<div id="app">
-  <h1>Hello App!</h1>
-  <p>
-    <!--使用 router-link 组件进行导航 -->
-    <!--通过传递 `to` 来指定链接 -->
-    <!--`<router-link>` 将呈现一个带有正确 `href` 属性的 `<a>` 标签-->
-    <router-link to="/">Go to Home</router-link>
-    <router-link to="/about">Go to About</router-link>
-  </p>
-  <!-- 路由出口 -->
-  <!-- 路由匹配到的组件将渲染在这里 -->
-  <router-view></router-view>
-</div>
+    <div id="app">
+      <h1>Hello App!</h1>
+      <p>
+        <!--使用 router-link 组件进行导航 -->
+        <!--通过传递 `to` 来指定链接 -->
+        <!--`<router-link>` 将呈现一个带有正确 `href` 属性的 `<a>` 标签-->
+        <router-link to="/">Go to Home</router-link>
+        <router-link to="/about">Go to About</router-link>
+      </p>
+      <!-- 路由出口 -->
+      <!-- 路由匹配到的组件将渲染在这里 -->
+      <router-view></router-view>
+    </div>
+  </body>
+  <script>
+    // 1. 定义路由组件.
+    const Home = { template: "<div>Home</div>" };
+    const About = { template: "<div>About</div>" };
+
+    // 2. 定义一些路由
+    // 每个路由映射一个组件。
+    const routes = [
+      { path: "/", component: Home },
+      { path: "/about", component: About },
+    ];
+
+    // 3. 创建路由实例并传递 `routes` 配置
+    // 可以在这里输入更多的配置
+    const router = VueRouter.createRouter({
+      // 4. 内部提供了 history 模式的实现。为了简单起见，我们在这里使用 hash 模式。
+      history: VueRouter.createWebHashHistory(),
+      routes, // `routes: routes` 的缩写
+    });
+
+    // 5. 创建并挂载根实例
+    const app = Vue.createApp({});
+    //确保 _use_ 路由实例使
+    //整个应用支持路由。
+    app.use(router);
+
+    app.mount("#app");
+  </script>
+</html>
 ```
 
-1.1.1 router-link
-
-请注意，我们没有使用常规的 a 标签，而是使用一个自定义组件 router-link 来创建链接。这使得 Vue Router 可以在不重新加载页面的情况下更改 URL，处理 URL 的生成以及编码。我们将在后面看到如何从这些功能中获益。
-
-1.1.2 router-view
-
-router-view 将显示与 URL 对应的组件。你可以把它放在任何地方，以适应你的布局。
-
-1.2 JavaScript
-
-```js
-// 1. 定义路由组件.
-// 也可以从其他文件导入
-const Home = { template: "<div>Home</div>" };
-const About = { template: "<div>About</div>" };
-
-// 2. 定义一些路由
-// 每个路由都需要映射到一个组件。
-// 我们后面再讨论嵌套路由。
-const routes = [
-  { path: "/", component: Home },
-  { path: "/about", component: About },
-];
-
-// 3. 创建路由实例并传递 `routes` 配置
-// 你可以在这里输入更多的配置，但我们在这里
-// 暂时保持简单
-const router = VueRouter.createRouter({
-  // 4. 内部提供了 history 模式的实现。为了简单起见，我们在这里使用 hash 模式。
-  history: VueRouter.createWebHashHistory(),
-  routes, // `routes: routes` 的缩写
-});
-
-// 5. 创建并挂载根实例
-const app = Vue.createApp({});
-//确保 _use_ 路由实例使
-//整个应用支持路由。
-app.use(router);
-
-app.mount("#app");
-
-// 现在，应用已经启动了！
-```
-
-通过调用 app.use(router)，我们会触发第一次导航且可以在任意组件中以 this.$router 的形式访问它，并且以 this.$route 的形式访问当前路由：
+在 Vue2 中可以通过 this.router 跳转路由和 this.$route 访问当前路由。
 
 ```js
 // Home.vue
@@ -147,13 +120,23 @@ export default {
 };
 ```
 
-要在 setup 函数中访问路由，请调用 useRouter 或 useRoute 函数。
+在 Vue3 的 setup 函数中通过调用 useRouter 和 useRoute 函数创建实例来访问。
 
-在整个文档中，我们会经常使用 router 实例，请记住，this.$router 与直接使用通过 createRouter 创建的 router 实例完全相同。我们使用 this.$router 的原因是，我们不想在每个需要操作路由的组件中都导入路由。
+```html
+<script setup lang="ts">
+  import { useRouter, useRoute } from "vue-router";
+
+  const router = useRouter();
+  const route = useRoute();
+
+  router.push("/"); // 跳转
+  route.params; // 参数
+</script>
+```
 
 2. 动态路由匹配
 
-很多时候，我们需要将给定匹配模式的路由映射到同一个组件。例如，我们可能有一个 User 组件，它应该对所有用户进行渲染，但用户 ID 不同。在 Vue Router 中，我们可以在路径中使用一个动态字段来实现，我们称之为 路径参数 ：
+多个匹配路由映射到同一组件，通过一个动态字段来实现，称之为路径参数，路径参数用冒号 : 表示。如下 /users/johnny 和 /users/jolyne 会映射到同一个路由。
 
 ```js
 const User = {
@@ -167,9 +150,7 @@ const routes = [
 ];
 ```
 
-现在像 /users/johnny 和 /users/jolyne 这样的 URL 都会映射到同一个路由。
-
-路径参数 用冒号 : 表示。当一个路由被匹配时，它的 params 的值将在每个组件中以 this.$route.params 的形式暴露出来。因此，我们可以通过更新 User 的模板来呈现当前的用户 ID：
+通过 this.$route.params 来访问 URL 上的参数：
 
 ```js
 const User = {
@@ -177,19 +158,26 @@ const User = {
 };
 ```
 
-你可以在同一个路由中设置有多个 路径参数，它们会映射到 $route.params 上的相应字段。例如：
+路由可以设置多个参数，在 $route.params 上相对应：
 
-匹配模式：/users/:username、/users/:username/posts/:postId
-匹配路径：/users/eduardo、/users/eduardo/posts/123
-$route.params：{ username: 'eduardo' }、{ username: 'eduardo', postId: '123' }
+```js
+const User = {
+  template: "<div>User</div>",
+};
 
-除了 $route.params 之外，$route 对象还公开了其他有用的信息，如 $route.query（如果 URL 中存在参数）、$route.hash 等。
+// 传递给 `createRouter`
+const routes = [
+  // 动态字段以冒号开始
+  { path: "/users/:username/posts/:postId", component: User },
+];
+
+// 匹配路由：/users/eduardo/posts/123
+// $route.params：{ username: 'eduardo', postId: '123' }
+```
 
 2.1 响应路由参数的变化
 
-使用带有参数的路由时需要注意的是，当用户从 /users/johnny 导航到 /users/jolyne 时，相同的组件实例将被重复使用。因为两个路由都渲染同个组件，比起销毁再创建，复用则显得更加高效。不过，这也意味着组件的生命周期钩子不会被调用。
-
-要对同一个组件中参数的变化做出响应的话，你可以简单地 watch $route 对象上的任意属性，在这个场景中，就是 $route.params ：
+同一路由的不同参数跳转，因为映射的是相同组件，所以复用组件显得更高效，但生命周期函数就不会被调用，比如从 /users/johnny 导航到 /users/jolyne。要对同一路由的参数做出响应，需要用 watch 监听：
 
 ```js
 const User = {
@@ -205,21 +193,9 @@ const User = {
 };
 ```
 
-或者，使用 beforeRouteUpdate 导航守卫，它也可以取消导航：
-
-```js
-const User = {
-  template: "...",
-  async beforeRouteUpdate(to, from) {
-    // 对路由变化做出响应...
-    this.userData = await fetchUser(to.params.id);
-  },
-};
-```
-
 2.2 捕获所有路由或 404 Not found 路由
 
-常规参数只匹配 url 片段之间的字符，用 / 分隔。如果我们想匹配任意路径，我们可以使用自定义的 路径参数 正则表达式，在 路径参数 后面的括号中加入 正则表达式 :
+想匹配任意路径，使用路径参数正则表达式，在路径参数后面的括号中加入正则表达式 :
 
 ```js
 const routes = [
@@ -230,30 +206,13 @@ const routes = [
 ];
 ```
 
-在这个特定的场景中，我们在括号之间使用了自定义正则表达式，并将 pathMatch 参数标记为可选可重复。这样做是为了让我们在需要的时候，可以通过将 path 拆分成一个数组，直接导航到路由：
-
-```js
-this.$router.push({
-  name: "NotFound",
-  // 保留当前路径并删除第一个字符，以避免目标 URL 以 `//` 开头。
-  params: { pathMatch: this.$route.path.substring(1).split("/") },
-  // 保留现有的查询和 hash 值，如果有的话
-  query: this.$route.query,
-  hash: this.$route.hash,
-});
-```
-
-2.3 高级匹配模式
-
-Vue Router 使用自己的路径匹配语法，其灵感来自于 express，因此它支持许多高级匹配模式，如可选的参数，零或多个 / 一个或多个，甚至自定义的正则匹配规则。
-
 3. 路由的匹配语法
 
-大多数应用都会使用 /about 这样的静态路由和 /users/:userId 这样的动态路由，就像我们刚才在动态路由匹配中看到的那样，但是 Vue Router 可以提供更多的方式！
+大多数应用都会使用 /about 静态路由和 /users/:userId 动态路由，但是 Vue Router 提供了更多的方式！
 
 3.1 在参数中自定义正则
 
-当定义像 :userId 这样的参数时，我们内部使用以下的正则 ([^/]+) (至少一个不是斜杠 / 的字符)来从 URL 中提取参数。这很好用，除非你需要根据参数的内容来区分两个路由。想象一下，两个路由 /:orderId 和 /:productName，两者会匹配完全相同的 URL，所以我们需要一种方法来区分它们。最简单的方法就是在路径中添加一个静态部分来区分它们：
+两个路由 /:orderId 和 /:productName，会匹配完全相同的 URL，需要一种方法来区分他们，最简单的方法是添加一个静态部分来区分：
 
 ```js
 const routes = [
@@ -264,7 +223,7 @@ const routes = [
 ];
 ```
 
-但在某些情况下，我们并不想添加静态的 /o /p 部分。由于，orderId 总是一个数字，而 productName 可以是任何东西，所以我们可以在括号中为参数指定一个自定义的正则：
+如果不想添加静态部分，也可以添加正则，orderId 总是一个数字， productName 可以是任何东西。以在括号中为参数指定正则，现在，/25 将匹配 /:orderId，其他情况匹配 /:productName。
 
 ```js
 const routes = [
@@ -275,13 +234,11 @@ const routes = [
 ];
 ```
 
-现在，转到 /25 将匹配 /:orderId，其他情况将会匹配 /:productName。routes 数组的顺序并不重要!
-
-TIP：确保转义反斜杠( \ )，就像我们对 \d (变成\\d)所做的那样，在 JavaScript 中实际传递字符串中的反斜杠字符。
+TIP：确保转义反斜杠( \ )，就像对 \d (变成\\d)所做的那样，在 JS 中实际传递字符串中的反斜杠字符。
 
 3.2 可重复的参数
 
-如果你需要匹配具有多个部分的路由，如 /first/second/third，你应该用 \*（0 个或多个）和 +（1 个或多个）将参数标记为可重复：
+匹配多个部分的路由，如 /first/second/third，应该用 *（0 个或多个）和 +（1 个或多个）将参数标记为可重复：
 
 ```js
 const routes = [
@@ -292,7 +249,7 @@ const routes = [
 ];
 ```
 
-这将为你提供一个参数数组，而不是一个字符串，并且在使用命名路由时也需要你传递一个数组：
+这将提供一个参数数组，而不是一个字符串，并且在使用命名路由时也需要你传递一个数组：
 
 ```js
 // 给定 { path: '/:chapters*', name: 'chapters' },
@@ -306,7 +263,7 @@ router.resolve({ name: "chapters", params: { chapters: [] } }).href;
 // 抛出错误，因为 `chapters` 为空
 ```
 
-这些也可以通过在右括号后添加它们与自定义正则结合使用：
+可以与正则结合使用：
 
 ```js
 const routes = [
@@ -352,7 +309,7 @@ const routes = [
 
 请注意，\* 在技术上也标志着一个参数是可选的，但 ? 参数不能重复。
 
-4. 嵌套路由
+1. 嵌套路由
 
 一些应用程序的 UI 由多层嵌套的组件组成。在这种情况下，URL 的片段通常对应于特定的嵌套组件结构，例如：
 
@@ -2502,5 +2459,3 @@ app.config.globalProperties.append = (path, pathToAppend) =>
   <span @click="navigate" @keypress.enter="navigate" role="link">About Us</span>
 </router-link>
 ```
-
-11.11 删除 <router-link> 中的 exact 属性
