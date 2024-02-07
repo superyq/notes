@@ -1,6 +1,6 @@
 # Vue-Router 官网速通
 
-前言：参考[Vue Router](https://router.vuejs.org/zh/introduction.html)
+前言：参考[Vue Router](https://router.vuejs.org/zh/introduction.html)，本文档例子使用 vue3 语法。
 
 一：介绍
 
@@ -97,30 +97,7 @@ router-view 显示与 URL 对应的组件。可以放在任何地方，以适应
 </html>
 ```
 
-在 Vue2 中可以通过 this.router 跳转路由和 this.$route 访问当前路由。
-
-```js
-// Home.vue
-export default {
-  computed: {
-    username() {
-      // 我们很快就会看到 `params` 是什么
-      return this.$route.params.username;
-    },
-  },
-  methods: {
-    goToDashboard() {
-      if (isAuthenticated) {
-        this.$router.push("/dashboard");
-      } else {
-        this.$router.push("/login");
-      }
-    },
-  },
-};
-```
-
-在 Vue3 的 setup 函数中通过调用 useRouter 和 useRoute 函数创建实例来访问。
+在 Vue3 中通过调用 useRouter 和 useRoute 函数创建实例来访问。
 
 ```html
 <script setup lang="ts">
@@ -180,17 +157,11 @@ const routes = [
 同一路由的不同参数跳转，因为映射的是相同组件，所以复用组件显得更高效，但生命周期函数就不会被调用，比如从 /users/johnny 导航到 /users/jolyne。要对同一路由的参数做出响应，需要用 watch 监听：
 
 ```js
-const User = {
-  template: "...",
-  created() {
-    this.$watch(
-      () => this.$route.params,
-      (toParams, previousParams) => {
-        // 对路由变化做出响应...
-      }
-    );
-  },
-};
+// vue3
+import { watchEffect } from "vue";
+watchEffect(() => {
+  console.log(1, route.params, route.query);
+});
 ```
 
 2.2 捕获所有路由或 404 Not found 路由
@@ -539,41 +510,17 @@ const routes = [
 ];
 ```
 
-8.2 相对重定向
+8.2 别名
 
-也可以重定向到相对位置：
+访问别名和访问路由一个效果，使用 alias 声明别名，以 / 开头，并可以使用数组提供多个别名：
 
 ```js
 const routes = [
   {
-    // 将总是把/users/123/posts重定向到/users/123/profile。
-    path: "/users/:id/posts",
-    redirect: (to) => {
-      // 该函数接收目标路由作为参数
-      // 相对位置不以`/`开头
-      // 或 { path: 'profile'}
-      return "profile";
-    },
+    path: "/",
+    component: Homepage,
+    alias: "/home",
   },
-];
-```
-
-8.3 别名
-
-重定向是指当用户访问 /home 时，URL 会被 / 替换，然后匹配成 /。那么什么是别名呢？
-
-将 / 别名为 /home，意味着当用户访问 /home 时，URL 仍然是 /home，但会被匹配为用户正在访问 /。
-
-上面对应的路由配置为：
-
-```js
-const routes = [{ path: "/", component: Homepage, alias: "/home" }];
-```
-
-通过别名，你可以自由地将 UI 结构映射到一个任意的 URL，而不受配置的嵌套结构的限制。使别名以 / 开头，以使嵌套路径中的路径成为绝对路径。你甚至可以将两者结合起来，用一个数组提供多个别名：
-
-```js
-const routes = [
   {
     path: "/users",
     component: UsersLayout,
@@ -588,40 +535,17 @@ const routes = [
 ];
 ```
 
-如果你的路由有参数，请确保在任何绝对别名中包含它们：
+9. 路由组件传参
 
-```js
-const routes = [
-  {
-    path: "/users/:id",
-    component: UsersByIdLayout,
-    children: [
-      // 为这 3 个 URL 呈现 UserDetails
-      // - /users/24
-      // - /users/24/profile
-      // - /24
-      { path: "profile", component: UserDetails, alias: ["/:id", ""] },
-    ],
-  },
-];
-```
-
-1. 路由组件传参
-
-在你的组件中使用 $route 会与路由紧密耦合，这限制了组件的灵活性，因为它只能用于特定的 URL。虽然这不一定是件坏事，但我们可以通过 props 配置来解除这种行为：
-
-我们可以将下面的代码
+在组件中使用 $route 会与路由紧密耦合，限制了组件的灵活性，因为它只能用于特定的 URL。可以通过 props 配置来解除这种行为：
 
 ```js
 const User = {
   template: "<div>User {{ $route.params.id }}</div>",
 };
 const routes = [{ path: "/user/:id", component: User }];
-```
 
-替换成
-
-```js
+// 替换成
 const User = {
   // 请确保添加一个与路由参数完全相同的 prop 名
   props: ["id"],
@@ -630,15 +554,9 @@ const User = {
 const routes = [{ path: "/user/:id", component: User, props: true }];
 ```
 
-这允许你在任何地方使用该组件，使得该组件更容易重用和测试。
+9.1 命名视图
 
-9.1 布尔模式
-
-当 props 设置为 true 时，route.params 将被设置为组件的 props。
-
-9.2 命名视图
-
-对于有命名视图的路由，你必须为每个命名视图定义 props 配置：
+对于有命名视图的路由，必须为每个命名视图定义 props 配置：
 
 ```js
 const routes = [
@@ -650,39 +568,24 @@ const routes = [
 ];
 ```
 
-9.3 对象模式
+9.2 函数模式
 
-当 props 是一个对象时，它将原样设置为组件 props。当 props 是静态的时候很有用。
-
-```js
-const routes = [
-  {
-    path: "/promotion/from-newsletter",
-    component: Promotion,
-    props: { newsletterPopup: false },
-  },
-];
-```
-
-9.4 函数模式
-
-你可以创建一个返回 props 的函数。这允许你将参数转换为其他类型，将静态值与基于路由的值相结合等等。
+创建一个返回 props 的函数。可以将参数转换为其他类型：
 
 ```js
 const routes = [
   {
-    path: "/search",
-    component: SearchUser,
-    props: (route) => ({ query: route.query.q }),
+    path: "/demo/:id?",
+    name: "demo",
+    component: Demo,
+    props: (route) => {
+      return { id: +route.params.id };
+    },
   },
 ];
 ```
 
-URL /search?q=vue 将传递 {query: 'vue'} 作为 props 传给 SearchUser 组件。
-
-请尽可能保持 props 函数为无状态的，因为它只会在路由发生变化时起作用。如果你需要状态来定义 props，请使用包装组件，这样 vue 才可以对状态变化做出反应。
-
-9.5 Via RouterView
+9.3 Via RouterView
 
 ```js
 <RouterView v-slot="{ Component }">
@@ -695,16 +598,17 @@ URL /search?q=vue 将传递 {query: 'vue'} 作为 props 传给 SearchUser 组件
 
 10. 不同的历史模式
 
-在创建路由器实例时，history 配置允许我们在不同的历史模式中进行选择。
+在创建路由器实例时，history 配置可以选择不同的历史模式。
 
 10.1 Hash 模式
 
-hash 模式是用 createWebHashHistory() 创建的：
+hash 模式是用 createWebHashHistory() 创建的，会在 url 后添加哈希字符（#），对 SEO 不友好，不推荐：
 
 ```js
 import { createRouter, createWebHashHistory } from "vue-router";
 
 const router = createRouter({
+  // /home#/
   history: createWebHashHistory(),
   routes: [
     //...
@@ -712,11 +616,9 @@ const router = createRouter({
 });
 ```
 
-它在内部传递的实际 URL 之前使用了一个哈希字符（#）。由于这部分 URL 从未被发送到服务器，所以它不需要在服务器层面上进行任何特殊处理。不过，它在 SEO 中确实有不好的影响。如果你担心这个问题，可以使用 HTML5 模式。
-
 10.2 Memory 模式
 
-Memory 模式不会假定自己处于浏览器环境，因此不会与 URL 交互也不会自动触发初始导航。这使得它非常适合 Node 环境和 SSR。它是用 createMemoryHistory() 创建的，并且需要你在调用 app.use(router) 之后手动 push 到初始导航。
+Memory 模式是用 createMemoryHistory() 创建的，适合 Node 环境和 SSR，不推荐：
 
 ```js
 import { createRouter, createMemoryHistory } from "vue-router";
@@ -728,11 +630,9 @@ const router = createRouter({
 });
 ```
 
-虽然不推荐，你仍可以在浏览器应用程序中使用此模式，但请注意它不会有历史记录，这意味着你无法后退或前进。
-
 10.3 HTML5 模式
 
-用 createWebHistory() 创建 HTML5 模式，推荐使用这个模式：
+用 createWebHistory() 创建 HTML5 模式，URL 会看起来很 "正常"，推荐使用这个模式：
 
 ```js
 import { createRouter, createWebHistory } from "vue-router";
@@ -745,200 +645,19 @@ const router = createRouter({
 });
 ```
 
-当使用这种历史模式时，URL 会看起来很 "正常"，例如 https://example.com/user/id。漂亮!
-
-不过，问题来了。由于我们的应用是一个单页的客户端应用，如果没有适当的服务器配置，用户在浏览器中直接访问 https://example.com/user/id，就会得到一个 404 错误。这就尴尬了。
-
-不用担心：要解决这个问题，你需要做的就是在你的服务器上添加一个简单的回退路由。如果 URL 不匹配任何静态资源，它应提供与你的应用程序中的 index.html 相同的页面。漂亮依旧!
-
-10.4 服务器配置示例
-
-注意：以下示例假定你正在从根目录提供服务。如果你部署到子目录，你应该使用 Vue CLI 的 publicPath 配置和相关的路由器的 base 属性。你还需要调整下面的例子，以使用子目录而不是根目录（例如，将 RewriteBase/ 替换为 RewriteBase/name-of-your-subfolder/）。
-
-10.4.1 Apache
-
-```
-<IfModule mod_negotiation.c>
-  Options -MultiViews
-</IfModule>
-
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
-</IfModule>
-```
-
-也可以使用 FallbackResource 代替 mod_rewrite。
-
-10.4.2 nginx
-
-```
-location / {
-  try_files $uri $uri/ /index.html;
-}
-```
-
-10.4.3 原生 Node.js
-
-```js
-const http = require("http");
-const fs = require("fs");
-const httpPort = 80;
-
-http
-  .createServer((req, res) => {
-    fs.readFile("index.html", "utf-8", (err, content) => {
-      if (err) {
-        console.log('We cannot open "index.html" file.');
-      }
-
-      res.writeHead(200, {
-        "Content-Type": "text/html; charset=utf-8",
-      });
-
-      res.end(content);
-    });
-  })
-  .listen(httpPort, () => {
-    console.log("Server listening on: http://localhost:%s", httpPort);
-  });
-```
-
-10.4.4 Express + Node.js
-
-对于 Node.js/Express，可以考虑使用 connect-history-api-fallback 中间件。
-
-10.4.5 Internet Information Services (IIS)
-
-安装 IIS UrlRewrite
-在网站的根目录下创建一个 web.config 文件，内容如下：
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-  <system.webServer>
-    <rewrite>
-      <rules>
-        <rule name="Handle History Mode and custom 404/500" stopProcessing="true">
-          <match url="(.*)" />
-          <conditions logicalGrouping="MatchAll">
-            <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
-            <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
-          </conditions>
-          <action type="Rewrite" url="/" />
-        </rule>
-      </rules>
-    </rewrite>
-  </system.webServer>
-</configuration>
-```
-
-10.4.6 Caddy v2
-
-```
-try_files {path} /
-```
-
-10.4.7 Caddy v1
-
-```
-rewrite {
-    regexp .*
-    to {path} /
-}
-```
-
-10.4.8 Firebase hosting
-
-将此添加到你的 firebase.json 中：
-
-```json
-{
-  "hosting": {
-    "public": "dist",
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
-  }
-}
-```
-
-10.4.9 Netlify
-
-创建一个 \_redirects 文件，包含在你的部署文件中：
-
-```js
-/* /index.html 200
-```
-
-在 vue-cli、nuxt 和 vite 项目中，这个文件通常放在名为 static 或 public 的目录下。
-
-你可以在 Netlify 文档中找到更多关于语法的信息。你也可以创建一个 netlify.toml 来结合其他 Netlify 功能的重定向。
-
-10.4.10 Vercel
-
-在项目根目录创建一个 vercel.json 文件，内容如下：
-
-```json
-{
-  "rewrites": [{ "source": "/:path*", "destination": "/index.html" }]
-}
-```
-
-10.5 附加说明
-
-这有一个注意事项。你的服务器将不再报告 404 错误，因为现在所有未找到的路径都会显示你的 index.html 文件。为了解决这个问题，你应该在你的 Vue 应用程序中实现一个万能的路由来显示 404 页面。
-
-```js
-const router = createRouter({
-  history: createWebHistory(),
-  routes: [{ path: "/:pathMatch(.*)", component: NotFoundComponent }],
-});
-```
-
-另外，如果你使用的是 Node.js 服务器，你可以通过在服务器端使用路由器来匹配传入的 URL，如果没有匹配到路由，则用 404 来响应，从而实现回退。查看 Vue 服务器端渲染文档了解更多信息。
-
 三. 进阶
 
 1. 导航守卫
 
-正如其名，vue-router 提供的导航守卫主要用来通过跳转或取消的方式守卫导航。这里有很多方式植入路由导航中：全局的，单个路由独享的，或者组件级的。
+导航守卫通过跳转或取消的方式守卫导航。路由导航包括：全局，单个路由，组件级。
 
 1.1 全局前置守卫
 
-你可以使用 router.beforeEach 注册一个全局前置守卫：
+使用 router.beforeEach 注册全局前置守卫，导航跳转前触发，接受两个参数，to 即将进入的路由，from 即将离开的路由，返回 false 是取消当前跳转，返回一个路由是跳转到返回路由中：
 
 ```js
 const router = createRouter({ ... })
 
-router.beforeEach((to, from) => {
-  // ...
-  // 返回 false 以取消导航
-  return false
-})
-```
-
-当一个导航触发时，全局前置守卫按照创建顺序调用。守卫是异步解析执行，此时导航在所有守卫 resolve 完之前一直处于等待中。
-
-每个守卫方法接收两个参数：
-
-to: 即将要进入的目标 用一种标准化的方式
-from: 当前导航正要离开的路由 用一种标准化的方式
-
-可以返回的值如下:
-
-false: 取消当前的导航。如果浏览器的 URL 改变了(可能是用户手动或者浏览器后退按钮)，那么 URL 地址会重置到 from 路由对应的地址。
-
-一个路由地址: 通过一个路由地址重定向到一个不同的地址，如同调用 router.push()，且可以传入诸如 replace: true 或 name: 'home' 之类的选项。它会中断当前的导航，同时用相同的 from 创建一个新导航。
-
-```js
 router.beforeEach(async (to, from) => {
   if (
     // 检查用户是否已登录
@@ -952,45 +671,9 @@ router.beforeEach(async (to, from) => {
 });
 ```
 
-如果遇到了意料之外的情况，可能会抛出一个 Error。这会取消导航并且调用 router.onError() 注册过的回调。
-
-如果什么都没有，undefined 或返回 true，则导航是有效的，并调用下一个导航守卫
-以上所有都同 async 函数 和 Promise 工作方式一样：
-
-```js
-router.beforeEach(async (to, from) => {
-  // canUserAccess() 返回 `true` 或 `false`
-  const canAccess = await canUserAccess(to);
-  if (!canAccess) return "/login";
-});
-```
-
-1.1.1 可选的第三个参数 next
-
-在之前的 Vue Router 版本中，还可以使用 第三个参数 next 。这是一个常见的错误来源，我们经过 RFC 讨论将其移除。然而，它仍然是被支持的，这意味着你可以向任何导航守卫传递第三个参数。在这种情况下，确保 next 在任何给定的导航守卫中都被严格调用一次。它可以出现多于一次，但是只能在所有的逻辑路径都不重叠的情况下，否则钩子永远都不会被解析或报错。这里有一个在用户未能验证身份时重定向到/login 的错误用例：
-
-```js
-// BAD
-router.beforeEach((to, from, next) => {
-  if (to.name !== "Login" && !isAuthenticated) next({ name: "Login" });
-  // 如果用户未能验证身份，则 `next` 会被调用两次
-  next();
-});
-```
-
-下面是正确的版本:
-
-```js
-// GOOD
-router.beforeEach((to, from, next) => {
-  if (to.name !== "Login" && !isAuthenticated) next({ name: "Login" });
-  else next();
-});
-```
-
 1.2 全局解析守卫
 
-你可以用 router.beforeResolve 注册一个全局守卫。这和 router.beforeEach 类似，因为它在每次导航时都会触发，不同的是，解析守卫刚好会在导航被确认之前、所有组件内守卫和异步路由组件被解析之后调用。这里有一个例子，确保用户可以访问自定义 meta 属性 requiresCamera 的路由：
+使用 router.beforeResolve 注册全局解析守卫。解析守卫在导航被确认之前、所有组件内守卫和异步路由组件被解析之后调用。是获取数据或执行任何其他操作（如用户无法进入页面时希望避免执行的操作）的理想位置。例如：确保用户可以访问自定义 meta 属性 requiresCamera 的路由：
 
 ```js
 router.beforeResolve(async (to) => {
@@ -1010,11 +693,9 @@ router.beforeResolve(async (to) => {
 });
 ```
 
-router.beforeResolve 是获取数据或执行任何其他操作（如果用户无法进入页面时你希望避免执行的操作）的理想位置。
-
 1.3 全局后置钩子
 
-你也可以注册全局后置钩子，然而和守卫不同的是，这些钩子不会接受 next 函数也不会改变导航本身：
+使用 router.afterEach 注册全局后置钩子，后置钩子不会改变导航本身，可以用于分析、更改页面标题、声明页面等辅助功能以及许多其他事情：
 
 ```js
 router.afterEach((to, from) => {
@@ -1022,19 +703,9 @@ router.afterEach((to, from) => {
 });
 ```
 
-它们对于分析、更改页面标题、声明页面等辅助功能以及许多其他事情都很有用。
-
-它们也反映了 navigation failures 作为第三个参数：
-
-```js
-router.afterEach((to, from, failure) => {
-  if (!failure) sendToAnalytics(to.fullPath);
-});
-```
-
 1.4 在守卫内的全局注入
 
-从 Vue 3.3 开始，你可以在导航守卫内使用 inject() 方法。这在注入像 pinia stores 这样的全局属性时很有用。在 app.provide() 中提供的所有内容都可以在 router.beforeEach()、router.beforeResolve()、router.afterEach() 内获取到：
+使用 inject() 方法在导航守卫内注入全局属性。app.provide() 中所有内容都可以在 router.beforeEach()、router.beforeResolve()、router.afterEach() 内获取到：
 
 ```ts
 // main.ts
