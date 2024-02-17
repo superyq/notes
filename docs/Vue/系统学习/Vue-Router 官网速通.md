@@ -34,10 +34,6 @@ pnpm create vue
 
 1. 入门
 
-将组件映射到路由上，让 Vue Router 知道在哪里渲染它们。
-
-使用 router-link 未直接使用 a 标签来创建链接。好处：1. 在不重新加载页面的情况下更改 URL。2. 处理 URL 的生成以及编码。
-
 router-view 显示与 URL 对应的组件。可以放在任何地方，以适应布局。
 
 ```html
@@ -1212,121 +1208,40 @@ export default defineConfig({
 
 9. 扩展 RouterLink
 
-自定义 RouterLink 实现导航菜单链接，处理外部链接，添加 inactive-class：
+自定义 RouterLink 实现导航菜单链接，处理外部链接：
 
 ```html
-<template>
-  <a v-if="isExternalLink" v-bind="$attrs" :href="to" target="_blank">
-    <slot />
-  </a>
-  <router-link
-    v-else
-    v-bind="$props"
-    custom
-    v-slot="{ isActive, href, navigate }"
-  >
-    <a
-      v-bind="$attrs"
-      :href="href"
-      @click="navigate"
-      :class="isActive ? activeClass : inactiveClass"
-    >
-      <slot />
-    </a>
-  </router-link>
-</template>
-
-<script>
+<script setup lang="ts">
   import { RouterLink } from "vue-router";
+  import { computed } from "vue";
 
-  export default {
-    name: "AppLink",
-    inheritAttrs: false,
-
-    props: {
-      // 如果使用 TypeScript，请添加 @ts-ignore
-      ...RouterLink.props,
-      inactiveClass: String,
-    },
-
-    computed: {
-      isExternalLink() {
-        return typeof this.to === "string" && this.to.startsWith("http");
-      },
-    },
-  };
-</script>
-```
-
-如果你喜欢使用渲染函数或创建 computed 属性，你可以使用 Composition API 中的 useLink ：
-
-```js
-import { RouterLink, useLink } from "vue-router";
-
-export default {
-  name: "AppLink",
-
-  props: {
-    // 如果使用 TypeScript，请添加 @ts-ignore
+  const props = defineProps({
+    // @ts-ignore
     ...RouterLink.props,
-    inactiveClass: String,
-  },
+    _target: {
+      type: String,
+      default: "_self",
+    },
+  });
 
-  setup(props) {
-    // `props` 包含 `to` 和任何其他可以传递给 <router-link> 的 prop
-    const { navigate, href, route, isActive, isExactActive } = useLink(props);
+  const isExternalLink = computed(
+    () => typeof props.to === "string" && props.to.startsWith("http")
+  );
+</script>
 
-    // profit!
-
-    return { isExternalLink };
-  },
-};
-```
-
-在实践中，你可能希望将你的 AppLink 组件用于应用程序的不同部分。例如，使用 Tailwind CSS，你可以用所有的类创建一个 NavLink.vue 组件：
-
-```html
 <template>
-  <AppLink
-    v-bind="$attrs"
-    class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out"
-    active-class="border-indigo-500 text-gray-900 focus:border-indigo-700"
-    inactive-class="text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:text-gray-700 focus:border-gray-300"
-  >
-    <slot />
-  </AppLink>
+  <a v-if="isExternalLink" v-bind="$attrs" :href="to" :target="_target"
+    ><slot
+  /></a>
+  <router-link v-else v-bind="$props" :to="$props.to"><slot /></router-link>
 </template>
 ```
 
 10. 导航故障
 
-当使用 router-link 组件时，Vue Router 会自动调用 router.push 来触发一次导航。虽然大多数链接的预期行为是将用户导航到一个新页面，但也有少数情况下用户将留在同一页面上：
-
-用户已经位于他们正在尝试导航到的页面
-一个导航守卫通过调用 return false 中断了这次导航
-当前的导航守卫还没有完成时，一个新的导航守卫会出现了
-一个导航守卫通过返回一个新的位置，重定向到其他地方 (例如，return '/login')
-一个导航守卫抛出了一个 Error
-
-如果我们想在一个导航完成后做一些事情，我们需要一个在调用 router.push 后进行等待的方法。想象一下，我们有一个移动手机菜单，它允许我们进入不同的页面，而我们只想在导航到新页面后隐藏菜单，我们可能想这样做：
-
-```js
-router.push("/my-profile");
-this.isMenuOpen = false;
-```
-
-但是这样做会马上关闭菜单，因为 导航是异步的，我们需要 await router.push 返回的 promise ：
-
-```js
-await router.push("/my-profile");
-this.isMenuOpen = false;
-```
-
-现在，一旦导航完成，菜单就会关闭，但如果导航被阻止，它也会关闭。我们需要一种方法来检测我们是否真的改变了页面。
-
 10.1 检测导航故障
 
-如果导航被阻止，导致用户停留在同一个页面上，由 router.push 返回的 Promise 的解析值将是 Navigation Failure。否则，它将是一个 falsy 值(通常是 undefined)。这样我们就可以区分我们导航是否离开了当前位置：
+如果导航被阻，可以通过 router.push 返回的 Promise 的解判断是否离开了当前位置：
 
 ```js
 const navigationResult = await router.push("/my-profile");
@@ -1339,25 +1254,9 @@ if (navigationResult) {
 }
 ```
 
-Navigation Failure 是带有一些额外属性的 Error 实例，这些属性为我们提供了足够的信息，让我们知道哪些导航被阻止了以及为什么被阻止了。要检查导航结果的性质，请使用 isNavigationFailure 函数：
-
-```js
-import { NavigationFailureType, isNavigationFailure } from "vue-router";
-
-// 试图离开未保存的编辑文本界面
-const failure = await router.push("/articles/2");
-
-if (isNavigationFailure(failure, NavigationFailureType.aborted)) {
-  // 给用户显示一个小通知
-  showToast("You have unsaved changes, discard and leave anyway?");
-}
-```
-
-TIP:如果你忽略第二个参数： isNavigationFailure(failure)，那么就只会检查这个 failure 是不是一个 Navigation Failure。
-
 10.2 全局导航故障
 
-你可以用 router.afterEach() 导航守卫检测全局导航故障：
+使用 router.afterEach() 检测全局导航故障：
 
 ```js
 router.afterEach((to, from, failure) => {
@@ -1367,77 +1266,20 @@ router.afterEach((to, from, failure) => {
 });
 ```
 
-10.3 鉴别导航故障
-
-正如我们在一开始所说的，有不同的情况会导致导航的中止，所有这些情况都会导致不同的 Navigation Failure。它们可以用 isNavigationFailure 和 NavigationFailureType 来区分。总共有三种不同的类型：
-
-aborted：在导航守卫中返回 false 中断了本次导航。
-cancelled： 在当前导航完成之前又有了一个新的导航。比如，在等待导航守卫的过程中又调用了 router.push。
-duplicated：导航被阻止，因为我们已经在目标位置了。
-
-10.4 导航故障的属性
-
-所有的导航失败都会暴露 to 和 from 属性，以反映失败导航的当前位置和目标位置：
-
-```js
-// 正在尝试访问 admin 页面
-router.push("/admin").then((failure) => {
-  if (isNavigationFailure(failure, NavigationFailureType.aborted)) {
-    failure.to.path; // '/admin'
-    failure.from.path; // '/'
-  }
-});
-```
-
-在所有情况下，to 和 from 都是规范化的路由地址。
-
-10.5 检测重定向
-
-当在导航守卫中返回一个新的位置时，我们会触发一个新的导航，覆盖正在进行的导航。与其他返回值不同的是，重定向不会阻止导航，而是创建一个新的导航。因此，通过读取路由地址中的 redirectedFrom 属性，对其进行不同的检查：
-
-```js
-await router.push("/my-profile");
-if (router.currentRoute.value.redirectedFrom) {
-  // redirectedFrom 是解析出的路由地址，就像导航守卫中的 to和 from
-}
-```
-
 11. 动态路由
 
-对路由的添加通常是通过 routes 选项来完成的，但是在某些情况下，你可能想在应用程序已经运行的时候添加或删除路由。具有可扩展接口(如 Vue CLI UI )这样的应用程序可以使用它来扩展应用程序。
+11.1 添加/移除 路由
 
-11.1 添加路由
-
-动态路由主要通过两个函数实现。router.addRoute() 和 router.removeRoute()。它们只注册一个新的路由，也就是说，如果新增加的路由与当前位置相匹配，就需要你用 router.push() 或 router.replace() 来手动导航，才能显示该新路由。我们来看一个例子：
-
-想象一下，只有一个路由的以下路由：
-
-```js
-const router = createRouter({
-  history: createWebHistory(),
-  routes: [{ path: "/:articleName", component: Article }],
-});
-```
-
-进入任何页面，/about，/store，或者 /3-tricks-to-improve-your-routing-code 最终都会呈现 Article 组件。如果我们在 /about 上添加一个新的路由：
+使用 router.addRoute() 和 router.removeRoute() 实现动态路由的添加和删除。
 
 ```js
 router.addRoute({ path: "/about", component: About });
+router.removeRoute("About"); // 使用 name 移除
 ```
-
-页面仍然会显示 Article 组件，我们需要手动调用 router.replace() 来改变当前的位置，并覆盖我们原来的位置（而不是添加一个新的路由，最后在我们的历史中两次出现在同一个位置）：
-
-```js
-router.addRoute({ path: "/about", component: About });
-// 我们也可以使用 this.$route 或 route = useRoute() （在 setup 中）
-router.replace(router.currentRoute.value.fullPath);
-```
-
-记住，如果你需要等待新的路由显示，可以使用 await router.replace()。
 
 11.2 在导航守卫中添加路由
 
-如果你决定在导航守卫内部添加或删除路由，你不应该调用 router.replace()，而是通过返回新的位置来触发重定向：
+通过返回新的位置来触发重定向：
 
 ```js
 router.beforeEach((to) => {
@@ -1449,46 +1291,9 @@ router.beforeEach((to) => {
 });
 ```
 
-上面的例子有两个假设：第一，新添加的路由记录将与 to 位置相匹配，实际上导致与我们试图访问的位置不同。第二，hasNecessaryRoute() 在添加新的路由后返回 false，以避免无限重定向。
+11.3 添加嵌套路由
 
-因为是在重定向中，所以我们是在替换将要跳转的导航，实际上行为就像之前的例子一样。而在实际场景中，添加路由的行为更有可能发生在导航守卫之外，例如，当一个视图组件挂载时，它会注册新的路由。
-
-11.3 删除路由
-
-有几个不同的方法来删除现有的路由：
-
-| 通过添加一个名称冲突的路由。如果添加与现有途径名称相同的途径，会先删除路由，再添加路由：
-
-```js
-router.addRoute({ path: "/about", name: "about", component: About });
-// 这将会删除之前已经添加的路由，因为他们具有相同的名字且名字必须是唯一的
-router.addRoute({ path: "/other", name: "about", component: Other });
-```
-
-| 通过调用 router.addRoute() 返回的回调：
-
-```js
-const removeRoute = router.addRoute(routeRecord);
-removeRoute(); // 删除路由如果存在的话
-```
-
-当路由没有名称时，这很有用。
-
-| 通过使用 router.removeRoute() 按名称删除路由：
-
-```js
-router.addRoute({ path: "/about", name: "about", component: About });
-// 删除路由
-router.removeRoute("about");
-```
-
-需要注意的是，如果你想使用这个功能，但又想避免名字的冲突，可以在路由中使用 Symbol 作为名字。
-
-当路由被删除时，所有的别名和子路由也会被同时删除
-
-11.4 添加嵌套路由
-
-要将嵌套路由添加到现有的路由中，可以将路由的 name 作为第一个参数传递给 router.addRoute()，这将有效地添加路由，就像通过 children 添加的一样：
+将路由的 name 作为第一个参数传递给 router.addRoute()：
 
 ```js
 router.addRoute({ name: "admin", path: "/admin", component: Admin });
@@ -1502,9 +1307,9 @@ router.addRoute({
 });
 ```
 
-11.5 查看现有路由
+11.4 查看现有路由
 
 Vue Router 提供了两个功能来查看现有的路由：
 
-| router.hasRoute()：检查路由是否存在。
+| router.hasRoute(routerName)：检查路由是否存在。
 | router.getRoutes()：获取一个包含所有路由记录的数组。
