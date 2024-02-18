@@ -63,6 +63,8 @@ export const useDemoStore = defineStore("demo", {
   state: () => {
     return {
       name: "yq",
+      age: 18,
+      loves: ["book"],
     };
   },
   actions: {
@@ -75,74 +77,82 @@ export const useDemoStore = defineStore("demo", {
 
 1.1 使用 store
 
-在组件中使用 useDemoStore 创建实例，在实例上可以直接访问state，getter，actions定义的属性：
+在组件中使用 useDemoStore 创建实例，在实例上可以直接访问 state，getter，actions 定义的属性：
 
 ```html
 <script setup lang="ts">
-import { useDemoStore } from "@/store/demo.ts";
+  import { useDemoStore } from "@/store/demo.ts";
 
-const demoStore = useDemoStore();
-console.log(demoStore.name) // 'yq'
+  const demoStore = useDemoStore();
+  console.log(demoStore.name); // 'yq'
+
+  const handleChange = () => {
+    demoStore.changeName();
+    console.log(demoStore.name); // 'yqcoder'
+  };
 </script>
 
 <template>
-  <div>demo</div>
+  <div>{{ demoStore.name }}</div>
+  <div @click="handleChange">change name</div>
 </template>
 
 <style lang="scss" scoped></style>
 ```
 
-store 是用reavtive包裹的对象，可以不用.value，但也不能解构：
+store 是用 reavtive 包裹的对象，可以不用.value，但也不能解构：
 
-```js
-export default defineComponent({
-  setup() {
-    const store = useStore();
-    // ❌ 这不起作用，因为它会破坏响应式
-    // 这和从 props 解构是一样的
-    const { name, doubleCount } = store;
+```html
+<script setup lang="ts">
+  import { useDemoStore } from "@/store/demo.ts";
 
-    name; // "eduardo"
-    doubleCount; // 2
+  // 非响应性的
+  const { name, changeName } = useDemoStore();
+  console.log(name); // 'yq'
 
-    return {
-      // 一直会是 "eduardo"
-      name,
-      // 一直会是 2
-      doubleCount,
-      // 这将是响应式的
-      doubleValue: computed(() => store.doubleCount),
-    };
-  },
-});
+  const handleChange = () => {
+    changeName();
+    console.log(name); // 'yq'
+  };
+</script>
+
+<template>
+  <div>{{ name }}</div>
+  <div @click="handleChange">change name</div>
+</template>
+
+<style lang="scss" scoped></style>
 ```
 
-为了从 Store 中提取属性同时保持其响应式，您需要使用 storeToRefs()。 它将为任何响应式属性创建 refs。 当您仅使用 store 中的状态但不调用任何操作时，这很有用：
+使用 storeToRefs() 使解构的状态变响应：
 
-```js
-import { storeToRefs } from "pinia";
+```html
+<script setup lang="ts">
+  import { storeToRefs } from "pinia";
+  import { useDemoStore } from "@/store/demo.ts";
 
-export default defineComponent({
-  setup() {
-    const store = useStore();
-    // `name` 和 `doubleCount` 是响应式引用
-    // 这也会为插件添加的属性创建引用
-    // 但跳过任何 action 或 非响应式（不是 ref/reactive）的属性
-    const { name, doubleCount } = storeToRefs(store);
+  const demoStore = useDemoStore();
+  const { name } = storeToRefs(demoStore);
+  console.log(name); // yq
+  const handleChange = () => {
+    demoStore.changeName();
+    console.log(name); // yqcoder
+  };
+</script>
 
-    return {
-      name,
-      doubleCount,
-    };
-  },
-});
+<template>
+  <div>{{ name }}</div>
+  <div @click="handleChange">change name</div>
+</template>
+
+<style lang="scss" scoped></style>
 ```
 
-1. State
+2. State
 
-大多数时候，state 是 store 的核心部分。 我们通常从定义应用程序的状态开始。 在 Pinia 中，状态被定义为返回初始状态的函数。 Pinia 在服务器端和客户端都可以工作。
+state 是 store 的核心部分。
 
-```js
+```ts
 import { defineStore } from "pinia";
 
 const useStore = defineStore("storeId", {
@@ -160,286 +170,170 @@ const useStore = defineStore("storeId", {
 
 2.1 访问 “state”
 
-默认情况下，您可以通过 store 实例访问状态来直接读取和写入状态：
+可以通过 store 实例直接访问和修改状态：
 
-```js
-const store = useStore();
+```ts
+const { useDemoStore } from "@/store/demo.ts";
+const demoStore = useDemoStore();
 
-store.counter++;
+demoStore.name = 'yqcoder';
 ```
 
 2.2 重置状态
 
-您可以通过调用 store 上的 $reset() 方法将状态 重置 到其初始值：
+使用 $reset() 方法将状态重置为初始值：
 
-```js
-const store = useStore();
+```ts
+import { useDemoStore } from "@/store/demo.ts";
 
-store.$reset();
-```
-
-2.2.1 使用选项 API
-
-对于以下示例，您可以假设已创建以下 Store：
-
-```js
-// Example File Path:
-// ./src/stores/counterStore.js
-
-import { defineStore } from 'pinia',
-
-const useCounterStore = defineStore('counterStore', {
-  state: () => ({
-    counter: 0
-  })
-})
-```
-
-2.2.2 使用 setup()
-
-虽然 Composition API 并不适合所有人，但 setup() 钩子可以使在 Options API 中使用 Pinia 更容易。 不需要额外的 map helper！
-
-```js
-import { useCounterStore } from "../stores/counterStore";
-
-export default {
-  setup() {
-    const counterStore = useCounterStore();
-
-    return { counterStore };
-  },
-  computed: {
-    tripleCounter() {
-      return counterStore.counter * 3;
-    },
-  },
-};
-```
-
-2.2.3 不使用 setup()
-
-如果您不使用 Composition API，并且使用的是 computed、methods、...，则可以使用 mapState() 帮助器将状态属性映射为只读计算属性：
-
-```js
-import { mapState } from "pinia";
-import { useCounterStore } from "../stores/counterStore";
-
-export default {
-  computed: {
-    // 允许访问组件内部的 this.counter
-    // 与从 store.counter 读取相同
-    ...mapState(useCounterStore, {
-      myOwnName: "counter",
-      // 您还可以编写一个访问 store 的函数
-      double: (store) => store.counter * 2,
-      // 它可以正常读取“this”，但无法正常写入...
-      magicValue(store) {
-        return store.someGetter + this.counter + this.double;
-      },
-    }),
-  },
-};
-```
-
-如果您希望能够写入这些状态属性（例如，如果您有一个表单），您可以使用 mapWritableState() 代替。 请注意，您不能传递类似于 mapState() 的函数：
-
-```js
-import { mapWritableState } from 'pinia'
-import { useCounterStore } from '../stores/counterStore'
-
-export default {
-  computed: {
-    // 允许访问组件内的 this.counter 并允许设置它
-    // this.counter++
-    // 与从 store.counter 读取相同
-    ...mapWritableState(useCounterStore, ['counter'])
-    // 与上面相同，但将其注册为 this.myOwnName
-    ...mapWritableState(useCounterStore, {
-      myOwnName: 'counter',
-    }),
-  },
-}
+const demoStore = useDemoStore();
+demoStore.$reset();
 ```
 
 2.3 改变状态
 
-除了直接用 store.counter++ 修改 store，你还可以调用 $patch 方法。 它允许您使用部分“state”对象同时应用多个更改：
+使用 $patch 方法，可以同时修改多个状态：
 
-```js
-store.$patch({
-  counter: store.counter + 1,
-  name: "Abalam",
+```ts
+import { useDemoStore } from "@/store/demo.ts";
+
+const demoStore = useDemoStore();
+demoStore.$patch({
+  name: "yyy",
+  age: 22,
 });
 ```
 
-但是，使用这种语法应用某些突变非常困难或代价高昂：任何集合修改（例如，从数组中推送、删除、拼接元素）都需要您创建一个新集合。 正因为如此，$patch 方法也接受一个函数来批量修改集合内部分对象的情况：
+并且 $patch 也接受一个函数来批量修改状态：
 
-```js
-cartStore.$patch((state) => {
-  state.items.push({ name: "shoes", quantity: 1 });
-  state.hasChanged = true;
+```ts
+import { useDemoStore } from "@/store/demo.ts";
+
+const demoStore = useDemoStore();
+demoStore.$patch((state) => {
+  state.name = "yy";
+  state.age = 23;
+  state.loves.push("sex");
 });
 ```
-
-这里的主要区别是$patch() 允许您将批量更改的日志写入开发工具中的一个条目中。 注意两者，state 和 $patch() 的直接更改都出现在 devtools 中，并且可以进行 time travelled（在 Vue 3 中还没有）。
 
 2.4 替换 state
 
-您可以通过将其 $state 属性设置为新对象来替换 Store 的整个状态：
+使用 $state 来替换 Store 的整个状态：
 
-```js
-store.$state = { counter: 666, name: "Paimon" };
-```
+```ts
+import { useDemoStore } from "@/store/demo.ts";
 
-您还可以通过更改 pinia 实例的 state 来替换应用程序的整个状态。 这在 SSR for hydration 期间使用。
-
-```js
-pinia.state.value = {};
-```
-
-2.5 订阅状态
-
-可以通过 store 的 $subscribe() 方法查看状态及其变化，类似于 Vuex 的 subscribe 方法。 与常规的 watch() 相比，使用 $subscribe() 的优点是 subscriptions 只会在 patches 之后触发一次（例如，当使用上面的函数版本时）。
-
-```js
-cartStore.$subscribe((mutation, state) => {
-  // import { MutationType } from 'pinia'
-  mutation.type; // 'direct' | 'patch object' | 'patch function'
-  // 与 cartStore.$id 相同
-  mutation.storeId; // 'cart'
-  // 仅适用于 mutation.type === 'patch object'
-  mutation.payload; // 补丁对象传递给 to cartStore.$patch()
-
-  // 每当它发生变化时，将整个状态持久化到本地存储
-  localStorage.setItem("cart", JSON.stringify(state));
-});
-```
-
-默认情况下，state subscriptions 绑定到添加它们的组件（如果 store 位于组件的 setup() 中）。 意思是，当组件被卸载时，它们将被自动删除。 如果要在卸载组件后保留它们，请将 { detached: true } 作为第二个参数传递给 detach 当前组件的 state subscription：
-
-```js
-export default {
-  setup() {
-    const someStore = useSomeStore();
-
-    // 此订阅将在组件卸载后保留
-    someStore.$subscribe(callback, { detached: true });
-
-    // ...
-  },
+const demoStore = useDemoStore();
+demoStore.$state = {
+  name: "yy",
+  age: 33,
+  loves: ["sex"],
 };
 ```
 
 3. Getters
 
-Getter 完全等同于 Store 状态的 计算值。 它们可以用 defineStore() 中的 getters 属性定义。 他们接收“状态”作为第一个参数以鼓励箭头函数的使用：
+Getter 等同于 Store 状态的计算值：
 
-```js
-export const useStore = defineStore("main", {
-  state: () => ({
-    counter: 0,
-  }),
+```ts
+import { defineStore } from "pinia";
+
+export const useDemoStore = defineStore("demo", {
+  state: () => {
+    return {
+      name: "yq",
+      age: 18,
+      loves: ["book"],
+    };
+  },
+  actions: {
+    changeName() {
+      this.name = "yqcoder";
+    },
+  },
   getters: {
-    doubleCount: (state) => state.counter * 2,
+    lovesL: (state) => state.loves.length,
   },
 });
 ```
 
-大多数时候，getter 只会依赖状态，但是，他们可能需要使用其他 getter。 正因为如此，我们可以在定义常规函数时通过 this 访问到 整个 store 的实例，但是需要定义返回类型（在 TypeScript 中）。 这是由于 TypeScript 中的一个已知限制，并且不会影响使用箭头函数定义的 getter，也不会影响不使用 this 的 getter：
+通过 this 可以访问状态和 getter，在 TS 中，使用 this 访问状态，需要声明返回类型：
 
 ```js
-export const useStore = defineStore("main", {
-  state: () => ({
-    counter: 0,
-  }),
-  getters: {
-    // 自动将返回类型推断为数字
-    doubleCount(state) {
-      return state.counter * 2;
-    },
-    // 返回类型必须明确设置
-    doublePlusOne(): number {
-      return this.counter * 2 + 1;
+import { defineStore } from "pinia";
+
+export const useDemoStore = defineStore("demo", {
+  state: () => {
+    return {
+      name: "yq",
+      age: 18,
+      loves: ["book"],
+    };
+  },
+  actions: {
+    changeName() {
+      this.name = "yqcoder";
     },
   },
-});
-```
-
-然后你可以直接在 store 实例上访问 getter：
-
-```vue
-<template>
-  <p>Double count is {{ store.doubleCount }}</p>
-</template>
-
-<script>
-export default {
-  setup() {
-    const store = useStore();
-
-    return { store };
-  },
-};
-</script>
-```
-
-3.1 访问其他 getter
-
-与计算属性一样，您可以组合多个 getter。 通过 this 访问任何其他 getter。 即使您不使用 TypeScript，您也可以使用 JSDoc 提示您的 IDE 类型：
-
-```js
-export const useStore = defineStore("main", {
-  state: () => ({
-    counter: 0,
-  }),
   getters: {
-    // 类型是自动推断的，因为我们没有使用 `this`
-    doubleCount: (state) => state.counter * 2,
-    // 这里需要我们自己添加类型（在 JS 中使用 JSDoc）。 我们还可以
-    // 使用它来记录 getter
-    /**
-     * 返回计数器值乘以二加一。
-     *
-     * @returns {number}
-     */
-    doubleCountPlusOne() {
-      // 自动完成 ✨
-      return this.doubleCount + 1;
+    nameL: (state) => state.name.length,
+    lovesL(): number {
+      return this.nameL;
     },
   },
 });
 ```
 
-3.2 将参数传递给 getter
+3.1 将参数传递给 getter
 
-Getters 只是幕后的 computed 属性，因此无法向它们传递任何参数。 但是，您可以从 getter 返回一个函数以接受任何参数：
+Getters 只是 computed 属性，因此无法传递任何参数。 但可以通过一个函数来接受参数：
 
-```js
-export const useStore = defineStore("main", {
+```ts
+import { defineStore } from "pinia";
+
+export const useDemoStore = defineStore("demo", {
+  state: () => {
+    return {
+      name: "yq",
+      age: 18,
+      loves: ["book"],
+    };
+  },
+  actions: {
+    changeName() {
+      this.name = "yqcoder";
+    },
+  },
   getters: {
-    getUserById: (state) => {
-      return (userId) => state.users.find((user) => user.id === userId);
+    lovesL(): number {
+      return this.nameL;
+    },
+    nameL: (state) => state.name.length,
+    yearAfter: (state) => {
+      return (yearNumber: number): number => state.age + yearNumber;
     },
   },
 });
 ```
 
-并在组件中使用：
+在组件中使用：
 
-```js
-<script>
-export default {
-  setup() {
-    const store = useStore()
+```html
+<script setup lang="ts">
+  import { useDemoStore } from "@/store/demo.ts";
 
-    return { getUserById: store.getUserById }
-  },
-}
+  const deomStore = useDemoStore();
 </script>
 
 <template>
-  <p>User 2: {{ getUserById(2) }}</p>
+  <div>
+    <!-- 输出：28 -->
+    <span>{{ deomStore.yearAfter(10) }}</span>
+  </div>
 </template>
+
+<style lang="scss" scoped></style>
 ```
 
 请注意，在执行此操作时，getter 不再缓存，它们只是您调用的函数。 但是，您可以在 getter 本身内部缓存一些结果，这并不常见，但应该证明性能更高：
