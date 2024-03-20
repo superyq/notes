@@ -30,20 +30,25 @@ arr.concat([7, 8]); // 返回：[1,2,3,4,5,6,7,8]
 
 slice(start?, end?)，start：开始下标，end：结束下标。
 
+结束下标大于开始下标，裁切值不包括结束下标的值。
+
 ```js
 let arr = [1, 2, 3, 4, 5, 6];
 
+// 全部裁切
+arr.slice(); // 返回：[1,2,3,4,5,6]
+
 // 从下标 1 开始，裁切到尾部
-arr.slice(1); // 返回 [2,3,4,5,6]
+arr.slice(1); // 返回：[2,3,4,5,6]
 
 // 从下标 1 开始，裁切到下标 2
-arr.slice(1, 2); // 返回 [2]
+arr.slice(1, 2); // 返回：[2]
 
 // 从数组倒数第 1 开始，裁切到尾部
-arr.slice(-1); // 返回 [6]
+arr.slice(-1); // 返回：[6]
 
 // 从数组倒数第 2 开始，裁切到数组倒数第 1 位
-arr.slice(-2, -1); // 返回 [5]
+arr.slice(-2, -1); // 返回：[5]
 ```
 
 4. indexOf 查找
@@ -82,7 +87,7 @@ arr.lastIndexOf(1, -1); // 返回：3
 
 6. reduce 高阶函数
 
-reduce(fn(total, curValue, curIndex?, arr?), initValue?)，fn：叠加器，参数：total 叠加值，curValue 当前值，curIndex 当前下标，arr 原数组，initValue：初始值。当没有 initValue 是，total 的初始值为 arr[0]。
+reduce(callback(total, curValue, curIndex?, arr?), initValue?)，callback：叠加器，参数：total 叠加值，curValue 当前值，curIndex 当前下标，arr 原数组，initValue：初始值。当没有 initValue 是，total 的初始值为 arr[0]。
 
 6.1 数组求和
 
@@ -183,9 +188,9 @@ forEach(callback(curValue, curIndex?, arr?))，curValue 当前值，curIndex 当
 
 ```js
 let arr = [1, 2, 3];
-arr.forEach(item => {
+arr.forEach((item) => {
   // TODO
-})
+});
 ```
 
 二：改变原数组的方法
@@ -274,27 +279,36 @@ arr.splice(1, 2, 4, 5); // arr：[1,4,5] 返回：[2,3]
 
 6. sort 排序
 
-sort(fn?)，fn：可选参数，规定排序顺序，必须是函数。
+sort(callback?)，callback：可选参数，规定排序顺序，必须是函数。
 
 可用于对数字，字母进行排序，数字优先级高于字母。
 
 如果需要按照其他规则排序，需要提供函数，函数一般有两个参数：a，b。数组中 a 的下标小于 b。比较两个参数，如果需要换位置则返回大于 0 的值。
 
+6.1 默认排序，不会区分各十百位
+
 ```js
-// 默认排序，不会区分各十百位
 let arr = [2, 1, 21, 11, 4, 31, 3];
 arr.sort(); // arr：[1,11,2,21,3,32,4] 返回：[1,11,2,21,3,32,4]
+```
 
-// 从小到大排序
+6.2 从小到大排序
+
+```js
 let arr = [2, 1, 21, 11, 4, 31, 3];
 arr.sort((a, b) => a - b); // arr：[1,2,3,4,11,21,31] 返回：[1,2,3,4,11,21,31]
+```
 
-// 从大到小排序
+6.3 从大到小排序
+
+```js
 let arr = [2, 1, 21, 11, 4, 31, 3];
 arr.sort((a, b) => b - a); // arr：[31,21,11,4,3,2,1] 返回：[31,21,11,4,3,2,1]
+```
 
-// 对象数组按特定属性大小排序
-// 按 sort 从小到大排序
+6.4 按 sort 从小到大排序
+
+```js
 let arr = [
   { name: "小明", sort: 10 },
   { name: "小红", sort: 1 },
