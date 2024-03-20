@@ -19,8 +19,11 @@ let arr = [1, 2, 3];
 // 尾部插入 4
 arr.concat(4); // 返回：[1,2,3,4]
 
-// 尾部依次插入 5，6
+// 尾部插入 5，6
 arr.concat(5, 6); // 返回：[1,2,3,5,6]
+
+// 尾部插入 7，8
+arr.concat([7, 8]); // 返回：[1,2,3,4,5,6,7,8]
 ```
 
 3. slice 裁切
@@ -45,7 +48,7 @@ arr.slice(-2, -1); // 返回 [5]
 
 4. indexOf 查找
 
-indexOf(item, start?)，item：查找项，start：从哪个下标开始，如果找到返回项目所在下标
+indexOf(item, start?)，item：查找项，start：从哪个下标开始，如果找到返回元素所在下标
 
 ```js
 let arr = [1, 2, 3, 1];
@@ -62,7 +65,7 @@ arr.indexOf(1, -1); // 返回：3
 
 5. lastIndexOf 从数组尾部往头部查找
 
-lastIndexOf(item, start?)，item：查找项，start：从哪个下标开始，如果找到返回项目所在下标
+lastIndexOf(item, start?)，item：查找项，start：从哪个下标开始，如果找到返回元素所在下标
 
 ```js
 let arr = [1, 2, 3, 1];
@@ -75,6 +78,114 @@ arr.lastIndexOf(1, 1); // 返回：0
 
 // 从下标为 1 开始查找元素 1 所在下标
 arr.lastIndexOf(1, -1); // 返回：3
+```
+
+6. reduce 高阶函数
+
+reduce(fn(total, curValue, curIndex?, arr?), initValue?)，fn：叠加器，参数：total 叠加值，curValue 当前值，curIndex 当前下标，arr 原数组，initValue：初始值。当没有 initValue 是，total 的初始值为 arr[0]。
+
+6.1 数组求和
+
+```js
+let arr = [1, 2, 3];
+arr.reduce((total, curValue) => total + curValue); // 返回：6
+```
+
+6.2 初始值 10，数组求和
+
+```js
+let arr = [1, 2, 3];
+arr.reduce((total, curValue) => total + curValue, 10); // 返回：16
+```
+
+6.3 数组去重
+
+```js
+let arr = [
+  { id: 1, name: "小明" },
+  { id: 2, name: "小红" },
+  { id: 1, name: "小明" },
+  { id: 2, name: "小红" },
+];
+arr.reduce((total, curValue) => {
+  const has = total.filter((item) => item.id == curValue.id);
+  if (!has.length) {
+    total.push(curValue);
+  }
+  return total;
+}, []); // 返回：[{ id: 1, name: "小明" },{ id: 2, name: "小红" }]
+```
+
+6.4 二维转一维
+
+```js
+let arr = [1, [2, 3], [4, 5, 6]];
+arr.reduce((total, curValue) => total.concat(curValue), []); // 返回： [1, 2, 3, 4, 5, 6]
+```
+
+6.5 多维转一维
+
+```js
+let arr = [1, [2, 3], [4, [5, 6]]];
+const flatArr = (arr) => {
+  return arr.reduce((total, curValue) => {
+    return total.concat(Array.isArray(curValue) ? flatArr(curValue) : curValue);
+  }, []);
+};
+flatArr(arr); // 返回：[1, 2, 3, 4, 5, 6]
+```
+
+7. map 遍历
+
+map(callback(curValue, curIndex?, arr?))，curValue 当前值，curIndex 当前下标，arr 原数组
+
+```js
+let arr = [1, 2, 3];
+arr.map((item) => item + 1); // 返回：[2,3,4]
+```
+
+8. filter 筛选
+
+filter(callback(curValue, curIndex?, arr?))，curValue 当前值，curIndex 当前下标，arr 原数组。
+
+满足筛选条件，callback 内返回 true，filter 返回满足条件元素组成的数组。
+
+```js
+let arr = [1, 2, 3];
+arr.filter((item) => item > 1); // 返回：[2,3]
+```
+
+9. every 判断
+
+every(callback(curValue, curIndex?, arr?))，curValue 当前值，curIndex 当前下标，arr 原数组。
+
+判断所用数组元素满足规定条件，满足返回 true，有一个不满足返回 false
+
+```js
+let arr = [1, 2, 3];
+arr.every((item) => item > 1); // 返回：false
+```
+
+10. some 判断
+
+some(callback(curValue, curIndex?, arr?))，curValue 当前值，curIndex 当前下标，arr 原数组。
+
+判断数组元素是否有一个满足规定条件，都不满足返回 false，有满足返回 true
+
+```js
+let arr = [1, 2, 3];
+arr.some((item) => item > 1); // 返回：true
+```
+
+11. forEach 纯遍历，无返回
+
+forEach(callback(curValue, curIndex?, arr?))，curValue 当前值，curIndex 当前下标，arr 原数组。
+
+```js
+let arr = [1, 2, 3];
+arr.forEach(item => {
+  // TODO
+})
 ```
 
 二：改变原数组的方法
@@ -169,31 +280,32 @@ sort(fn?)，fn：可选参数，规定排序顺序，必须是函数。
 
 如果需要按照其他规则排序，需要提供函数，函数一般有两个参数：a，b。数组中 a 的下标小于 b。比较两个参数，如果需要换位置则返回大于 0 的值。
 
- <!-- 数组方法 -->
-
 ```js
-// 排序 从大到小
-arr.sort((num1, num2) => num1 - num2); // 返回：[1,2,3]，改变原数组 [1,2,3]
+// 默认排序，不会区分各十百位
+let arr = [2, 1, 21, 11, 4, 31, 3];
+arr.sort(); // arr：[1,11,2,21,3,32,4] 返回：[1,11,2,21,3,32,4]
 
-// 反转排序
-arr.reverse(); // 返回：[3,2,1]，改变原数组 [3,2,1]
+// 从小到大排序
+let arr = [2, 1, 21, 11, 4, 31, 3];
+arr.sort((a, b) => a - b); // arr：[1,2,3,4,11,21,31] 返回：[1,2,3,4,11,21,31]
 
-// 将数组的所有元素"缩减"为一个单独的值
-// reduce()方法接受一个回调函数作为参数，该回调函数可以接受四个参数：累加器（accumulator）、当前值（current value）、当前索引（current index）和原始数组（original array）。
-// reduce()方法可选第二个参数是累加器默认值，默认为0。
-// 回调函数通过对每个元素的操作来更新累加器的值，并返回更新后的累加器。
-arr.reduce((accumulator, currentValue) => {
-  return accumulator + currentValue;
-}, 0); // 6
+// 从大到小排序
+let arr = [2, 1, 21, 11, 4, 31, 3];
+arr.sort((a, b) => b - a); // arr：[31,21,11,4,3,2,1] 返回：[31,21,11,4,3,2,1]
+
+// 对象数组按特定属性大小排序
+// 按 sort 从小到大排序
+let arr = [
+  { name: "小明", sort: 10 },
+  { name: "小红", sort: 1 },
+  { name: "小李", sort: 21 },
+];
+arr.sort((a, b) => a.sort - b.sort); // arr：[{name: "小红",sort: 1},{name: "小明",sort: 10},{name: "小李",sort: 21}] 返回：[{name: "小红",sort: 1},{name: "小明",sort: 10},{name: "小李",sort: 21}]
 ```
 
-<!-- 数组遍历 -->
+7. reverse 顺序颠倒
 
 ```js
-// item：子项，index：下标，self：遍历的数组
-arr.map((item, index, self) => item + 1) // 返回：[2,3,4]
-arr.filter((item, index, self) => item > 1) // 返回：[2,3]
-arr.every((item, index, self) => item > 1) // 返回：false
-arr.some((item, index.self) => item > 1) // 返回：true
-arr.forEach((item, index self) => { item + 2 }) // 没有返回体，只是遍历数组
+let arr = [1, 2, 3];
+arr.reverse(); // arr：[3,2,1] 返回：[3,2,1]
 ```
