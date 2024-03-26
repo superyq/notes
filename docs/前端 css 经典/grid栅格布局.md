@@ -361,31 +361,388 @@ grid-template: repeat(3, 100px) / repeat(3, 100px);
 
 9. grid-auto-flow
 
-改变布局顺序
+定义栅格元素的排列规则：row、column、row dense、column dense。
+
+9.1 row
+
+默认水平顺序排列
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  grid-auto-flow: column;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/19.jpg"/>
+
+9.2 column
+
+垂直顺序排序
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  grid-auto-flow: column;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/20.jpg"/>
 
 10. justify-items
 
-单元格内容水平位置：start、end、center、stretch
+单元格内容水平位置设置：stretch、start、end、center
 
-10. align-items
+10.1 stretch
 
-单元格内容垂直位置：start、end、center、stretch
+默认单元格内容水平填充单元格
 
-11. place-items
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  justify-items: stretch;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/24.jpg"/>
+
+10.2 start
+
+单元格内容水平靠右
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  justify-items: start;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/21.jpg"/>
+
+10.3 end
+
+单元格内容水平靠左
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  justify-items: end;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/22.jpg"/>
+
+10.4 center
+
+单元格内容水平居中
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  justify-items: center;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/23.jpg"/>
+
+11. align-items
+
+单元格内容垂直位置：stretch、start、end、center
+
+11.1 stretch
+
+单元格内容垂直填充
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  align-items: stretch;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/24.jpg"/>
+
+11.2 start
+
+单元格内容垂直靠上
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  align-items: start;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/25.jpg"/>
+
+11.3 end
+
+单元格内容垂直靠下
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  align-items: end;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/26.jpg"/>
+
+11.4 center
+
+单元格内容垂直居中
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  align-items: center;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/27.jpg"/>
+
+12. place-items
 
 是 align-items 属性和 justify-items 属性的合并简写形式。如果省略第二个值，则浏览器认为与第一个值相等。
+
+设置单元格内容垂直和水平居中
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  place-items: center;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/28.jpg"/>
 
 12. justify-content
 
 容器内容水平位置：start、end、center、stretch、space-around、space-between、space-evenly
 
-12. align-content
+12.1 start
 
-容器垂直位置：start、end、center、stretch、space-around、space-between、space-evenly
+默认容器内容水平靠左
 
-13. place-content
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  justify-content: start;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/29.jpg"/>
+
+12.2 end
+
+默认容器内容水平靠右
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  justify-content: end;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/30.jpg"/>
+
+12.3 center
+
+默认容器内容水平居中
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  justify-content: center;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/31.jpg"/>
+
+12.4 space-around
+
+默认容器内容水平平均分布，项目间距是项目距离容器边框的两倍
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  justify-content: space-around;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/32.jpg"/>
+
+12.5 space-between
+
+默认容器内容水平平均分布，靠近容器边框项目紧贴容器，其余水平项目平均间距
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  justify-content: space-between;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/33.jpg"/>
+
+12.6 space-evenly
+
+默认容器内容水平平均分布，项目间距和项目距离容器边框间距相等
+
+```scss
+.container {
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 200px);
+  justify-content: space-evenly;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/34.jpg"/>
+
+13. align-content
+
+容器内容垂直位置：start、end、center、stretch、space-around、space-between、space-evenly，同 justify-content 属性一致。一般需要给容器设置固定高度。align-content 属性才有效。
+
+设置容器内容垂直居中
+
+```scss
+.container {
+  height: 500px;
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 100px);
+  align-content: center;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/35.jpg"/>
+
+14. place-content
 
 是 align-content 属性和 justify-content 属性的合并简写形式。如果省略第二个值，浏览器就会假定第二个值等于第一个值。
+
+设置容器内容水平居中，垂直居中。
+
+```scss
+.container {
+  height: 500px;
+  background: green;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 200px);
+  grid-template-rows: repeat(3, 100px);
+  place-content: center;
+  span {
+    border: 1px solid;
+  }
+}
+```
+
+<img src="../../images/grid/36.jpg"/>
 
 三 项目属性
 
@@ -396,56 +753,6 @@ grid-template: repeat(3, 100px) / repeat(3, 100px);
 1. grid-row-start、grid-row-end
 
 上边框、下边框所在的水平网格线
-
-1.  容器属性
-
-```scss
-.container {
-  width: 500px;
-  height: 500px;
-  /* 容器的类型为块元素grid还是行内元素inline-grid */
-  display: grid;
-  border: 1px solid;
-
-  /* 设置列和列宽：auto-fill，屏幕每行容纳最多的200px的盒子 */
-  grid-template-columns: repeat(auto-fill, 200px);
-  /* fr：剩余空间平均后的一等分 */
-  /* grid-template-columns: 200px 1fr 2fr 3fr; */
-  /* minmax：最大和最小尺寸，如下 最小300px，最大2fr */
-  /* grid-template-columns: 1fr 1fr minmax(300px, 2fr) */
-  /* auto：宽度自适应 */
-  /* grid-template-columns: 100px auto 100px; */
-
-  /* 设置 行间距 列间距 */
-  grid-gap: 10px 20px;
-
-  /* 设置行高：设置每列高度都为200px */
-  grid-auto-rows: 200px;
-  /* 单独设置每列的行高 */
-  /* grid-template-rows: 100px 200px; */
-
-  /* 设置区域命名，同子项目里的grid-area使用 */
-  grid-template-areas:
-    ". header header"
-    "sidebar content content";
-  // header子项目占了两份
-  .header {
-    grid-area: header;
-  }
-
-  // 单元格内容水平位置
-  justify-items: start | end | center | stretch;
-  // 单元格内容垂直位置
-  align-items: start | end | center | stretch;
-
-  // 整个内容区域在容器里面的水平位置
-  justify-content: start | end | center | stretch | space-around | space-between
-    | space-evenly;
-  // 整个内容区域的垂直位置
-  align-content: start | end | center | stretch | space-around | space-between |
-    space-evenly;
-}
-```
 
 2. 项目属性
 
