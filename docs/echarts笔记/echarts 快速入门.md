@@ -755,6 +755,1121 @@ ECharts 4 之前一直以来的数据声明方式仍然被正常支持，如果�
 
 一些特殊的非 table 格式的图表，如 treemap、graph、lines 等，现在仍不支持在 dataset 中设置，仍然需要使用 series.data。另外，对于巨大数据量的渲染（如百万以上的数据量），需要使用 appendData 进行增量加载，这种情况不支持使用 dataset。
 
+4. 数据转换
+
+“数据转换” 这个词指的是，给定一个已有的“数据集”（dataset）和一个“转换方法”（transform），echarts 能生成一个新的“数据集”，然后可以使用这个新的“数据集”绘制图表。
+
+4.1 数据转换基础使用
+
+在 echarts 中，数据转换是依托于数据集（dataset）来实现的. 我们可以设置 dataset.transform 来表示，此 dataset 的数据，来自于此 transform 的结果。
+
+下面是上述例子的效果，三个饼图分别显示了 2011、2012、2013 年的数据。
+
+```js
+var option = {
+  dataset: [
+    {
+      // 这个 dataset 的 index 是 `0`。
+      source: [
+        ["Product", "Sales", "Price", "Year"],
+        ["Cake", 123, 32, 2011],
+        ["Cereal", 231, 14, 2011],
+        ["Tofu", 235, 5, 2011],
+        ["Dumpling", 341, 25, 2011],
+        ["Biscuit", 122, 29, 2011],
+        ["Cake", 143, 30, 2012],
+        ["Cereal", 201, 19, 2012],
+        ["Tofu", 255, 7, 2012],
+        ["Dumpling", 241, 27, 2012],
+        ["Biscuit", 102, 34, 2012],
+        ["Cake", 153, 28, 2013],
+        ["Cereal", 181, 21, 2013],
+        ["Tofu", 395, 4, 2013],
+        ["Dumpling", 281, 31, 2013],
+        ["Biscuit", 92, 39, 2013],
+        ["Cake", 223, 29, 2014],
+        ["Cereal", 211, 17, 2014],
+        ["Tofu", 345, 3, 2014],
+        ["Dumpling", 211, 35, 2014],
+        ["Biscuit", 72, 24, 2014],
+      ],
+      // id: 'a'
+    },
+    {
+      // 这个 dataset 的 index 是 `1`。
+      // 这个 `transform` 配置，表示，此 dataset 的数据，来自于此 transform 的结果。
+      transform: {
+        type: "filter",
+        config: { dimension: "Year", value: 2011 },
+      },
+      // 我们还可以设置这些可选的属性： `fromDatasetIndex` 或 `fromDatasetId`。
+      // 这些属性，指定了，transform 的输入，来自于哪个 dataset。例如，
+      // `fromDatasetIndex: 0` 表示输入来自于 index 为 `0` 的 dataset 。又例如，
+      // `fromDatasetId: 'a'` 表示输入来自于 `id: 'a'` 的 dataset。
+      // 当这些属性都不指定时，默认认为，输入来自于 index 为 `0` 的 dataset 。
+    },
+    {
+      // 这个 dataset 的 index 是 `2`。
+      // 同样，这里因为 `fromDatasetIndex` 和 `fromDatasetId` 都没有被指定，
+      // 那么输入默认来自于 index 为 `0` 的 dataset 。
+      transform: {
+        // 这个类型为 "filter" 的 transform 能够遍历并筛选出满足条件的数据项。
+        type: "filter",
+        // 每个 transform 如果需要有配置参数的话，都须配置在 `config` 里。
+        // 在这个 "filter" transform 中，`config` 用于指定筛选条件。
+        // 下面这个筛选条件是：选出维度（ dimension ）'Year' 中值为 2012 的所有
+        // 数据项。
+        config: { dimension: "Year", value: 2012 },
+      },
+    },
+    {
+      // 这个 dataset 的 index 是 `3`。
+      transform: {
+        type: "filter",
+        config: { dimension: "Year", value: 2013 },
+      },
+    },
+  ],
+  series: [
+    {
+      type: "pie",
+      radius: 50,
+      center: ["25%", "50%"],
+      // 这个饼图系列，引用了 index 为 `1` 的 dataset 。也就是，引用了上述
+      // 2011 年那个 "filter" transform 的结果。
+      datasetIndex: 1,
+    },
+    {
+      type: "pie",
+      radius: 50,
+      center: ["50%", "50%"],
+      datasetIndex: 2,
+    },
+    {
+      type: "pie",
+      radius: 50,
+      center: ["75%", "50%"],
+      datasetIndex: 3,
+    },
+  ],
+};
+```
+
+<!-- 7 -->
+
+4.2 数据转换的进阶使用
+
+transform 可以被链式声明，这是一个语法糖。
+
+```js
+option = {
+  dataset: [
+    {
+      source: [
+        // 原始数据
+      ],
+    },
+    {
+      // 几个 transform 被声明成 array ，他们构成了一个链，
+      // 前一个 transform 的输出是后一个 transform 的输入。
+      transform: [
+        {
+          type: "filter",
+          config: { dimension: "Product", value: "Tofu" },
+        },
+        {
+          type: "sort",
+          config: { dimension: "Year", order: "desc" },
+        },
+      ],
+    },
+  ],
+  series: {
+    type: "pie",
+    // 这个系列引用上述 transform 的结果。
+    datasetIndex: 1,
+  },
+};
+```
+
+在大多数场景下，transform 只需输出一个 data 。但是也有一些场景，需要输出多个 data ，每个 data 可以被不同的 series 或者 dataset 所使用。例如，在内置的 "boxplot" transform 中，除了 boxplot 系列所需要的 data 外，离群点（ outlier ）也会被生成，并且可以用例如散点图系列显示出来。例如，example。
+
+```js
+option = {
+  dataset: [
+    {
+      // 这个 dataset 的 index 为 `0`。
+      source: [
+        // 原始数据
+      ],
+    },
+    {
+      // 这个 dataset 的 index 为 `1`。
+      transform: {
+        type: "boxplot",
+      },
+      // 这个 "boxplot" transform 生成了两个数据：
+      // result[0]: boxplot series 所需的数据。
+      // result[1]: 离群点数据。
+      // 当其他 series 或者 dataset 引用这个 dataset 时，他们默认只能得到
+      // result[0] 。
+      // 如果想要他们得到 result[1] ，需要额外声明如下这样一个 dataset ：
+    },
+    {
+      // 这个 dataset 的 index 为 `2`。
+      // 这个额外的 dataset 指定了数据来源于 index 为 `1` 的 dataset。
+      fromDatasetIndex: 1,
+      // 并且指定了获取 transform result[1] 。
+      fromTransformResult: 1,
+    },
+  ],
+  xAxis: {
+    type: "category",
+  },
+  yAxis: {},
+  series: [
+    {
+      name: "boxplot",
+      type: "boxplot",
+      // Reference the data from result[0].
+      // 这个 series 引用 index 为 `1` 的 dataset 。
+      datasetIndex: 1,
+    },
+    {
+      name: "outlier",
+      type: "scatter",
+      // 这个 series 引用 index 为 `2` 的 dataset 。
+      // 从而也就得到了上述的 transform result[1] （即离群点数据）
+      datasetIndex: 2,
+    },
+  ],
+};
+```
+
+dataset.fromTransformResult 和 dataset.transform 能同时出现在一个 dataset 中，这表示，这个 transform 的输入，是上游的结果中以 fromTransformResult 获取的结果。例如：
+
+```js
+{
+  fromDatasetIndex: 1,
+  fromTransformResult: 1,
+  transform: {
+    type: 'sort',
+    config: { dimension: 2, order: 'desc' }
+  }
+}
+```
+
+使用 transform 时，有时候我们会配不对，显示不出来结果，并且不知道哪里错了。所以，这里提供了一个配置项 transform.print 方便 debug 。这个配置项只在开发环境中生效。
+
+```js
+option = {
+  dataset: [
+    {
+      source: [],
+    },
+    {
+      transform: {
+        type: "filter",
+        config: {},
+        // 配置为 `true` 后， transform 的结果
+        // 会被 console.log 打印出来。
+        print: true,
+      },
+    },
+  ],
+  // ...
+};
+```
+
+4.3 数据转换器 "filter"
+
+echarts 内置提供了能起过滤作用的数据转换器。我们只需声明 transform.type: "filter"，以及给出数据筛选条件。如下例：
+
+```js
+option = {
+  dataset: [
+    {
+      source: [
+        ["Product", "Sales", "Price", "Year"],
+        ["Cake", 123, 32, 2011],
+        ["Latte", 231, 14, 2011],
+        ["Tofu", 235, 5, 2011],
+        ["Milk Tee", 341, 25, 2011],
+        ["Porridge", 122, 29, 2011],
+        ["Cake", 143, 30, 2012],
+        ["Latte", 201, 19, 2012],
+        ["Tofu", 255, 7, 2012],
+        ["Milk Tee", 241, 27, 2012],
+        ["Porridge", 102, 34, 2012],
+        ["Cake", 153, 28, 2013],
+        ["Latte", 181, 21, 2013],
+        ["Tofu", 395, 4, 2013],
+        ["Milk Tee", 281, 31, 2013],
+        ["Porridge", 92, 39, 2013],
+        ["Cake", 223, 29, 2014],
+        ["Latte", 211, 17, 2014],
+        ["Tofu", 345, 3, 2014],
+        ["Milk Tee", 211, 35, 2014],
+        ["Porridge", 72, 24, 2014],
+      ],
+    },
+    {
+      transform: {
+        type: "filter",
+        config: { dimension: "Year", "=": 2011 },
+        // 这个筛选条件表示，遍历数据，筛选出维度（ dimension ）
+        // 'Year' 上值为 2011 的所有数据项。
+      },
+    },
+  ],
+  series: {
+    type: "pie",
+    datasetIndex: 1,
+  },
+};
+```
+
+config.dimension 指定了维度，能设成这样的值：
+| 设定成声明在 dataset 中的维度名，例如 config: { dimension: 'Year', '=': 2011 }。不过， dataset 中维度名的声明并非强制，所以我们也可以
+| 设定成 dataset 中的维度 index （index 值从 0 开始）例如 config: { dimension: 3, '=': 2011 }。
+
+关系操作符，可以设定这些： >（gt）、>=（gte）、<（lt）、<=（lte）、=（eq）、!=（ne、<>）、reg。（小括号中的符号或名字，是别名，设置起来作用相同）。他们首先基本地能基于数值大小进行比较，然后也有些额外的功能特性：
+| 多个关系操作符能声明在一个 {} 中，例如 { dimension: 'Price', '>=': 20, '<': 30 }。这表示“与”的关系，即，筛选出价格大于等于 20 小于 30 的数据项。
+| data 里的值，不仅可以是数值（ number ），也可以是“类数值的字符串”（“ numeric string ”）。“类数值的字符串”本身是一个字符串，但是可以被转换为字面所描述的数值，例如 ' 123 '。转换过程中，空格（全角半角空格）和换行符都能被消除（ trim ）。
+| 如果我们需要对日期对象（JS Date）或者日期字符串（如 '2012-05-12'）进行比较，我们需要手动指定 parser: 'time'，例如 config: { dimension: 3, lt: '2012-05-12', parser: 'time' }。
+| 纯字符串比较也被支持，但是只能用在 = 或 != 上。而 >, >=, <, <= 并不支持纯字符串比较，也就是说，这四个操作符的右值，不能是字符串。
+| reg 操作符能提供正则表达式比较。例如， { dimension: 'Name', reg: /\s+Müller\s\*$/ } 能在 'Name' 维度上选出姓 'Müller' 的数据项。
+
+我们也支持了逻辑比较操作符 与或非（ and | or | not ）：
+
+```js
+option = {
+  dataset: [
+    {
+      source: [
+        // ...
+      ],
+    },
+    {
+      transform: {
+        type: "filter",
+        config: {
+          // 使用 and 操作符。
+          // 类似地，同样的位置也可以使用 “or” 或 “not”。
+          // 但是注意 “not” 后应该跟一个 {...} 而非 [...] 。
+          and: [
+            { dimension: "Year", "=": 2011 },
+            { dimension: "Price", ">=": 20, "<": 30 },
+          ],
+        },
+        // 这个表达的是，选出 2011 年价格大于等于 20 但小于 30 的数据项。
+      },
+    },
+  ],
+  series: {
+    type: "pie",
+    datasetIndex: 1,
+  },
+};
+```
+
+and/or/not 自然可以被嵌套，例如：
+
+```js
+transform: {
+  type: 'filter',
+  config: {
+    or: [{
+      and: [{
+        dimension: 'Price', '>=': 10, '<': 20
+      }, {
+        dimension: 'Sales', '<': 100
+      }, {
+        not: { dimension: 'Product', '=': 'Tofu' }
+      }]
+    }, {
+      and: [{
+        dimension: 'Price', '>=': 10, '<': 20
+      }, {
+        dimension: 'Sales', '<': 100
+      }, {
+        not: { dimension: 'Product', '=': 'Cake' }
+      }]
+    }]
+  }
+}
+```
+
+还可以指定“解析器”（ parser ）来对值进行解析后再做比较。现在支持的解析器有：
+| parser: 'time'：把原始值解析成时间戳（ timestamp ）后再做比较。这个解析器的行为，和 echarts.time.parse 相同，即，当原始值为时间对象（ JS Date 实例），或者是时间戳，或者是描述时间的字符串（例如 '2012-05-12 03:11:22' ），都可以被解析为时间戳，然后就可以基于数值大小进行比较。如果原始数据是其他不可解析为时间戳的值，那么会被解析为 NaN。
+| parser: 'trim'：如果原始数据是字符串，则把字符串两端的空格（全角半角）和换行符去掉。如果不是字符串，还保持为原始数据。
+| parser: 'number'：强制把原始数据转成数值。如果不能转成有意义的数值，那么转成 NaN。在大多数场景下，我们并不需要这个解析器，因为按默认策略，“像数值的字符串”就会被转成数值。但是默认策略比较严格，这个解析器比较宽松，如果我们遇到含有尾缀的字符串（例如 '33%', 12px），我们需要手动指定 parser: 'number'，从而去掉尾缀转为数值才能比较。
+
+这个例子显示了如何使用 parser: 'time'：
+
+```js
+option = {
+  dataset: [
+    {
+      source: [
+        ["Product", "Sales", "Price", "Date"],
+        ["Milk Tee", 311, 21, "2012-05-12"],
+        ["Cake", 135, 28, "2012-05-22"],
+        ["Latte", 262, 36, "2012-06-02"],
+        ["Milk Tee", 359, 21, "2012-06-22"],
+        ["Cake", 121, 28, "2012-07-02"],
+        ["Latte", 271, 36, "2012-06-22"],
+        // ...
+      ],
+    },
+    {
+      transform: {
+        type: "filter",
+        config: {
+          dimension: "Date",
+          ">=": "2012-05",
+          "<": "2012-06",
+          parser: "time",
+        },
+      },
+    },
+  ],
+};
+```
+
+4.4 数据转换器 "sort"
+
+"sort" 是另一个内置的数据转换器，用于排序数据。目前主要能用于在类目轴（ axis.type: 'category' ）中显示排过序的数据。例如：
+
+```js
+option = {
+  dataset: [
+    {
+      dimensions: ["name", "age", "profession", "score", "date"],
+      source: [
+        [" Hannah Krause ", 41, "Engineer", 314, "2011-02-12"],
+        ["Zhao Qian ", 20, "Teacher", 351, "2011-03-01"],
+        [" Jasmin Krause ", 52, "Musician", 287, "2011-02-14"],
+        ["Li Lei", 37, "Teacher", 219, "2011-02-18"],
+        [" Karle Neumann ", 25, "Engineer", 253, "2011-04-02"],
+        [" Adrian Groß", 19, "Teacher", null, "2011-01-16"],
+        ["Mia Neumann", 71, "Engineer", 165, "2011-03-19"],
+        [" Böhm Fuchs", 36, "Musician", 318, "2011-02-24"],
+        ["Han Meimei ", 67, "Engineer", 366, "2011-03-12"],
+      ],
+    },
+    {
+      transform: {
+        type: "sort",
+        // 按分数排序
+        config: { dimension: "score", order: "asc" },
+        print: true,
+      },
+    },
+  ],
+  xAxis: { type: "category" },
+  yAxis: {},
+  series: [
+    {
+      type: "bar",
+      datasetIndex: 1,
+      encode: {
+        x: "name",
+        y: "score",
+      },
+    },
+  ],
+  // ...
+};
+```
+
+<!-- 9 -->
+
+数据转换器 "sort" 还有一些额外的功能：
+
+可以多重排序，多个维度一起排序。见下面的例子。
+
+排序规则是这样的：
+| 默认按照数值大小排序。其中，“可转为数值的字符串”也被转换成数值，和其他数值一起按大小排序。
+| 对于其他“不能转为数值的字符串”，也能在它们之间按字符串进行排序。这个特性有助于这种场景：把相同标签的数据项排到一起，尤其是当多个维度共同排序时。见下面的例子。
+| 当“数值及可转为数值的字符串”和“不能转为数值的字符串”进行排序时，或者它们和“其他类型的值”进行比较时，它们本身是不知如何进行比较的。那么我们称呼“后者”为“incomparable”，并且可以设置 incomparable: 'min' | 'max' 来指定一个“incomparable”在这个比较中是最大还是最小，从而能使它们能产生比较结果。这个设定的用途，比如可以是，决定空值（例如 null, undefined, NaN, '', '-'）在排序的头还是尾。
+
+解析器 parser: 'time' | 'trim' | 'number' 可以被使用，和数据转换器 "filter" 中的情况一样。
+| 如果要对时间进行排序（例如，值为 JS Date 实例或者时间字符串如 '2012-03-12 11:13:54'），我们需要声明 parser: 'time'。
+| 如果需要对有后缀的数值进行排序（如 '33%', '16px'）我们需要声明 parser: 'number'。
+
+这是一个“多维度排序”的例子。
+
+```js
+option = {
+  dataset: [
+    {
+      dimensions: ["name", "age", "profession", "score", "date"],
+      source: [
+        [" Hannah Krause ", 41, "Engineer", 314, "2011-02-12"],
+        ["Zhao Qian ", 20, "Teacher", 351, "2011-03-01"],
+        [" Jasmin Krause ", 52, "Musician", 287, "2011-02-14"],
+        ["Li Lei", 37, "Teacher", 219, "2011-02-18"],
+        [" Karle Neumann ", 25, "Engineer", 253, "2011-04-02"],
+        [" Adrian Groß", 19, "Teacher", null, "2011-01-16"],
+        ["Mia Neumann", 71, "Engineer", 165, "2011-03-19"],
+        [" Böhm Fuchs", 36, "Musician", 318, "2011-02-24"],
+        ["Han Meimei ", 67, "Engineer", 366, "2011-03-12"],
+      ],
+    },
+    {
+      transform: {
+        type: "sort",
+        config: [
+          // 对两个维度按声明的优先级分别排序。
+          { dimension: "profession", order: "desc" },
+          { dimension: "score", order: "desc" },
+        ],
+      },
+    },
+  ],
+  series: {
+    type: "bar",
+    datasetIndex: 1,
+  },
+  //...
+};
+```
+
+5. 坐标轴
+
+5.1 x 轴、y 轴
+
+x 轴和 y 轴都由轴线、刻度、刻度标签、轴标题四个部分组成。部分图表中还会有网格线来帮助查看和计算数据
+
+<!-- 10 -->
+
+普通的二维数据坐标系都有 x 轴和 y 轴，通常情况下，x 轴显示在图表的底部，y 轴显示在左侧，一般配置如下：
+
+```js
+option = {
+  xAxis: {
+    // ...
+  },
+  yAxis: {
+    // ...
+  },
+};
+```
+
+x 轴常用来标示数据的维度，维度一般用来指数据的类别，是观察数据的角度，例如“销售时间” “销售地点” “产品名称”等。y 轴常常用来标示数据的数值，数值是用来具体考察某一类数据的数量值，也是我们需要分析的指标，例如“销售数量”和“销售金额”等。
+
+```js
+option = {
+  xAxis: {
+    type: "time",
+    name: "销售时间",
+    // ...
+  },
+  yAxis: {
+    type: "value",
+    name: "销售数量",
+    // ...
+  },
+  // ...
+};
+```
+
+当 x 轴（水平坐标轴）跨度很大，可以采用区域缩放方式灵活显示数据内容。
+
+```js
+option = {
+  xAxis: {
+    type: "time",
+    name: "销售时间",
+    // ...
+  },
+  yAxis: {
+    type: "value",
+    name: "销售数量",
+    // ...
+  },
+  dataZoom: [
+    // ...
+  ],
+  // ...
+};
+```
+
+在二维数据中，轴也可以有多个。ECharts 中一般情况下单个 grid 组件最多只能放两个 x/y 轴，多于两个 x/y 轴需要通过配置 offset 属性防止同个位置多个轴的重叠。两个 x 轴显示在上下，两个 y 轴显示在左右两侧。
+
+```js
+option = {
+  xAxis: {
+    type: "time",
+    name: "销售时间",
+    // ...
+  },
+  yAxis: [
+    {
+      type: "value",
+      name: "销售数量",
+      // ...
+    },
+    {
+      type: "value",
+      name: "销售金额",
+      // ...
+    },
+  ],
+  // ...
+};
+```
+
+5.2 轴线
+
+ECharts 提供了轴线 axisLine 相关的配置，我们可以根据实际情况调整，例如轴线两端的箭头，轴线的样式等。
+
+```js
+option = {
+  xAxis: {
+    axisLine: {
+      symbol: "arrow",
+      lineStyle: {
+        type: "dashed",
+        // ...
+      },
+    },
+    // ...
+  },
+  yAxis: {
+    axisLine: {
+      symbol: "arrow",
+      lineStyle: {
+        type: "dashed",
+        // ...
+      },
+    },
+  },
+  // ...
+};
+```
+
+5.3 刻度
+
+ECharts 提供了轴线 axisTick 相关的配置，我们可以根据实际情况调整，例如刻度线的长度，样式等。
+
+```js
+option = {
+  xAxis: {
+    axisTick: {
+      length: 6,
+      lineStyle: {
+        type: "dashed",
+        // ...
+      },
+    },
+    // ...
+  },
+  yAxis: {
+    axisTick: {
+      length: 6,
+      lineStyle: {
+        type: "dashed",
+        // ...
+      },
+    },
+  },
+  // ...
+};
+```
+
+5.4 刻度标签
+
+ECharts 提供了轴线 axisLabel 相关的配置，我们可以根据实际情况调整，例如文字对齐方式，自定义刻度标签内容等。
+
+```js
+option = {
+  xAxis: {
+    axisLabel: {
+      formatter: "{value} kg",
+      align: "center",
+      // ...
+    },
+    // ...
+  },
+  yAxis: {
+    axisLabel: {
+      formatter: "{value} 元",
+      align: "center",
+      // ...
+    },
+  },
+  // ...
+};
+```
+
+5.5 示例
+
+图左侧的 y 轴代表东京月平均气温，右侧的 y 轴表示东京降水量，x 轴表示时间。两组 y 轴在一起，反映了平均气温和降水量间的趋势关系。
+
+```js
+option = {
+  tooltip: {
+    trigger: "axis",
+    axisPointer: { type: "cross" },
+  },
+  legend: {},
+  xAxis: [
+    {
+      type: "category",
+      axisTick: {
+        alignWithLabel: true,
+      },
+      data: [
+        "1月",
+        "2月",
+        "3月",
+        "4月",
+        "5月",
+        "6月",
+        "7月",
+        "8月",
+        "9月",
+        "10月",
+        "11月",
+        "12月",
+      ],
+    },
+  ],
+  yAxis: [
+    {
+      type: "value",
+      name: "降水量",
+      min: 0,
+      max: 250,
+      position: "right",
+      axisLabel: {
+        formatter: "{value} ml",
+      },
+    },
+    {
+      type: "value",
+      name: "温度",
+      min: 0,
+      max: 25,
+      position: "left",
+      axisLabel: {
+        formatter: "{value} °C",
+      },
+    },
+  ],
+  series: [
+    {
+      name: "降水量",
+      type: "bar",
+      yAxisIndex: 0,
+      data: [6, 32, 70, 86, 68.7, 100.7, 125.6, 112.2, 78.7, 48.8, 36.0, 19.3],
+    },
+    {
+      name: "温度",
+      type: "line",
+      smooth: true,
+      yAxisIndex: 1,
+      data: [
+        6.0, 10.2, 10.3, 11.5, 10.3, 13.2, 14.3, 16.4, 18.0, 16.5, 12.0, 5.2,
+      ],
+    },
+  ],
+};
+```
+
+<!-- 11 -->
+
+6. 视觉映射
+
+数据可视化是数据到视觉元素的映射过程（这个过程也可称为视觉编码，视觉元素也可称为视觉通道）。
+ECharts 的每种图表本身就内置了这种映射过程，比如折线图把数据映射到“线”，柱状图把数据映射到“长度”。一些更复杂的图表，如关系图、事件河流图、树图也都会做出各自内置的映射。
+此外，ECharts 还提供了 visualMap 组件 来提供通用的视觉映射。visualMap 组件中可以使用的视觉元素有：
+| 图形类别（symbol）、图形大小（symbolSize）
+| 颜色（color）、透明度（opacity）、颜色透明度（colorAlpha）、
+| 颜色明暗度（colorLightness）、颜色饱和度（colorSaturation）、色调（colorHue）
+
+6.1 数据和维度
+
+ECharts 中的数据，一般存放于 series.data 中。根据图表类型不同，数据的具体形式也可能有些许差异。比如可能是“线性表“、“树“、“图“等。但他们都有个共性：都是“数据项（dataItem）“的集合。每个数据项含有“数据值（value）“和其他信息（如果需要的话）。每个数据值，可以是单一的数值（一维）或者一个数组（多维）。
+
+例如，series.data 最常见的形式，是“线性表“，即一个普通数组：
+
+```js
+series: {
+  data: [
+    {
+      // 这里每一个项就是数据项（dataItem）
+      value: 2323, // 这是数据项的数据值（value）
+      itemStyle: {},
+    },
+    1212, // 也可以直接是 dataItem 的 value，这更常见。
+    2323, // 每个 value 都是“一维“的。
+    4343,
+    3434,
+  ];
+}
+```
+
+```js
+series: {
+  data: [
+    {
+      // 这里每一个项就是数据项（dataItem）
+      value: [3434, 129, "圣马力诺"], // 这是数据项的数据值（value）
+      itemStyle: {},
+    },
+    [1212, 5454, "梵蒂冈"], // 也可以直接是 dataItem 的 value，这更常见。
+    [2323, 3223, "瑙鲁"], // 每个 value 都是“三维“的，每列是一个维度。
+    [4343, 23, "图瓦卢"], // 假如是“气泡图“，常见第一维度映射到x轴，
+    // 第二维度映射到y轴，
+    // 第三维度映射到气泡半径（symbolSize）
+  ];
+}
+```
+
+在图表中，往往默认把 value 的前一两个维度进行映射，比如取第一个维度映射到 x 轴，取第二个维度映射到 y 轴。如果想要把更多的维度展现出来，可以借助 visualMap。最常见的情况，散点图（scatter） 使用半径展现了第三个维度。
+
+6.2 visualMap 组件
+
+visualMap 组件定义了把数据的哪个维度映射到什么视觉元素上。现在提供如下两种类型的 visualMap 组件，通过 visualMap.type 来区分。
+
+其定义结构例如：
+
+```js
+option = {
+  visualMap: [
+    // 可以同时定义多个 visualMap 组件。
+    {
+      // 第一个 visualMap 组件
+      type: "continuous", // 定义为连续型 visualMap
+      // ...
+    },
+    {
+      // 第二个 visualMap 组件
+      type: "piecewise", // 定义为分段型 visualMap
+      // ...
+    },
+  ],
+  // ...
+};
+```
+
+7. 图例
+
+图例是图表中对内容区元素的注释、用不同形状、颜色、文字等来标示不同数据列，通过点击对应数据列的标记，可以显示或隐藏该数据列。图例虽然不是图表中的主要信息、却是了解图表信息的钥匙。
+
+7.1 布局
+
+图例一般放在图表的右上角、也可以放在图表的底部、同一页面中的所有图例位置保持一致，可以横排对齐也可以纵排对齐。还要综合考虑整体的图表空间是适合哪种摆放方式。当图表纵向空间紧张或者内容区量过大的时候、建议摆放在图表的下方。下面是几种图例的摆放方式：
+
+```js
+option = {
+  legend: {
+    // Try 'horizontal'
+    orient: "vertical",
+    right: 10,
+    top: "center",
+  },
+  dataset: {
+    source: [
+      ["product", "2015", "2016", "2017"],
+      ["Matcha Latte", 43.3, 85.8, 93.7],
+      ["Milk Tea", 83.1, 73.4, 55.1],
+      ["Cheese Cocoa", 86.4, 65.2, 82.5],
+      ["Walnut Brownie", 72.4, 53.9, 39.1],
+    ],
+  },
+  xAxis: { type: "category" },
+  yAxis: {},
+  series: [{ type: "bar" }, { type: "bar" }, { type: "bar" }],
+};
+```
+
+对于图例较多时，可以使用可滚动翻页的图例
+
+```js
+option = {
+  legend: {
+    type: "scroll",
+    orient: "vertical",
+    right: 10,
+    top: 20,
+    bottom: 20,
+    data: ["图例一", "图例二", "图例三" /* ... */, , "图例n"],
+    // ...
+  },
+  // ...
+};
+```
+
+7.2 样式
+
+在深色系背景下、为了方便阅读，建议给图例加上半透明的浅色背景层，文字颜色设置为浅色。
+
+```js
+option = {
+  legend: {
+    data: ["图例一", "图例二", "图例三"],
+    backgroundColor: "#ccc",
+    textStyle: {
+      color: "#ccc",
+      // ...
+    },
+    // ...
+  },
+  // ...
+};
+```
+
+7.3 交互
+
+根据场景需要，图例可支持交互操作，点击控制显示或隐藏对应的数据列；
+
+```js
+option = {
+  legend: {
+    data: ["图例一", "图例二", "图例三"],
+    selected: {
+      图例一: true,
+      图例二: true,
+      图例三: false,
+    },
+    // ...
+  },
+  // ...
+};
+```
+
+7.4 图例注意事项
+
+图例要注意视情况使用，有些双轴图包含了多种图表类型，不同类型的图例样式要有所区分。
+
+```js
+option = {
+  legend: {
+    data: [
+      {
+        name: "图例一",
+        icon: "rect",
+      },
+      {
+        name: "图例二",
+        icon: "circle",
+      },
+      {
+        name: "图例三",
+        icon: "pin",
+      },
+    ],
+    // ...
+  },
+  series: [
+    {
+      name: "图例一",
+      // ...
+    },
+    {
+      name: "图例二",
+      // ...
+    },
+    {
+      name: "图例三",
+      // ...
+    },
+  ],
+  // ...
+};
+```
+
+8. 事件与行为
+
+在 Apache ECharts 的图表中用户的操作将会触发相应的事件。开发者可以监听这些事件，然后通过回调函数做相应的处理，比如跳转到一个地址，或者弹出对话框，或者做数据下钻等等。
+
+ECharts 中的事件名称对应 DOM 事件名称，均为小写的字符串，如下是一个绑定点击操作的示例。
+
+```js
+myChart.on("click", function (params) {
+  // 控制台打印数据的名称
+  console.log(params.name);
+});
+```
+
+在 ECharts 中事件分为两种类型，一种是用户鼠标操作点击，或者 hover 图表的图形时触发的事件，还有一种是用户在使用可以交互的组件后触发的行为事件，例如在切换图例开关时触发的 'legendselectchanged' 事件（这里需要注意切换图例开关是不会触发 'legendselected' 事件的），数据区域缩放时触发的 'datazoom' 事件等等。
+
+8.1 鼠标事件的处理
+
+ECharts 支持常规的鼠标事件类型，包括 'click'、 'dblclick'、 'mousedown'、 'mousemove'、 'mouseup'、 'mouseover'、 'mouseout'、 'globalout'、 'contextmenu' 事件。下面先来看一个简单的点击柱状图后打开相应的百度搜索页面的示例。
+
+```js
+// 基于准备好的dom，初始化ECharts实例
+// var myChart = echarts.init(document.getElementById('main'));
+
+// 指定图表的配置项和数据
+var option = {
+  xAxis: {
+    data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"],
+  },
+  yAxis: {},
+  series: [
+    {
+      name: "销量",
+      type: "bar",
+      data: [5, 20, 36, 10, 10, 20],
+    },
+  ],
+};
+// 使用刚指定的配置项和数据显示图表。
+myChart.setOption(option);
+// 处理点击事件并且跳转到相应的百度搜索页面
+myChart.on("click", function (params) {
+  window.open("https://www.baidu.com/s?wd=" + encodeURIComponent(params.name));
+});
+```
+
+如何区分鼠标点击到了哪里：
+
+```js
+myChart.on("click", function (params) {
+  if (params.componentType === "markPoint") {
+    // 点击到了 markPoint 上
+    if (params.seriesIndex === 5) {
+      // 点击到了 index 为 5 的 series 的 markPoint 上。
+    }
+  } else if (params.componentType === "series") {
+    if (params.seriesType === "graph") {
+      if (params.dataType === "edge") {
+        // 点击到了 graph 的 edge（边）上。
+      } else {
+        // 点击到了 graph 的 node（节点）上。
+      }
+    }
+  }
+});
+```
+
+8.2 组件交互的行为事件
+
+在 ECharts 中基本上所有的组件交互行为都会触发相应的事件，常用的事件和事件对应参数在 events 文档中有列出。
+
+下面是监听一个图例开关的示例：
+
+```js
+// 图例开关的行为只会触发 legendselectchanged 事件
+myChart.on("legendselectchanged", function (params) {
+  // 获取点击图例的选中状态
+  var isSelected = params.selected[params.name];
+  // 在控制台中打印
+  console.log((isSelected ? "选中了" : "取消选中了") + "图例" + params.name);
+  // 打印所有图例的状态
+  console.log(params.selected);
+});
+```
+
+代码触发 ECharts 中组件的行为
+
+上面提到诸如 'legendselectchanged' 事件会由组件交互的行为触发，那除了用户的交互操作，有时候也会有需要在程序里调用方法触发图表的行为，诸如显示 tooltip，选中图例。
+
+在 ECharts 通过调用 myChart.dispatchAction({ type: '' }) 触发图表行为，统一管理了所有动作，也可以方便地根据需要去记录用户的行为路径。
+
+常用的动作和动作对应参数在 action 文档中有列出。
+
+下面示例演示了如何通过 dispatchAction 去轮流高亮饼图的每个扇形。
+
+```js
+option = {
+  title: {
+    text: "饼图程序调用高亮示例",
+    left: "center",
+  },
+  tooltip: {
+    trigger: "item",
+    formatter: "{a} <br/>{b} : {c} ({d}%)",
+  },
+  legend: {
+    orient: "vertical",
+    left: "left",
+    data: ["直接访问", "邮件营销", "联盟广告", "视频广告", "搜索引擎"],
+  },
+  series: [
+    {
+      name: "访问来源",
+      type: "pie",
+      radius: "55%",
+      center: ["50%", "60%"],
+      data: [
+        { value: 335, name: "直接访问" },
+        { value: 310, name: "邮件营销" },
+        { value: 234, name: "联盟广告" },
+        { value: 135, name: "视频广告" },
+        { value: 1548, name: "搜索引擎" },
+      ],
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: "rgba(0, 0, 0, 0.5)",
+        },
+      },
+    },
+  ],
+};
+
+let currentIndex = -1;
+
+setInterval(function () {
+  var dataLen = option.series[0].data.length;
+  // 取消之前高亮的图形
+  myChart.dispatchAction({
+    type: "downplay",
+    seriesIndex: 0,
+    dataIndex: currentIndex,
+  });
+  currentIndex = (currentIndex + 1) % dataLen;
+  // 高亮当前图形
+  myChart.dispatchAction({
+    type: "highlight",
+    seriesIndex: 0,
+    dataIndex: currentIndex,
+  });
+  // 显示 tooltip
+  myChart.dispatchAction({
+    type: "showTip",
+    seriesIndex: 0,
+    dataIndex: currentIndex,
+  });
+}, 1000);
+```
+
+<!-- 13 -->
+
+8.4 监听“空白处”的事件
+
+有时候，开发者需要监听画布的“空白处”所触发的事件。比如，当需要在用户点击“空白处”的时候重置图表时。在讨论这个功能之前，我们需要先明确两种事件。zrender 事件和 echarts 事件。
+
+```js
+myChart.getZr().on("click", function (event) {
+  // 该监听器正在监听一个`zrender 事件`。
+});
+myChart.on("click", function (event) {
+  // 该监听器正在监听一个`echarts 事件`。
+});
+```
+
+zrender 事件与 echarts 事件不同。前者是当鼠标在任何地方都会被触发，而后者是只有当鼠标在图形元素上时才能被触发。事实上，echarts 事件是在 zrender 事件的基础上实现的，也就是说，当一个 zrender 事件在图形元素上被触发时，echarts 将触发一个 echarts 事件给开发者。
+
+有了 zrender 事件，我们就可以实现监听空白处的事件，具体如下：
+
+```js
+myChart.getZr().on("click", function (event) {
+  // 没有 target 意味着鼠标/指针不在任何一个图形元素上，它是从“空白处”触发的。
+  if (!event.target) {
+    // 点击在了空白处，做些什么。
+  }
+});
+```
+
 三：基础配置项
 
 1. title 标题组件
