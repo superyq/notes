@@ -1872,29 +1872,238 @@ myChart.getZr().on("click", function (event) {
 
 三：基础配置项
 
-1. title 标题组件
+大部分 echarts 样式都可以通过配置项解决，可以自行参考详细的配置项，[echarts 配置项](https://echarts.apache.org/zh/option.html#title)，本文档只作常用配置介绍。
+
+1. xAxis x 轴 | yAxis y 轴
+
+直角坐标系中的 x 轴，y 轴，两个选项的配置一模一样。
+
+```js
+let option = {
+  xAxis: {
+    type: "category", // 轴类型：'value' 数值轴，适用于连续数据 | 'category' 类目轴，适用于离散的类目数据 | 'time' 时间轴，适用于连续的时序数据 | 'log' 对数轴。适用于对数数据。
+    data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"], // 类目数据，在类目轴（type: 'category'）中有效。
+    show: true, // 是否显示：默认 true
+    position: "bottom", // x 轴的位置：'top' | 'bottom'
+    name: "x 轴的名字", // 轴名称
+    nameLocation: "center", // 轴名称显示位置 'start' | 'middle' 或者 'center' | 'end'
+    nameGap: 15, // 轴名称与轴线之间的距离
+    nameRotate: 30, // 轴名字旋转，角度值
+    axisLine: {
+      // 轴线配置
+      show: true,
+      lineStyle: {}, // 轴线样式设置
+    },
+    axisTick: {
+      // 轴刻度配置
+      show: true,
+      alignWithLabel: false, // 刻度线和标签是否对齐
+      inside: true, // 轴刻度是否朝内
+      length: 5, // 轴刻度长度
+      lineStyle: {}, // 轴刻度样式设置
+    },
+    axisLabel: {
+      // 刻度标签
+      show: true,
+      interval: "auto", // 刻度标签间隔显示：0 强制全显示 | 1 间隔一个刻度标签显示 | 2 间隔两个刻度标签显示
+      inside: false, // 刻度标签是否朝内
+      rotate: 30, // 刻度标签旋转的角度
+    },
+    splitLine: {
+      // 区域中的分隔线
+      show: true,
+    },
+  },
+  yAxis: {},
+  series: [
+    {
+      name: "销量",
+      type: "bar",
+      data: [5, 20, 36, 10, 10, 20],
+    },
+  ],
+};
+```
+
+2. series 系列列表
+
+每个系列通过 type 决定自己的图表类型。
+
+```js
+let option = {
+  series: [
+    {
+      type: "line", // 折线/面积图
+    },
+    {
+      type: "bar", // 柱状图
+    },
+    {
+      type: "pie", // 饼图
+    },
+    {
+      type: "scatter", // 散点（气泡）图
+    },
+    {
+      type: "effectScatter", // 带有涟漪特效动画的散点（气泡）图
+    },
+    {
+      type: "radar", // 雷达图
+    },
+    {
+      type: "tree", // 树图
+    },
+    {
+      type: "sunburst", // 旭日图
+    },
+    {
+      type: "candlestick", // K线图
+    },
+    {
+      type: "heatmap", // 热力图
+    },
+    {
+      type: "map", // 地图
+    },
+    {
+      type: "parallel", // 平行坐标系
+    },
+    {
+      type: "lines", // 路径图
+    },
+    {
+      type: "graph", // 关系图
+    },
+    {
+      type: "sankey", // 桑基图
+    },
+    {
+      type: "funnel", // 漏斗图
+    },
+    {
+      type: "gauge", // 仪表盘
+    },
+    {
+      type: "pictorialBar", // 象形柱图
+    },
+    {
+      type: "themeRiver", // 主题河流
+    },
+    {
+      type: "custom", // 自定义系列
+    },
+  ],
+};
+```
+
+3. title 标题组件
 
 包含主标题和副标题
 
-2. legend 图例组件
+```js
+option = {
+  xAxis: {
+    data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"],
+  },
+  yAxis: {},
+  series: [
+    {
+      name: "销量",
+      type: "bar",
+      data: [5, 20, 36, 10, 10, 20],
+    },
+  ],
+  title: {
+    // 主标题和副标题
+    show: true, // 是否显示
+    text: "主标题", // 主标题文本，支持使用 \n 换行
+    link: "http://www.baidu.com", // 主标题文本超链接
+    target: "blank", // 打开主标题超链接。方式：'self' 当前窗口打开 | 'blank' 新窗口打开
+    subtext: "副标题", // 副标题文本，支持使用 \n 换行
+    sublink: "http://wwww.4399.com", // 副标题文本超链接
+    subtarget: "blank", // 打开副标题超链接 'self' 当前窗口打开 | 'blank' 新窗口打开
+  },
+};
+```
 
-展示不同系列的标记、颜色、名字，可以通过点击控制系列的显示和隐藏。
+<!-- 15 -->
 
-3. grid 绘图网格
+4. legend 图例组件
 
-单个 grid 最多可以放置上下两个 X 轴，左右两个 Y 轴，可以在网格上绘制折线图，柱状图，散点图。
+展示不同系列的图例，系列必须设置有 name 属性，可以通过点击控制系列的显示和隐藏。
 
-4. xAxis x 轴
+```js
+let option = {
+  xAxis: {
+    data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"],
+  },
+  yAxis: {},
+  series: [
+    {
+      name: "销量",
+      type: "bar",
+      data: [5, 20, 36, 10, 10, 20],
+    },
+  ],
+  legend: {
+    type: "plain", // 图例的类型：'plain' 普通图例 | 'scroll' 可滚动图例
+    left: "auto", // 图例距离容器左侧距离
+    top: "auto", // 图例距离容器左侧距离
+    right: "auto", // 图例距离容器左侧距离
+    bottom: "auto", // 图例距离容器左侧距离
+    itemGap: 10, // 图例间距
+    formatter: function (name) {
+      // 格式化图例文本
+      return "Legend" + name;
+    },
+    selectedMode: true, // 图例选择模式：true | false | 'single' | 'multiple'
+    icon: "circle", // 图例项 icon：'circle' | 'rect' | 'roundRect' | 'triangle' | 'diamond' | 'pin' | 'arrow' | 'none'
+  },
+};
+```
 
-单个 grid 最多可以放置上下两个 X 轴，多于两个 x 轴需要通过配置 offset 属性防止同个位置多个 x 轴的重叠。
+<!-- 16 -->
 
-5. yAxis y 轴
+5. tooltip 提示框
 
-单个 grid 最多可以放置左右两个 Y 轴，多于两个 y 轴需要通过配置 offset 属性防止同个位置多个 y 轴的重叠。
+提示框可以在很多地方设置，可以设置全局的 tooltip、坐标系中 grid.tooltip、系列中 series.tooltip、系列每个数据项中 series.data.tooltip
 
-6. polar 极坐标系
+
+
+6. grid 绘图网格
+
+直角坐标系内绘图网格，可以通过该配置设置网格的位置和大小
+
+```js
+let option = {
+  xAxis: {
+    data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"],
+  },
+  yAxis: {},
+  series: [
+    {
+      name: "销量",
+      type: "bar",
+      data: [5, 20, 36, 10, 10, 20],
+    },
+  ],
+  grid: {
+    show: true,
+    left: "10%",
+    width: "100px",
+  },
+};
+```
+
+<!-- 17 -->
+
+1. polar 极坐标系
 
 用于散点图和折线图，每个极坐标系拥有一个角度轴和一个半径轴。
+
+```js
+
+```
 
 7. radiusAxis 极坐标系的径向轴
 
@@ -1911,8 +2120,6 @@ myChart.getZr().on("click", function (event) {
 11. visualMap 视觉映射
 
 用于进行『视觉编码』，也就是将数据映射到视觉元素（视觉通道）。
-
-12. tooltip 提示框
 
 13. axisPointer 坐标轴指示器
 
@@ -1955,10 +2162,6 @@ myChart.getZr().on("click", function (event) {
 24. aria
 
 支持自动根据图表配置项智能生成描述，使得盲人可以在朗读设备的帮助下了解图表内容，让图表可以被更多人群访问。
-
-25. series 系列列表
-
-每个系列通过 type 决定自己的图表类型。
 
 26. darkMode 是否是暗黑模式
 
