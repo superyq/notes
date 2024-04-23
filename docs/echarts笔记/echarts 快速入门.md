@@ -179,7 +179,9 @@ onMounted(() => {
 });
 onUnmounted(() => {
   myChart.setOption({
-    echartsInstance: false,
+    echartsInstance: {
+      dispose: false,
+    },
   });
   window.removeEventListener("resize", resize);
 });
@@ -2068,7 +2070,34 @@ let option = {
 
 提示框可以在很多地方设置，可以设置全局的 tooltip、坐标系中 grid.tooltip、系列中 series.tooltip、系列每个数据项中 series.data.tooltip
 
+字符串模板变量有 {a}，{b}，{c}，{d}，{e} 分别表示系列名、数据名、数据值等。当有多系列时可以通过{a0}, {a1}, {a2}等。
 
+不同图表类型下的 {a}，{b}，{c}，{d} 含义不一样。 其中变量{a}, {b}, {c}, {d}在不同图表类型下代表数据含义为：
+
+折线（区域）图、柱状（条形）图、K 线图 : {a}（系列名称），{b}（类目值），{c}（数值）, {d}（无）
+散点图（气泡）图 : {a}（系列名称），{b}（数据名称），{c}（数值数组）, {d}（无）
+地图 : {a}（系列名称），{b}（区域名称），{c}（合并数值）, {d}（无）
+饼图、仪表盘、漏斗图: {a}（系列名称），{b}（数据项名称），{c}（数值）, {d}（百分比）
+
+```js
+let option = {
+  xAxis: { data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"] },
+  yAxis: {},
+  series: [
+    {
+      name: "销量",
+      type: "bar",
+      data: [5, 20, 36, 10, 10, 20],
+    },
+  ],
+  tooltip: {
+    position: [10, 10], // 提示框位置：相对于容器左侧 10px, 上侧 10 px
+    formatter: "{a0}<br />{b0}: {c0}", // 提示框浮层内容格式器，支持字符串模板和回调函数
+  },
+};
+```
+
+<!-- 19 -->
 
 6. grid 绘图网格
 
@@ -2088,143 +2117,102 @@ let option = {
     },
   ],
   grid: {
-    show: true,
-    left: "10%",
-    width: "100px",
+    top: "10%", // grid 组件离容器上侧的距离
+    left: "20%", // grid 组件离容器左侧的距离
+    width: "400px", // grid 组件的宽度，默认自适应
   },
 };
 ```
 
 <!-- 17 -->
 
-1. polar 极坐标系
-
-用于散点图和折线图，每个极坐标系拥有一个角度轴和一个半径轴。
-
-```js
-
-```
-
-7. radiusAxis 极坐标系的径向轴
-
-8. angleAxis 极坐标系的角度轴。
-
-9. radar 雷达图坐标系
-
-只适用于雷达图。
-
-10. dataZoom 区域缩放
-
-能自由关注细节的数据信息，或者概览数据整体，或者去除离群点的影响。
-
-11. visualMap 视觉映射
-
-用于进行『视觉编码』，也就是将数据映射到视觉元素（视觉通道）。
-
-13. axisPointer 坐标轴指示器
-
-14. toolbox 工具栏
+7. toolbox 工具栏
 
 内置有导出图片，数据视图，动态类型切换，数据区域缩放，重置五个工具。
 
-15. brush 区域选择
+```js
+let option = {
+  xAxis: { data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"] },
+  yAxis: {},
+  series: [
+    {
+      name: "销量",
+      type: "bar",
+      data: [5, 20, 36, 10, 10, 20],
+    },
+  ],
+  toolbox: {
+    show: true,
+    feature: {
+      // 各工具配置项。除了各个内置的工具按钮外，还可以自定义工具按钮。
+      dataZoom: {
+        // 数据区域缩放。目前只支持直角坐标系的缩放。
+        yAxisIndex: "none",
+      },
+      dataView: { readOnly: false }, // 数据视图工具，可以展现当前图表所用的数据，编辑后可以动态更新。
+      magicType: { type: ["line", "bar"] }, // 动态类型切换
+      restore: {}, // 配置项还原
+      saveAsImage: {}, // 保存为图片
+    },
+  },
+};
+```
 
-用户可以选择图中一部分数据，从而便于向用户展示被选中数据，或者他们的一些统计计算结果。
+<!-- 20 -->
 
-16. geo 地理坐标系
+8. dataset 数据集
 
-地理坐标系组件用于地图的绘制，支持在地理坐标系上绘制散点图，线集。
+数据可以单独管理，被多个组件复用，并且可以自由指定数据到视觉的映射。
 
-17. parallel 平行坐标系
+8.1 dataset.source
 
-一种常用的可视化高维数据的图表。
+二维数组，其中第一行/列可以给出 维度名，也可以不给出，直接就是数据：
 
-18. parallelAxis 平行坐标系中的坐标轴
+```js
+[
+  ["product", "2015", "2016", "2017"],
+  ["Matcha Latte", 43.3, 85.8, 93.7],
+  ["Milk Tea", 83.1, 73.4, 55.1],
+  ["Cheese Cocoa", 86.4, 65.2, 82.5],
+  ["Walnut Brownie", 72.4, 53.9, 39.1],
+];
+```
 
-19. singleAxis 单轴
+按行的 key-value 形式（对象数组），其中键（key）表明了 维度名：
 
-可以被应用到散点图中展现一维数据。
+```js
+[
+  { product: "Matcha Latte", count: 823, score: 95.8 },
+  { product: "Milk Tea", count: 235, score: 81.4 },
+  { product: "Cheese Cocoa", count: 1042, score: 91.2 },
+  { product: "Walnut Brownie", count: 988, score: 76.9 },
+];
+```
 
-20. timeline
+按列的 key-value 形式，每一项表示二维表的 “一列”：
 
-提供了在多个 ECharts option 间进行切换、播放等操作的功能。
+```js
+{
+  'product': ['Matcha Latte', 'Milk Tea', 'Cheese Cocoa', 'Walnut Brownie'],
+  'count': [823, 235, 1042, 988],
+  'score': [95.8, 81.4, 91.2, 76.9]
+}
+```
 
-21. graphic 原生图形元素
+8.2 dataset.dimensions
 
-可以支持的图形元素包括：image, text, circle, sector, ring, polygon, polyline, rect, line, bezierCurve, arc, group。
+使用 dimensions 定义 series.data 或者 dataset.source 的每个维度的信息。
 
-22. calendar 日历坐标系
-
-23. dataset 数据集
-
-数据可以单独管理，被多个组件复用，并且可以自由指定数据到视觉的映射。这在不少场景下能带来使用上的方便。
-
-24. aria
-
-支持自动根据图表配置项智能生成描述，使得盲人可以在朗读设备的帮助下了解图表内容，让图表可以被更多人群访问。
-
-26. darkMode 是否是暗黑模式
-
-默认会根据背景色 backgroundColor 的亮度自动设置。 如果是设置了容器的背景色而无法判断到，就可以使用该配置手动指定，echarts 会根据是否是暗黑模式调整文本等的颜色。该配置通常会被用于主题中。
-
-27. color 调色盘颜色列表
-
-如果系列没有设置颜色，则会依次循环从该列表中取颜色作为系列颜色。 默认为：['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']
-
-28. backgroundColor 背景色
-
-默认无背景。
-
-29. textStyle 全局的字体样式。
-
-30. animation 是否开启动画。
-
-31. animationThreshold 是否开启动画的阈值
-
-当单个系列显示的图形数量大于这个阈值时会关闭动画。
-
-32. animationDuration 初始动画的时长
-
-支持回调函数，可以通过每个数据返回不同的时长实现更戏剧的初始动画效果
-
-33. animationEasing 初始动画的缓动效果
-
-34. animationDelay 初始动画的延迟
-
-支持回调函数，可以通过每个数据返回不同的 delay 时间实现更戏剧的初始动画效果。
-
-35. animationDurationUpdate 数据更新动画的时长
-
-支持回调函数，可以通过每个数据返回不同的时长实现更戏剧的更新动画效果。
-
-36. animationEasingUpdate 数据更新动画的缓动效果
-
-37. animationDelayUpdate 数据更新动画的延迟
-
-支持回调函数，可以通过每个数据返回不同的 delay 时间实现更戏剧的更新动画效果。
-
-38. stateAnimation 状态切换的动画配置
-
-支持在每个系列里设置单独针对该系列的配置。
-
-39. blendMode 图形的混合模式
-
-默认为 'source-over'。 支持每个系列单独设置。'lighter' 也是比较常见的一种混合模式，该模式下图形数量集中的区域会颜色叠加成高亮度的颜色（白色）。常常能起到突出该区域的效果。
-
-40. hoverLayerThreshold 图形数量阈值
-
-决定是否开启单独的 hover 层，在整个图表的图形数量大于该阈值时开启单独的 hover 层。
-
-41. useUTC 是否使用 UTC 时间
-
-默认取值为 false，即使用本地时间。
-
-42. options 用于 timeline
-
-用于 timeline 的 option 数组。数组的每一项是一个 echarts option (ECUnitOption)。
-
-43. media 移动端自适应
-
-四：基础应用
-
-1. 柱状图
+```js
+let option = {
+  xAxis: { data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"] },
+  yAxis: {},
+  series: [
+    {
+      name: "销量",
+      type: "bar",
+      data: [5, 20, 36, 10, 10, 20],
+    },
+  ],
+};
+```
