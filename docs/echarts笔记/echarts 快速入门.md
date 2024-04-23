@@ -2199,20 +2199,20 @@ let option = {
 }
 ```
 
-8.2 dataset.dimensions
-
-使用 dimensions 定义 series.data 或者 dataset.source 的每个维度的信息。
-
 ```js
 let option = {
-  xAxis: { data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"] },
-  yAxis: {},
-  series: [
-    {
-      name: "销量",
-      type: "bar",
-      data: [5, 20, 36, 10, 10, 20],
+  dataset: {
+    source: {
+      product: ["Matcha Latte", "Milk Tea", "Cheese Cocoa", "Walnut Brownie"],
+      count: [823, 235, 1042, 988],
+      score: [95.8, 81.4, 91.2, 76.9],
     },
-  ],
+  },
+  xAxis: { type: "category" },
+  yAxis: {},
+  legend: {},
+  series: [{ type: "bar" }, { type: "bar" }],
 };
 ```
+
+<!-- 21 -->
