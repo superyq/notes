@@ -1384,9 +1384,6 @@ console.log(result);
 通过 type 获取编辑器的 element 列表。
 
 ```js
-const editor = editorRef.value;
-if (editor == null) return;
-
 editor.getElemsByType("image"); // 所有图片
 editor.getElemsByType("link"); // 所有链接
 ```
@@ -1396,9 +1393,6 @@ editor.getElemsByType("link"); // 所有链接
 通过 type 前缀获取编辑器的 element 列表。
 
 ```js
-const editor = editorRef.value;
-if (editor == null) return;
-
 editor.getElemsByTypePrefix("header"); // 获取所有标题 header1 header2 header3...
 ```
 
