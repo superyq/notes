@@ -6,6 +6,8 @@
 
 1. 安装
 
+需要安装 @wangeditor/editor、@wangeditor/editor-for-vue@next 两个依赖
+
 ```bash
 # 安装 editor
 npm install @wangeditor/editor
@@ -45,9 +47,13 @@ pnpm add @wangeditor/editor-for-vue@next
         placeholder: "请输入内容...",
       },
     },
+    height: {
+      type: String,
+      default: "300px",
+    },
   });
-  const emits = defineEmits(["update:modelValue"]);
 
+  const emits = defineEmits(["update:modelValue"]);
   let valueHtml = computed({
     get() {
       return props.modelValue;
@@ -57,10 +63,17 @@ pnpm add @wangeditor/editor-for-vue@next
     },
   });
 
+  let style: any = computed(() => {
+    return {
+      height: props.height,
+      "overflow-y": "hidden",
+    };
+  });
+
   // 编辑器实例，必须用 shallowRef
   const editorRef = shallowRef();
 
-  // 内容 HTML
+  // 模式
   let mode = ref("default");
 
   // 组件销毁时，也及时销毁编辑器
@@ -84,7 +97,7 @@ pnpm add @wangeditor/editor-for-vue@next
       :mode="mode"
     />
     <Editor
-      style="height: 500px; overflow-y: hidden"
+      :style="style"
       v-model="valueHtml"
       :defaultConfig="editorConfig"
       :mode="mode"
@@ -108,7 +121,7 @@ pnpm add @wangeditor/editor-for-vue@next
   import { ref } from "vue";
   import Rich from "@/components/Rich.vue";
 
-  let richHtml = ref("asdf");
+  let richHtml = ref("");
 </script>
 
 <template>
@@ -124,14 +137,7 @@ pnpm add @wangeditor/editor-for-vue@next
 
 二：优势
 
-弃用了 document.execCommand API ，使用 slate.js（但不依赖 React）为内核，升级为 L1 能力。
-使用 vdom 技术（基于 snabbdom.js ）做视图更新，model 和 view 分离，增加稳定性。
-使用扩展插件和模块的机制，保证扩展性。
-wangEditor 有详细的中文文档，以及中文交流环境。
-wangEditor 内置了所有常见的富文本操作功能，能满足绝大部分使用需求。直接配置使用即可，无需再二次开发。
-wangEditor 基于 slate 内核开发，但不依赖于 React ，所以它本身是无框架依赖的。
-wangEditor 开源多年，大量用户使用和反馈，已经解决了很多问题。在 V5 版本测试过程中，也这些问题进行了重复测试，最大程度保证稳定性。
-wangEditor 早已不是作者单人作战，我们有多人团队，一起修复 bug 、升级功能、跟踪问题、社区答疑。
+使用 slate.js（但不依赖 React）为内核、强稳定性、高扩展性、有详细中文文档、可直接使用无需二次开发、不依赖框架。
 
 三：基础
 
@@ -141,6 +147,7 @@ wangEditor 早已不是作者单人作战，我们有多人团队，一起修复
 
 ```html
 <template>
+  <!-- 边框 -->
   <div class="editor-content-view">
     <!-- 工具栏 -->
     <Toolbar style="border-bottom: 1px solid #ccc" />
@@ -252,36 +259,22 @@ onBeforeUnmount(() => {
 
 五：配置和 API
 
+下面代码例子，都是以 components/Rich.vue 作为例子的基础上扩展功能。
+
 1. 工具栏配置
 
 1.1 getConfig
 
 通过 toolbar.getConfig() 查看工具栏的默认配置
 
-```html
-<script setup lang="ts">
-  import { DomEditor } from "@wangeditor/editor";
+```js
+import { DomEditor } from "@wangeditor/editor";
 
-  // 编辑器实例，必须用 shallowRef
-  const editorRef = shallowRef();
-
-  const handleClick = () => {
-    const editor = editorRef.value;
-    if (editor == null) return;
-
-    const toolbar = DomEditor.getToolbar(editor);
-    const curToolbarConfig = toolbar.getConfig();
-    console.log(curToolbarConfig);
-  };
-</script>
-
-<template>
-  <button @click="handleClick">点击查看</button>
-  <div class="editor-content-view">
-    <Toolbar />
-    <Editor />
-  </div>
-</template>
+const handleCreated = (editor) => {
+  const toolbar = DomEditor.getToolbar(editor);
+  const result = toolbar.getConfig();
+  console.log(result);
+};
 ```
 
 <!-- 2 -->
@@ -407,27 +400,13 @@ onBeforeUnmount(() => {
 
 通过 editor.getConfig() 查看工具栏的默认配置
 
-```html
-<script setup lang="ts">
-  // 编辑器实例，必须用 shallowRef
-  const editorRef = shallowRef();
+```js
+import { DomEditor } from "@wangeditor/editor";
 
-  const handleClick = () => {
-    const editor = editorRef.value;
-    if (editor == null) return;
-
-    const curEditorConfig = toolbar.getConfig();
-    console.log(curEditorConfig);
-  };
-</script>
-
-<template>
-  <button @click="handleClick">点击查看</button>
-  <div class="editor-content-view">
-    <Toolbar />
-    <Editor />
-  </div>
-</template>
+const handleCreated = (editor) => {
+  const result = editor.getConfig();
+  console.log(result);
+};
 ```
 
 <!-- 6 -->
@@ -529,11 +508,10 @@ onBeforeUnmount(() => {
 要配置哪个菜单，首先要知道这个菜单的 key 。执行 editor.getAllMenuKeys() 可获取编辑器所有菜单，从中找到自己想要的菜单 key 即可。
 
 ```js
-const editor = editorRef.value;
-if (editor == null) return;
-
-const menuKeys = editor.getAllMenuKeys();
-console.log(menuKeys);
+const handleCreated = (editor) => {
+  const result = editor.getAllMenuKeys();
+  console.log(result);
+};
 ```
 
 <!-- 7 -->
@@ -541,11 +519,10 @@ console.log(menuKeys);
 找到菜单 key 之后，可以先看看菜单的当前配置，再自行修改。
 
 ```js
-const editor = editorRef.value;
-if (editor == null) return;
-
-const result = editor.getMenuConfig("uploadImage"); // 获取 uploadImage 的当前配置
-console.log(result);
+const handleCreated = (editor) => {
+  const result = editor.getMenuConfig("uploadImage"); // 获取 uploadImage 的当前配置
+  console.log(result);
+};
 ```
 
 <!-- 8 -->
@@ -1256,11 +1233,10 @@ let editorConfig = ref({
 获取编辑器所有配置
 
 ```js
-const editor = editorRef.value;
-if (editor == null) return;
-
-const result = editor.getConfig();
-console.log(result);
+const handleCreated = (editor) => {
+  const result = editor.getConfig();
+  console.log(result);
+};
 ```
 
 <!-- 14 -->
@@ -1270,11 +1246,10 @@ console.log(result);
 获取编辑器所有 menu 的 key
 
 ```js
-const editor = editorRef.value;
-if (editor == null) return;
-
-const result = editor.getAllMenuKeys();
-console.log(result);
+const handleCreated = (editor) => {
+  const result = editor.getAllMenuKeys();
+  console.log(result);
+};
 ```
 
 <!-- 15 -->
@@ -1284,11 +1259,10 @@ console.log(result);
 获取单个 menu 的配置。
 
 ```js
-const editor = editorRef.value;
-if (editor == null) return;
-
-const result = editor.getMenuConfig("color");
-console.log(result);
+const handleCreated = (editor) => {
+  const result = editor.getMenuConfig("color");
+  console.log(result);
+};
 ```
 
 <!-- 16 -->
@@ -1298,9 +1272,6 @@ console.log(result);
 编辑器 alert ，可通过 customAlert 配置。
 
 ```js
-const editor = editorRef.value;
-if (editor == null) return;
-
 editor.alert("错误信息", "error");
 ```
 
@@ -1371,3 +1342,578 @@ console.log(result);
 ```
 
 <!-- 18 -->
+
+4.7 getText
+
+获取当前编辑器的纯文本内容
+
+```js
+const handleCreated = (editor) => {
+  const result = editor.getText();
+  console.log(result);
+};
+```
+
+4.8 setHtml
+
+重置编辑器的 HTML 内容。
+
+```js
+editor.setHtml("<p>hello</p>");
+```
+
+4.9 isEmpty
+
+判断当前编辑器内容是否为空（只有一个空段落）
+
+```js
+editor.isEmpty();
+```
+
+4.10 getSelectionText
+
+获取选中的文本
+
+```js
+const result = editor.getSelectionText();
+console.log(result);
+```
+
+4.11 getElemsByType
+
+通过 type 获取编辑器的 element 列表。
+
+```js
+const editor = editorRef.value;
+if (editor == null) return;
+
+editor.getElemsByType("image"); // 所有图片
+editor.getElemsByType("link"); // 所有链接
+```
+
+4.12 getElemsByTypePrefix
+
+通过 type 前缀获取编辑器的 element 列表。
+
+```js
+const editor = editorRef.value;
+if (editor == null) return;
+
+editor.getElemsByTypePrefix("header"); // 获取所有标题 header1 header2 header3...
+```
+
+4.13 deleteBackward
+
+向前删除，相当于按 backspace 键。
+
+```js
+editor.deleteBackward();
+```
+
+4.14 deleteForward
+
+向后删除，相当于按 delete 键
+
+```js
+editor.deleteForward();
+```
+
+4.15 deleteFragment
+
+删除选中的内容
+
+```js
+editor.deleteFragment();
+```
+
+4.16 getFragment
+
+获取选中的内容，json 格式
+
+```js
+editor.getFragment();
+```
+
+4.17 insertBreak
+
+在选区回车换行
+
+```js
+editor.insertBreak();
+```
+
+4.18 insertText
+
+在选区插入文本
+
+```js
+editor.insertText("aaaa");
+```
+
+4.19 dangerouslyInsertHtml
+
+插入富文本
+
+```js
+editor.dangerouslyInsertHtml(`<h1>标题</h1><p>文本 <b>加粗</b></p>`);
+```
+
+4.20 clear
+
+清空编辑器内容
+
+```js
+editor.clear();
+```
+
+4.21 undo
+
+撤销
+
+```js
+editor.undo();
+```
+
+4.22 redo
+
+重做
+
+```js
+editor.redo();
+```
+
+4.23 insertNode
+
+在选区插入一个节点
+
+```js
+const node = { type: "paragraph", children: [{ text: "simple text" }] };
+editor.insertNode(node);
+```
+
+4.24 insertNodes
+
+在选区插入多个节点
+
+```js
+import { SlateTransforms } from "@wangeditor/editor";
+
+const node1 = { type: "paragraph", children: [{ text: "aaa" }] };
+const node2 = { type: "paragraph", children: [{ text: "bbb" }] };
+const nodeList = [node1, node2];
+
+SlateTransforms.insertNodes(editor, nodeList);
+```
+
+4.25 removeNodes
+
+删除选区所在的节点
+
+```js
+import { SlateTransforms } from "@wangeditor/editor";
+
+SlateTransforms.removeNodes(editor);
+```
+
+4.26 获取选中节点
+
+可使用 SlateEditor.nodes 获取选中的节点。
+
+```js
+import { SlateEditor, SlateElement, SlateNode } from "@wangeditor/editor";
+
+const nodeEntries = SlateEditor.nodes(editor, {
+  match: (node) => {
+    if (SlateElement.isElement(node)) {
+      if (node.type === "paragraph") {
+        return true; // 匹配 paragraph
+      }
+    }
+    return false;
+  },
+  universal: true,
+});
+
+if (nodeEntries == null) {
+  console.log("当前未选中的 paragraph");
+} else {
+  for (let nodeEntry of nodeEntries) {
+    const [node, path] = nodeEntry;
+    console.log("选中了 paragraph 节点", node);
+    console.log("节点 path 是", path);
+  }
+}
+```
+
+4.27 setNodes
+
+设置选中节点的属性
+
+```js
+import { SlateTransforms } from "@wangeditor/editor";
+
+SlateTransforms.setNodes(
+  editor,
+  {
+    // @ts-ignore
+    textAlign: "right",
+  },
+  {
+    mode: "highest", // 针对最高层级的节点
+  }
+);
+```
+
+4.28 getParentNode
+
+获取一个节点的父节点
+
+```js
+const parentNode = editor.getParentNode(node); // 返回 node 或者 null
+```
+
+4.29 toDOMNode
+
+获取一个节点对应的 DOM 节点
+
+```js
+const elem = editor.toDOMNode(node); // 返回 HTMLElement
+```
+
+4.30 isInline
+
+判断一个节点是否是 inline
+
+```js
+const inline = editor.isInline(node);
+```
+
+4.31 isVoid
+
+判断一个节点是否是 void
+
+```js
+const void = editor.isVoid(node)
+```
+
+4.32 isText
+
+判断一个节点是否是 text
+
+```js
+import { SlateText } from "@wangeditor/editor";
+
+SlateText.isText(node); // true/false
+```
+
+4.33 isElement
+
+判断一个节点是否是 elem
+
+```js
+import { SlateElement } from "@wangeditor/editor";
+
+SlateElement.isElement(node); // true/false
+```
+
+4.34 addMark
+
+为选中的文本添加标记（文本样式）
+
+```js
+editor.addMark("bold", true); // 加粗
+editor.addMark("color", "#999"); // 文本颜色
+```
+
+4.35 removeMark
+
+对选中的文字，取消标记（文本样式）
+
+```js
+editor.removeMark("bold"); // 取消加粗
+```
+
+4.36 marks
+
+获取选中文字的标记（文本样式）
+
+```js
+import { SlateEditor } from "@wangeditor/editor";
+
+SlateEditor.marks(editor); // 例如 { bold: true, color: "#595959" }
+```
+
+4.37 id
+
+获取编辑器 id
+
+```js
+editor.id; // 如 'wangEditor-1'
+```
+
+4.38 isFullScreen
+
+编辑器是否全屏
+
+```js
+editor.isFullScreen; // true/false
+```
+
+4.39 focus
+
+聚焦到编辑器
+
+```js
+editor.focus();
+
+// editor.focus(true) // 选区定位到最后
+```
+
+4.40 blur
+
+失焦编辑器
+
+```js
+editor.blur();
+```
+
+4.41 isFocused
+
+判断当前编辑器是否聚焦？
+
+```js
+editor.isFocused(); // true/false
+```
+
+4.42 updateView
+
+强制更新视图
+
+```js
+editor.updateView();
+```
+
+4.43 scrollToElem
+
+滚动到指定元素，类似锚点。
+
+```js
+editor.scrollToElem(elemId);
+```
+
+4.44 showProgressBar
+
+显示进度条，一般用于上传功能
+
+```js
+editor.showProgressBar(progress); // progress 为 0-100 的数字
+```
+
+4.45 hidePanelOrModal
+
+隐藏当前的弹框 （如插入链接） 和下拉列表（如设置标题、设置字体）
+
+```js
+editor.hidePanelOrModal();
+```
+
+4.46 fullScreen
+
+设置为全屏
+
+```js
+editor.fullScreen();
+```
+
+4.47 unFullScreen
+
+取消全屏
+
+```js
+editor.unFullScreen();
+```
+
+4.48 disable
+
+禁用编辑器，设置为只读
+
+```js
+editor.disable();
+```
+
+4.49 isDisabled
+
+判断当前编辑器是否只读？
+
+```js
+editor.isDisabled(); // true/false
+```
+
+4.50 enable
+
+取消禁用，取消只读
+
+```js
+editor.enable();
+```
+
+4.51 destroy
+
+销毁编辑器和工具栏
+
+```js
+editor.destroy();
+```
+
+4.52 getEditableContainer
+
+获取编辑区域容器 DOM 节点
+
+```js
+editor.getEditableContainer();
+```
+
+4.53 selection
+
+获取编辑器当前的选区。如果未选中，则返回 null 。
+
+```js
+editor.selection; // selection 或 null
+```
+
+selection 数据结构如下：
+
+```json
+{
+  "anchor": { "path": [1, 0], "offset": 8 },
+  "focus": { "path": [1, 0], "offset": 10 }
+}
+```
+
+4.54 select
+
+选中一个指定的选区。
+
+```js
+const newSelection = {
+  anchor: { path: [1, 0], offset: 8 },
+  focus: { path: [1, 0], offset: 10 },
+};
+editor.select(newSelection);
+```
+
+5.55 selectAll
+
+选中所有内容
+
+```js
+editor.selectAll();
+```
+
+5.56 deselect
+
+取消选中
+
+```js
+editor.deselect();
+```
+
+5.57 move
+
+移动光标
+
+```js
+editor.move(3); // 移动 3 个字符
+```
+
+5.58 moveReverse
+
+反向移动光标
+
+```js
+editor.moveReverse(2); // 反向移动 2 个字符
+```
+
+5.59 restoreSelection
+
+恢复最近一次非 null 选区。如编辑器 blur 之后，再重新恢复选区。
+
+```js
+editor.restoreSelection();
+```
+
+5.60 isSelectedAll
+
+判断编辑器是否全部选中。
+
+```js
+editor.isSelectedAll(); // true/false
+```
+
+5.61 getSelectionPosition
+
+获取选区的定位，将视情况返回 left right top bottom 的其中几个。
+
+```js
+editor.getSelectionPosition(); // 例如 { left: "80.15px", top: "116px" }
+```
+
+5.62 getNodePosition
+
+获取某个节点的定位，将视情况返回 left right top bottom 的其中几个。
+
+```js
+editor.getNodePosition(node); // 例如 { left: "80.15px", top: "116px" }
+```
+
+5.63 on
+
+监听某个事件
+
+```js
+editor.on("event-key", fn);
+```
+
+5.64 off
+
+取消监听
+
+```js
+editor.off("event-key", fn);
+```
+
+5.65 once
+
+只监听一次
+
+```js
+editor.once("event-key", fn);
+```
+
+5.66 emit
+
+触发事件
+
+```js
+editor.emit("event-key");
+```
+
+5.67 内置的事件
+
+```js
+editor.on("fullScreen", () => {
+  console.log("fullScreen");
+});
+editor.on("unFullScreen", () => {
+  console.log("unFullScreen");
+});
+editor.on("scroll", () => {
+  console.log("scroll");
+});
+editor.on("modalOrPanelShow", (modalOrPanel) => {
+  console.log(modalOrPanel);
+});
+editor.on("modalOrPanelHide", () => {
+  console.log("modalOrPanelHide");
+});
+```
