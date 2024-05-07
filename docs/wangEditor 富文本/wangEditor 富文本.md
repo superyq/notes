@@ -401,8 +401,6 @@ const handleCreated = (editor) => {
 通过 editor.getConfig() 查看工具栏的默认配置
 
 ```js
-import { DomEditor } from "@wangeditor/editor";
-
 const handleCreated = (editor) => {
   const result = editor.getConfig();
   console.log(result);
@@ -1186,7 +1184,7 @@ let editorConfig = ref({
 });
 ```
 
-3.9.5 自定义上传
+3.11.5 自定义上传
 
 如果不想使用 wangEditor 自带的上传功能，例如你要上传到阿里云 OSS 。
 可以通过 customUpload 来自定义上传。
@@ -1206,10 +1204,10 @@ let editorConfig = ref({
 });
 ```
 
-3.9.6 自定义选择图片
+3.11.6 自定义选择视频
 
-如果不想使用 wangEditor 自带的选择文件功能，例如你有自己的图床，或者图片选择器。
-可以通过 customBrowseAndUpload 来自己实现选择图片、上传图片，并插入图片。
+如果不想使用 wangEditor 自带的选择文件功能，例如你有自己的图床，或者视频文件选择器。
+可以通过 customBrowseAndUpload 来自己实现选择视频、上传视频，并插入视频
 
 ```js
 let editorConfig = ref({
@@ -1334,9 +1332,6 @@ customAlert 配置
 editor.getHtml() 获取非格式化的 html
 
 ```js
-const editor = editorRef.value;
-if (editor == null) return;
-
 const result = editor.getHtml();
 console.log(result);
 ```
@@ -1796,7 +1791,7 @@ const newSelection = {
 editor.select(newSelection);
 ```
 
-5.55 selectAll
+4.55 selectAll
 
 选中所有内容
 
@@ -1804,7 +1799,7 @@ editor.select(newSelection);
 editor.selectAll();
 ```
 
-5.56 deselect
+4.56 deselect
 
 取消选中
 
@@ -1812,7 +1807,7 @@ editor.selectAll();
 editor.deselect();
 ```
 
-5.57 move
+4.57 move
 
 移动光标
 
@@ -1820,7 +1815,7 @@ editor.deselect();
 editor.move(3); // 移动 3 个字符
 ```
 
-5.58 moveReverse
+4.58 moveReverse
 
 反向移动光标
 
@@ -1828,7 +1823,7 @@ editor.move(3); // 移动 3 个字符
 editor.moveReverse(2); // 反向移动 2 个字符
 ```
 
-5.59 restoreSelection
+4.59 restoreSelection
 
 恢复最近一次非 null 选区。如编辑器 blur 之后，再重新恢复选区。
 
@@ -1836,7 +1831,7 @@ editor.moveReverse(2); // 反向移动 2 个字符
 editor.restoreSelection();
 ```
 
-5.60 isSelectedAll
+4.60 isSelectedAll
 
 判断编辑器是否全部选中。
 
@@ -1844,7 +1839,7 @@ editor.restoreSelection();
 editor.isSelectedAll(); // true/false
 ```
 
-5.61 getSelectionPosition
+4.61 getSelectionPosition
 
 获取选区的定位，将视情况返回 left right top bottom 的其中几个。
 
@@ -1852,7 +1847,7 @@ editor.isSelectedAll(); // true/false
 editor.getSelectionPosition(); // 例如 { left: "80.15px", top: "116px" }
 ```
 
-5.62 getNodePosition
+4.62 getNodePosition
 
 获取某个节点的定位，将视情况返回 left right top bottom 的其中几个。
 
@@ -1860,7 +1855,7 @@ editor.getSelectionPosition(); // 例如 { left: "80.15px", top: "116px" }
 editor.getNodePosition(node); // 例如 { left: "80.15px", top: "116px" }
 ```
 
-5.63 on
+4.63 on
 
 监听某个事件
 
@@ -1868,7 +1863,7 @@ editor.getNodePosition(node); // 例如 { left: "80.15px", top: "116px" }
 editor.on("event-key", fn);
 ```
 
-5.64 off
+4.64 off
 
 取消监听
 
@@ -1876,7 +1871,7 @@ editor.on("event-key", fn);
 editor.off("event-key", fn);
 ```
 
-5.65 once
+4.65 once
 
 只监听一次
 
@@ -1884,7 +1879,7 @@ editor.off("event-key", fn);
 editor.once("event-key", fn);
 ```
 
-5.66 emit
+4.66 emit
 
 触发事件
 
@@ -1892,7 +1887,7 @@ editor.once("event-key", fn);
 editor.emit("event-key");
 ```
 
-5.67 内置的事件
+4.67 内置的事件
 
 ```js
 editor.on("fullScreen", () => {
