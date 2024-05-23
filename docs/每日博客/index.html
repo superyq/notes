@@ -13,118 +13,120 @@
       href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css"
     />
     <style>
-      html,
-      body,
-      #container {
-        height: 100%;
+      .carousel {
+        display: flex;
+        position: relative;
+        width: 705px;
+        margin: 50px auto;
+        overflow: hidden;
+      }
+      .carousel-box {
+        perspective: 1000px;
         width: 100%;
+        height: 200px;
       }
-
-      .input-card {
-        width: 25rem;
+      .carousel-item {
+        position: absolute;
+        left: calc(50% - 200px);
+        width: 400px;
+        height: 100%;
+        user-select: none;
+        transition: all 0.4s ease;
       }
-
-      .input-card .btn {
-        width: 7rem;
-        margin-right: 0.7rem;
+      .indicator {
+        position: absolute;
+        top: calc(50% - 25px);
+        width: 50px;
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+        border: 1px solid;
+        z-index: 999;
+        border-radius: 50%;
+        font-size: 25px;
+        cursor: pointer;
       }
-
-      .input-card .btn:last-child {
-        margin-right: 0;
+      .prev {
+        left: 0;
+      }
+      .next {
+        right: 0;
       }
     </style>
   </head>
   <body>
-    <div id="container" class="map" tabindex="0"></div>
-    <div class="input-card">
-      <h4>聚合点效果切换</h4>
-      <div class="input-item">
-        <input
-          type="button"
-          class="btn"
-          value="默认样式"
-          id="add0"
-          onclick="addCluster(0)"
-        />
-        <input
-          type="button"
-          class="btn"
-          value="自定义图标"
-          id="add1"
-          onclick="addCluster(1)"
-        />
-        <input
-          type="button"
-          class="btn"
-          value="完全自定义"
-          id="add2"
-          onclick="addCluster(2)"
-        />
+    <div class="carousel">
+      <div class="carousel-box">
+        <img class="carousel-item" src="2.jpg" />
+        <img class="carousel-item" src="2.jpg" />
+        <img class="carousel-item" src="2.jpg" />
+        <img class="carousel-item" src="2.jpg" />
+        <img class="carousel-item" src="2.jpg" />
       </div>
+      <div class="indicator prev"><</div>
+      <div class="indicator next">></div>
     </div>
-    <script src="//a.amap.com/jsapi_demos/static/china.js"></script>
+    <script>
+      const items = document.querySelectorAll(".carousel-item"); // 拿到所有轮播图片
+      let index = 2; // 当前索引
 
-    <script src="https://webapi.amap.com/maps?v=2.0&key=5650f52e49ff91430866ad5a5db80699&plugin=AMap.MarkerCluster"></script>
+      // 布局函数
+      const layout = () => {
+        console.log(items, index);
+        const offsetStep = 100; // 两张图片的偏移量
+        const scaleStep = 0.6; // 两张图片的缩放比例
+        const opacityStep = 0.5; // 两张图片的透明度
 
-    <script type="text/javascript">
-      var cluster;
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          const dis = Math.abs(i - index); // 布局比例
+          const sign = i - index > 0 ? 1 : -1; // 布局方向
 
-      var map = new AMap.Map("container", {
-        center: [104.937478, 35.439575],
-        zoom: 5,
-      });
+          const zIndex = items.length - dis;
+          const scale = scaleStep ** dis;
+          let rotateY = 45 * -sign;
+          const opacity = opacityStep ** dis;
+          let xOffset = (i - index) * offsetStep;
+          if (i !== index) {
+            xOffset = xOffset + 100 * sign;
+          } else {
+            rotateY = 0;
+          }
 
-      var gridSize = 60;
-      // 数据中需包含经纬度信息字段 lnglat
-      let points = [
-        { weight: 8, lnglat: ["108.939621", "34.343147"] },
-        { weight: 1, lnglat: ["112.985037", "23.15046"] },
-        { weight: 1, lnglat: ["110.361899", "20.026695"] },
-        { weight: 1, lnglat: ["121.434529", "31.215641"] },
-      ];
-      var count = points.length;
-
-      var _renderClusterMarker = function (context) {
-        var factor = Math.pow(context.count / count, 1 / 18);
-        var div = document.createElement("div");
-        var Hue = 180 - factor * 180;
-        var bgColor = "hsla(" + Hue + ",100%,40%,0.7)";
-        var fontColor = "hsla(" + Hue + ",100%,90%,1)";
-        var borderColor = "hsla(" + Hue + ",100%,40%,1)";
-        var shadowColor = "hsla(" + Hue + ",100%,90%,1)";
-        div.style.backgroundColor = bgColor;
-        var size = Math.round(30 + Math.pow(context.count / count, 1 / 5) * 20);
-        div.style.width = div.style.height = size + "px";
-        div.style.border = "solid 1px " + borderColor;
-        div.style.borderRadius = size / 2 + "px";
-        div.style.boxShadow = "0 0 5px " + shadowColor;
-        div.innerHTML = context.count;
-        div.style.lineHeight = size + "px";
-        div.style.color = fontColor;
-        div.style.fontSize = "14px";
-        div.style.textAlign = "center";
-        context.marker.setOffset(new AMap.Pixel(-size / 2, -size / 2));
-        context.marker.setContent(div);
-      };
-      var _renderMarker = function (context) {
-        var content =
-          '<div style="background-color: hsla(180, 100%, 50%, 0.3); height: 18px; width: 18px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 3px;"></div>';
-        var offset = new AMap.Pixel(-9, -9);
-        context.marker.setContent(content);
-        context.marker.setOffset(offset);
-      };
-
-      function addCluster(tag) {
-        if (cluster) {
-          cluster.setMap(null);
+          item.style.zIndex = zIndex;
+          item.style.transform = `translateX(${xOffset}px) scale(${scale}) rotateY(${rotateY}deg)`;
+          item.style.opacity = opacity;
+          console.log(item);
         }
-        cluster = new AMap.MarkerCluster(map, points, {
-          gridSize: gridSize, // 设置网格像素大小
-          renderClusterMarker: _renderClusterMarker, // 自定义聚合点样式
-          renderMarker: _renderMarker, // 自定义非聚合点样式
-        });
-      }
-      addCluster(2);
+      };
+      layout();
+      // 向前的按钮
+      const prev = document.querySelector(".prev");
+      prev.onclick = () => {
+        index--;
+        if (index < 0) {
+          index = 0;
+        }
+        layout();
+      };
+
+      // 向后的按钮
+      const next = document.querySelector(".next");
+      next.onclick = () => {
+        index++;
+        if (index > items.length - 1) {
+          index = items.length - 1;
+        }
+        layout();
+      };
+
+      // 点轮播图
+      items.forEach((item, i) => {
+        item.onclick = () => {
+          index = i;
+          layout();
+        };
+      });
     </script>
   </body>
 </html>
