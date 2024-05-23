@@ -1,37 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="initial-scale=1.0, user-scalable=no, width=device-width"
+    />
+    <title>点聚合</title>
+    <link
+      rel="stylesheet"
+      href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css"
+    />
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+      html,
+      body,
+      #container {
+        height: 100%;
+        width: 100%;
       }
-      body {
-        height: 100vh;
-        background: linear-gradient(45deg, #cfcfcf, #e6e6e6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+
+      .input-card {
+        width: 25rem;
       }
-      h1 {
-        font-size: 20vmin;
-        line-height: 1;
-        letter-spacing: 5px;
-        color: #e6e6e6;
-        text-align: center;
+
+      .input-card .btn {
+        width: 7rem;
+        margin-right: 0.7rem;
       }
-      .good-look {
-        text-shadow: 1px -1px #fff, -1px 1px #999, -10px 10px 5px #80808080;
+
+      .input-card .btn:last-child {
+        margin-right: 0;
       }
     </style>
   </head>
   <body>
-    <svg class="icon" width="200" height="200">
-      <line></line>
-    </svg>
+    <div id="container" class="map" tabindex="0"></div>
+    <div class="input-card">
+      <h4>聚合点效果切换</h4>
+      <div class="input-item">
+        <input
+          type="button"
+          class="btn"
+          value="默认样式"
+          id="add0"
+          onclick="addCluster(0)"
+        />
+        <input
+          type="button"
+          class="btn"
+          value="自定义图标"
+          id="add1"
+          onclick="addCluster(1)"
+        />
+        <input
+          type="button"
+          class="btn"
+          value="完全自定义"
+          id="add2"
+          onclick="addCluster(2)"
+        />
+      </div>
+    </div>
+    <script src="//a.amap.com/jsapi_demos/static/china.js"></script>
+
+    <script src="https://webapi.amap.com/maps?v=2.0&key=5650f52e49ff91430866ad5a5db80699&plugin=AMap.MarkerCluster"></script>
+
+    <script type="text/javascript">
+      var cluster;
+
+      var map = new AMap.Map("container", {
+        center: [104.937478, 35.439575],
+        zoom: 5,
+      });
+
+      var gridSize = 60;
+      // 数据中需包含经纬度信息字段 lnglat
+      let points = [
+        { weight: 8, lnglat: ["108.939621", "34.343147"] },
+        { weight: 1, lnglat: ["112.985037", "23.15046"] },
+        { weight: 1, lnglat: ["110.361899", "20.026695"] },
+        { weight: 1, lnglat: ["121.434529", "31.215641"] },
+      ];
+      var count = points.length;
+
+      var _renderClusterMarker = function (context) {
+        var factor = Math.pow(context.count / count, 1 / 18);
+        var div = document.createElement("div");
+        var Hue = 180 - factor * 180;
+        var bgColor = "hsla(" + Hue + ",100%,40%,0.7)";
+        var fontColor = "hsla(" + Hue + ",100%,90%,1)";
+        var borderColor = "hsla(" + Hue + ",100%,40%,1)";
+        var shadowColor = "hsla(" + Hue + ",100%,90%,1)";
+        div.style.backgroundColor = bgColor;
+        var size = Math.round(30 + Math.pow(context.count / count, 1 / 5) * 20);
+        div.style.width = div.style.height = size + "px";
+        div.style.border = "solid 1px " + borderColor;
+        div.style.borderRadius = size / 2 + "px";
+        div.style.boxShadow = "0 0 5px " + shadowColor;
+        div.innerHTML = context.count;
+        div.style.lineHeight = size + "px";
+        div.style.color = fontColor;
+        div.style.fontSize = "14px";
+        div.style.textAlign = "center";
+        context.marker.setOffset(new AMap.Pixel(-size / 2, -size / 2));
+        context.marker.setContent(div);
+      };
+      var _renderMarker = function (context) {
+        var content =
+          '<div style="background-color: hsla(180, 100%, 50%, 0.3); height: 18px; width: 18px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 3px;"></div>';
+        var offset = new AMap.Pixel(-9, -9);
+        context.marker.setContent(content);
+        context.marker.setOffset(offset);
+      };
+
+      function addCluster(tag) {
+        if (cluster) {
+          cluster.setMap(null);
+        }
+        cluster = new AMap.MarkerCluster(map, points, {
+          gridSize: gridSize, // 设置网格像素大小
+          renderClusterMarker: _renderClusterMarker, // 自定义聚合点样式
+          renderMarker: _renderMarker, // 自定义非聚合点样式
+        });
+      }
+      addCluster(2);
+    </script>
   </body>
 </html>
