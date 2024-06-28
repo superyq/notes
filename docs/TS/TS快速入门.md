@@ -1,23 +1,5 @@
 # TS 快速入门
 
-1. 什么是 TS
-
-TS 的唯一作用就是确定变量类型。
-TS 可确定的类型有：string，number，boolean，字面量，any（不建议使用），unknown，void，never，object，array，tuple，
-
-2. TS 怎么用
-
-TS 变量限制
-
-```ts
-// str 只能是 string 类型
-let str: string;
-// 联合类型
-let str = string | number;
-// 字面量
-let str = "male" | "female";
-```
-
 TS 函数限制
 
 ```ts
@@ -33,21 +15,6 @@ function fn1(): void {}
 // never 表示永远不会返回结果
 function fn2(): never {
   throw new Error("报错了");
-}
-```
-
-TS 对象限制
-
-```ts
-// 对象属性必须有 name，age，且类型必须匹配
-let obj = {
-  name: string,
-  age: number,
-};
-// [propName: string]: any 表示任意类型的属性，如下表示，obj1 必须有 string类型的 name，还有其他类型随便
-let obj1 = {
-  name: string,
-  [propName: stirng]: any
 }
 ```
 
@@ -93,14 +60,6 @@ people: {
   name: 'qcoder',
   gender: Gender.Male
 }
-```
-
-TS 类型别名
-
-```ts
-// a 的类型可以是
-type myType = string | number | boolean;
-let a: myType;
 ```
 
 TS 接口

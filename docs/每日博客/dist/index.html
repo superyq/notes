@@ -8,38 +8,63 @@
       content="initial-scale=1.0, user-scalable=no, width=device-width"
     />
     <title>document</title>
-    <style></style>
-  </head>
-  <body>
-    <button class="btn">打折</button>
-    <label>价格：4599.00</label>
-    <script>
-      const label = document.querySelector("label");
-      const btn = document.querySelector(".btn");
-
-      function animation(duration, from, to, callback) {
-        let value = from;
-        const speed = (to - from) / duration;
-        const start = Date.now();
-        function _run() {
-          const t = Date.now() - start;
-          if (t >= duration) {
-            value = to;
-            callback(value);
-            return;
-          }
-          value = from + t * speed;
-          callback(value);
-          requestAnimationFrame(_run);
-        }
-        _run();
+    <style>
+      .form-item {
+        width: 200px;
+        height: 30px;
+        margin: 200px auto;
+        position: relative;
+        border-bottom: 2px solid #000;
       }
 
-      btn.onclick = function () {
-        animation(2000, 4599, 30, (value) => {
-          label.textContent = `价格：${value.toFixed(2)}`;
-        });
-      };
-    </script>
+      .form-item input:focus,
+      .form-item input:focus-visible,
+      .form-item input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        border: none;
+        inset: 0;
+        outline: none;
+      }
+
+      .form-item label {
+        left: 0;
+        top: 0;
+        position: absolute;
+        transition: 0.4s ease;
+      }
+
+      .form-item .bar {
+        position: absolute;
+        display: block;
+        transform: translate(-50%, -50%);
+        background: #5264ae;
+        transition: 0.4s ease;
+        bottom: -4px;
+        left: 50%;
+        width: 0%;
+        height: 2px;
+      }
+
+      .form-item input:focus ~ .bar {
+        width: 100%;
+      }
+
+      .form-item input:valid ~ label,
+      .form-item input:focus ~ label {
+        color: #5264ae;
+        transform: translateY(-30px);
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form-item">
+      <input required id="username" type="text" />
+      <span class="bar"></span>
+      <label for="username">User Name</label>
+    </div>
+    <script></script>
   </body>
 </html>
