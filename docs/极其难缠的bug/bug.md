@@ -64,3 +64,5 @@ const img = document.getElementById(`img${this.imageIndex}`);
 img && img.click();
 </script>
 ```
+
+4.
